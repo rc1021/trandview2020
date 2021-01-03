@@ -18,4 +18,4 @@ Route::get('/', function () {
 });
 
 
-Route::get('signal-history', App\Http\Controllers\SignalHistoryController::class);
+Route::get('signal-history/{clock?}', App\Http\Controllers\SignalHistoryController::class)->name('signal.history');

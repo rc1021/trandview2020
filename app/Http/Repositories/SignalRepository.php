@@ -16,6 +16,8 @@ class SignalRepository
 
     public function getHistoryModel($request)
     {
+        if($request->clock)
+            return SignalHistory::where('clock', $request->clock)->orderBy('id', 'desc')->take(10)->get();
         return SignalHistory::orderBy('id', 'desc')->take(10)->get();
     }
 
