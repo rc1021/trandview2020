@@ -2,7 +2,9 @@ FROM php:7.4-fpm-alpine
 
 RUN apk add --no-cache nginx supervisor wget
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+RUN install-php-extensions gd mysqli pdo_mysql
 
 RUN mkdir -p /run/nginx
 

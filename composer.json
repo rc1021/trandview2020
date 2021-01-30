@@ -9,12 +9,14 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "bensampo/laravel-enum": "^3.2",
         "encore/laravel-admin": "^1.8",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "google/cloud-secret-manager": "^1.2",
         "guzzlehttp/guzzle": "^7.0.1",
         "jaggedsoft/php-binance-api": "@dev",
+        "khanamiryan/qrcode-detector-decoder": "^1.0",
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5"
     },
