@@ -13,4 +13,6 @@ Route::group([
 
     $router->get('/', 'HomeController@index')->name('home');
 
+    $router->get('auth/key-secrets', 'AuthController@getKeySecret')->name('keysecret');
+    $router->put('auth/key-secrets', 'AuthController@putKeySecret');
 });

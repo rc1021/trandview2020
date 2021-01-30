@@ -102,4 +102,17 @@ return [
     'prev'                   => '上一步',
     'next'                   => '下一步',
     'quick_create'           => '快速創建',
+
+    'auth' => [
+        'keysecret' => [
+            'title' => 'API金鑰',
+            'type' => '金鑰來源',
+            'alias' => '金鑰別名',
+            'alias_unique' => '金鑰別名是唯一值',
+            'apikey' => 'API Key',
+            'secretkey' => 'Secret Key',
+            'or_qrcode_upload' => '或者使用 QR Code 上傳',
+            'or_qrcode_upload_helper' => '使用 QR Code 上傳時，不需要填寫 API Key 和 Secret Key； QR Code 圖片可以在 <a target="_blank" href="https://www.binance.com/zh-TW/my/settings/api-management">這裡</a> 找到'
+        ],
+    ]
 ];
