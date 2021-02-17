@@ -8,10 +8,7 @@ class SignalRepository
 
     public function doFire($clock, $request)
     {
-        $signal = new SignalHistory;
-        $signal->clock = $clock;
-        $signal->message = $request->getContent();
-        $signal->save();
+        SignalHistory::parseAndPlay($clock, $request->getContent());
     }
 
     public function getHistoryModel($request)

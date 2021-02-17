@@ -17,6 +17,8 @@ class CreateSignalHistoriesTable extends Migration
             $table->id();
             $table->integer('clock');
             $table->string('message');
+            $table->boolean('is_valid')->default(false);
+            $table->text('error')->nullable();
             $table->timestamps();
         });
     }

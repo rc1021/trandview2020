@@ -15,4 +15,7 @@ Route::group([
 
     $router->get('auth/key-secrets', 'AuthController@getKeySecret')->name('keysecret');
     $router->put('auth/key-secrets', 'AuthController@putKeySecret');
+
+    $router->get('auth/transaction/setting', TransactionController::class.'@setting')->name('transaction.setting');
+    $router->resource('auth/transaction/logs', TransactionLogController::class);
 });

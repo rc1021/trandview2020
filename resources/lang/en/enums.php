@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\PerformanceApiType;
+use App\Enums\TradingPlatformType;
 
 return [
 
-    PerformanceApiType::class => [
-        PerformanceApiType::Binance => 'Binance',
+    TradingPlatformType::class => [
+        TradingPlatformType::BINANCE => 'Binance',
     ],
 
 ];

@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\TradingPlatformType;
 
 class CreateKeySecretsTable extends Migration
 {
@@ -17,7 +18,7 @@ class CreateKeySecretsTable extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->string('alias'); // key名稱
-            $table->string('type'); // PerformanceApiType
+            $table->string('type')->deafult(TradingPlatformType::BINANCE);
             $table->string('key');
             $table->string('secret');
             $table->timestamps();

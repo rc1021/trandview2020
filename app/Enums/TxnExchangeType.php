@@ -10,7 +10,8 @@ use BenSampo\Enum\Contracts\LocalizedEnum;
  * @method static static OptionTwo()
  * @method static static OptionThree()
  */
-final class PerformanceApiType extends Enum implements LocalizedEnum
+final class TxnExchangeType extends Enum implements LocalizedEnum
 {
-    const Binance =   0;
+    const BUYING = 1;
+    const SELLING = 2;
 }

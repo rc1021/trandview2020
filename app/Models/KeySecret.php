@@ -17,4 +17,9 @@ class KeySecret extends Model
     {
         return $this->belongsTo(AdminUser::class, 'user_id');
     }
+
+    public function signature($string)
+    {
+        return hash_hmac('sha256', $string, $this->secret);
+    }
 }

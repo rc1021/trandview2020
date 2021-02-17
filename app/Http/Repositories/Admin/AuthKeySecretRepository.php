@@ -7,16 +7,23 @@ use Encore\Admin\Form;
 use Encore\Admin\Layout\Content;
 use App\Models\KeySecret;
 use App\Models\AdminUser;
-use App\Enums\PerformanceApiType;
+use App\Enums\TradingPlatformType;
 use Illuminate\Http\Request;
 use Zxing\QrReader;
 
 class AuthKeySecretRepository
 {
+    public function getCurrentUserKeySecret()
+    {
+        $user = AdminUser::find(Admin::user()->id);
+        return $user->keysecret();
+    }
+
     public function getKeySecret(Content $content)
     {
         $form = $this->keySecretForm();
 
+        // 加入 QR Code 圖片上傳功能
         $form->divider(__('admin.auth.keysecret.or_qrcode_upload'));
         $form->image('qrcode', __('File upload'))
              ->help(__('admin.auth.keysecret.or_qrcode_upload_helper'));
@@ -33,12 +40,13 @@ class AuthKeySecretRepository
             $footer->disableCreatingCheck();
         });
 
+        // 取得用戶第一筆 Key/Secret
         $user = AdminUser::find(Admin::user()->id);
-        $keysecret = $user->keysecrets()->first();
+        $keysecret = $this->getCurrentUserKeySecret();
         if(!$keysecret)
             $keysecret = $user->keysecrets()->create([
                 'alias' => md5(uniqid($user->id, true)),
-                'type' => PerformanceApiType::Binance,
+                'type' => TradingPlatformType::BINANCE,
                 'key' => '',
                 'secret' => ''
             ]);
@@ -50,6 +58,7 @@ class AuthKeySecretRepository
 
     public function putKeySecret(Request $request)
     {
+        // 如果用戶有上傳 QR Code 圖片就試點解析出 Key/Secret
         try {
             if($request->hasFile('qrcode')) {
                 $qrcode = new QrReader($request->qrcode->path());
@@ -76,8 +85,7 @@ class AuthKeySecretRepository
         catch(Exception $e) { /* fetch qr code from image error */ }
         finally { $request->files->remove('qrcode'); }
 
-        $user = AdminUser::find(Admin::user()->id);
-        $keysecret = $user->keysecrets()->first();
+        $keysecret = $this->getCurrentUserKeySecret();
         return $this->keySecretForm()->update($keysecret->id);
     }
 
