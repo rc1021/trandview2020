@@ -2,7 +2,7 @@
 
 namespace App\Models\Traits;
 
-use App\Enums\SymbolType;
+use BinanceApi\Enums\SymbolType;
 use App\Enums\TxnDirectType;
 use Illuminate\Support\Arr;
 

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Enums\TxnDirectType;
-use App\Enums\SymbolType;
+use BinanceApi\Enums\SymbolType;
 
 class CreateAdminTxnEntryRecsTable extends Migration
 {

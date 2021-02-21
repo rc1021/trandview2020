@@ -4,7 +4,7 @@ namespace App\Models\Traits;
 
 use Illuminate\Support\Arr;
 use App\Enums\TradingPlatformType;
-use App\Enums\SymbolType;
+use BinanceApi\Enums\SymbolType;
 use App\Enums\TxnDirectType;
 use App\Enums\TxnExchangeType;
 use App\Jobs\ProcessSignal;

@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\SignalHistory;
 use App\Models\AdminUser;
-use App\Enums\SymbolType;
+use BinanceApi\Enums\SymbolType;
 use App\Enums\TxnDirectType;
 use App\Enums\TxnExchangeType;
 use App\Enums\TradingPlatformType;
@@ -20,25 +20,24 @@ use App\Models\AdminTxnBuyRec;
 use App\Models\AdminTxnExitRec;
 use App\Models\AdminTxnSellRec;
 use App\Providers\AppCode;
-use Binance;
+use BinanceApi\Models\BinanceApi;
 use Exception;
 
 class BinanceTrandingWorker implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $signal, $user, $type;
+    protected $signal, $user;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(AdminUser $user, TradingPlatformType $type, SignalHistory $signal)
+    public function __construct(AdminUser $user, SignalHistory $signal)
     {
         $this->user = $user->withoutRelations();
         $this->signal = $signal->withoutRelations();
-        $this->type = $type;
     }
 
     /**
@@ -48,88 +47,69 @@ class BinanceTrandingWorker implements ShouldQueue
      */
     public function handle()
     {
-        // try {
-            $this->user->refresh();
-            $this->user->transactionStatus->trading_program_status = 1;
-            $this->user->transactionStatus->save();
-            $exchange = TxnExchangeType::fromValue($this->signal->txn_exchange_type);
-            // 買入
-            if($exchange->is(TxnExchangeType::BUYING))
-            {
-                $this->buying();
-            }
-            // 賣出
-            elseif($exchange->is(TxnExchangeType::SELLING))
-            {
-                $this->selling();
-            }
-            $this->user->transactionStatus->trading_program_status = 0;
-            $this->user->transactionStatus->save();
-        // }
-        // catch(Exception $e) {
-
-        // }
+        $this->user->refresh();
+        $this->user->transactionStatus->trading_program_status = 1;
+        $this->user->transactionStatus->save();
+        $exchange = TxnExchangeType::fromValue($this->signal->txn_exchange_type);
+        // 買入
+        if($exchange->is(TxnExchangeType::BUYING))
+        {
+            ($this->user->transactionSetting->lever_switch)
+                ? $this->margin_buying()
+                : $this->buying();
+        }
+        // 賣出
+        elseif($exchange->is(TxnExchangeType::SELLING))
+        {
+            ($this->user->transactionSetting->lever_switch)
+                ? $this->margin_selling()
+                : $this->selling();
+        }
+        $this->user->transactionStatus->trading_program_status = 0;
+        $this->user->transactionStatus->save();
     }
 
-    private function binance_filter($symbol_key, &$quantity, &$price)
+    private function margin_buying()
     {
-        $exchange = AppCode::BinanceExchangeInfo($symbol_key);
-        $quantity = round($quantity, data_get($exchange, 'baseAssetPrecision', 8));
-        $price = round($price, data_get($exchange, 'quoteAssetPrecision', 8));
-        foreach ($exchange['filters'] as $key => $filter)
-        {
-            switch($filter['filterType'])
-            {
-                case 'PRICE_FILTER':
-                    $less = strlen(substr(strrchr(rtrim($filter['minPrice'], '0'), "."), 1));
-                    $price = round($price, $less);
-                    if($price > (int)$filter['maxPrice'])
-                        $price = (int)$filter['maxPrice'];
-                    break;
-                case 'LOT_SIZE':
-                    $less = strlen(substr(strrchr(rtrim($filter['minQty'], '0'), "."), 1));
-                    $quantity = round($quantity, $less);
-                    if($quantity > (int)$filter['maxQty'])
-                        $quantity = (int)$filter['maxQty'];
-                    break;
-            }
-        }
+
+    }
+
+    private function margin_selling()
+    {
+
     }
 
     private function buying()
     {
-        // Entry訊號接收到時數據
-        $entry = AdminTxnEntryRec::addRec(
-            $this->user->transactionSetting->transaction_matching,
-            $this->signal->position_at,
-            $this->user->transactionSetting->initial_tradable_total_funds,
-            $this->user->transactionSetting->initial_capital_risk,
-            $this->signal->txn_direct_type,
-            $this->user->transactionSetting->transaction_fees,
-            $this->signal->risk_start_price,
-            $this->signal->hight_position_price,
-            $this->signal->low_position_price,
-            $this->signal->entry_price,
-            $this->user->transactionSetting->lever_switch,
-            $this->user->transactionSetting->prededuct_handling_fee,
-            $this->user->id,
-            $this->signal->id
-        );
-
-        // 買入數量
-        $quantity = ($this->user->transactionSetting->prededuct_handling_fee) ? $entry->position_few_amount : $entry->position_few;
-        // 購買虛擬幣
-        $symbol = SymbolType::coerce((int)$this->user->transactionSetting->transaction_matching);
-        // 購入金額
-        $price = $this->signal->position_price;
-        // 過濾購買資料
-        $this->binance_filter($symbol->key, $quantity, $price);
-
-        // 建立連線
-        $apidata = $this->user->keysecret();
-        $api = new Binance\API($apidata->key,$apidata->secret);
 
         try {
+            // 建立連線
+            $api = app()->makeWith(BinanceApi::class, $this->user->keysecret()->toArray());
+
+            // Entry訊號接收到時數據
+            $entry = AdminTxnEntryRec::addRec(
+                $this->user->transactionSetting->transaction_matching,
+                $this->signal->position_at,
+                $this->user->transactionSetting->initial_tradable_total_funds,
+                $this->user->transactionSetting->initial_capital_risk,
+                $this->signal->txn_direct_type,
+                $this->user->transactionSetting->transaction_fees,
+                $this->signal->risk_start_price,
+                $this->signal->hight_position_price,
+                $this->signal->low_position_price,
+                $this->signal->entry_price,
+                $this->user->transactionSetting->lever_switch,
+                $this->user->transactionSetting->prededuct_handling_fee,
+                $this->user->id,
+                $this->signal->id
+            );
+
+            // 買入數量
+            $quantity = ($this->user->transactionSetting->prededuct_handling_fee) ? $entry->position_few_amount : $entry->position_few;
+            // 購買虛擬幣
+            $symbol = SymbolType::coerce((int)$this->user->transactionSetting->transaction_matching);
+            // 購入金額
+            $price = $this->signal->position_price;
 
             // 開始時間
             $start_at = time();
@@ -167,7 +147,9 @@ class BinanceTrandingWorker implements ShouldQueue
             $this->user->transactionStatus->save();
         }
         catch(Exception $e) {
-            $this->signal->error = $e->getMessage() . " { \"quantity\": $quantity, \"price\": $price }";
+            var_dump($e->getMessage());
+            var_dump($entry->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            $this->signal->error = $e->getMessage();
             $this->signal->save();
         }
     }
@@ -175,6 +157,9 @@ class BinanceTrandingWorker implements ShouldQueue
     private function selling()
     {
         try {
+            // 建立連線
+            $api = app()->makeWith(BinanceApi::class, $this->user->keysecret()->toArray());
+
             // 取得最後一次持倉的資訊
             $entry = $this->user->transactionEntryRecords()->doesntHave('txnExitRec')->latest()->first();
             $buy = $entry->txnBuyRec;
@@ -194,15 +179,6 @@ class BinanceTrandingWorker implements ShouldQueue
             // 購買虛擬幣
             $symbol = SymbolType::coerce((int)$this->user->transactionSetting->transaction_matching);
 
-            // 建立連線
-            $apidata = $this->user->keysecret();
-            $api = new Binance\API($apidata->key,$apidata->secret);
-
-            // 取得手續賣
-            $trade_fee = $api->tradeFee('BTCUSDT');
-            if(data_get($trade_fee, 'success', false))
-                $quantity -= $quantity * data_get($trade_fee, 'tradeFee.0.maker', 0.001);
-
             // 開始時間
             $start_at = time();
             $liquidation_start_at = date("Y-m-d H:i:s", $start_at);
@@ -212,8 +188,6 @@ class BinanceTrandingWorker implements ShouldQueue
             $done_at = time();
             $liquidation_done_at = date("Y-m-d H:i:s", $done_at);
             $liquidation_duration = $done_at - $start_at;
-
-            var_dump($order);
 
             $sell = AdminTxnSellRec::addRec(
                 [$order],

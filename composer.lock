@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "18cecb5dc37fcc07c561fbab50928c46",
+    "content-hash": "a7df70ec288d845d55baffbf495fdf5a",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -64,16 +64,16 @@
         },
         {
             "name": "bensampo/laravel-enum",
-            "version": "v3.2.0",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BenSampo/laravel-enum.git",
-                "reference": "a16fa6d9d1646b9fe52c5c91add6bc452c8baa8d"
+                "reference": "82d1ad8127e6fdd19f8fb86bf4b06cc80db6c9c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BenSampo/laravel-enum/zipball/a16fa6d9d1646b9fe52c5c91add6bc452c8baa8d",
-                "reference": "a16fa6d9d1646b9fe52c5c91add6bc452c8baa8d",
+                "url": "https://api.github.com/repos/BenSampo/laravel-enum/zipball/82d1ad8127e6fdd19f8fb86bf4b06cc80db6c9c0",
+                "reference": "82d1ad8127e6fdd19f8fb86bf4b06cc80db6c9c0",
                 "shasum": ""
             },
             "require": {
@@ -85,9 +85,9 @@
                 "php": "^7.3|^8.0"
             },
             "require-dev": {
-                "doctrine/dbal": "^2.9",
+                "doctrine/dbal": "^2.9|^3.0",
                 "mockery/mockery": "^1.4",
-                "orchestra/testbench": "^6.0",
+                "orchestra/testbench": "^6.2",
                 "phpstan/phpstan": "^0.12.59",
                 "phpunit/phpunit": "^8.5",
                 "squizlabs/php_codesniffer": "^3.0"
@@ -135,7 +135,7 @@
             ],
             "support": {
                 "issues": "https://github.com/BenSampo/laravel-enum/issues",
-                "source": "https://github.com/BenSampo/laravel-enum/tree/v3.2.0"
+                "source": "https://github.com/BenSampo/laravel-enum/tree/v3.3.0"
             },
             "funding": [
                 {
@@ -143,7 +143,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-12-15T10:28:48+00:00"
+            "time": "2021-02-16T17:27:06+00:00"
         },
         {
             "name": "brick/math",
@@ -3766,17 +3766,54 @@
             "time": "2019-12-15T10:18:18+00:00"
         },
         {
+            "name": "rc1021/binance-api",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./extra-pkgs/rc1021/binance-api",
+                "reference": "80b23c4d2b38ccdde7afb5e66ff8a175da311896"
+            },
+            "require": {
+                "bensampo/laravel-enum": "^3.2",
+                "guzzlehttp/guzzle": "^7.0.1",
+                "jaggedsoft/php-binance-api": "^0.5.25"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BinanceApi\\BinanceApiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BinanceApi\\": "src/"
+                }
+            },
+            "authors": [
+                {
+                    "name": "rc1021",
+                    "email": "rc.701021@gmail.com"
+                }
+            ],
+            "description": "自動交易程式-BinanceApi Binder",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
             "name": "react/cache",
-            "version": "v1.1.0",
+            "version": "v1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/cache.git",
-                "reference": "44a568925556b0bd8cacc7b49fb0f1cf0d706a0c"
+                "reference": "4bf736a2cccec7298bdf745db77585966fc2ca7e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/cache/zipball/44a568925556b0bd8cacc7b49fb0f1cf0d706a0c",
-                "reference": "44a568925556b0bd8cacc7b49fb0f1cf0d706a0c",
+                "url": "https://api.github.com/repos/reactphp/cache/zipball/4bf736a2cccec7298bdf745db77585966fc2ca7e",
+                "reference": "4bf736a2cccec7298bdf745db77585966fc2ca7e",
                 "shasum": ""
             },
             "require": {
@@ -3827,7 +3864,7 @@
             ],
             "support": {
                 "issues": "https://github.com/reactphp/cache/issues",
-                "source": "https://github.com/reactphp/cache/tree/v1.1.0"
+                "source": "https://github.com/reactphp/cache/tree/v1.1.1"
             },
             "funding": [
                 {
@@ -3839,7 +3876,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-09-18T12:12:35+00:00"
+            "time": "2021-02-02T06:47:52+00:00"
         },
         {
             "name": "react/dns",
@@ -9487,7 +9524,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "jaggedsoft/php-binance-api": 20
+        "rc1021/binance-api": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

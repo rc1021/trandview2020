@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Enums;
+namespace BinanceApi\Enums;
 
 use BenSampo\Enum\Enum;
 use BenSampo\Enum\Contracts\LocalizedEnum;

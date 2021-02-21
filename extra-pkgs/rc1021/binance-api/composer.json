@@ -1,0 +1,28 @@
+{
+    "name": "rc1021/binance-api",
+    "description": "自動交易程式-BinanceApi Binder",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "BinanceApi\\": "src/"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^7.0.1",
+        "bensampo/laravel-enum": "^3.2",
+        "jaggedsoft/php-binance-api": "^0.5.25"
+    },
+    "authors": [
+        {
+            "name": "rc1021",
+            "email": "rc.701021@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BinanceApi\\BinanceApiServiceProvider"
+            ]
+        }
+    }
+}

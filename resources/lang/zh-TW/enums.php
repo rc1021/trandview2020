@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\SymbolType;
+use BinanceApi\Enums\SymbolType;
 use App\Enums\TradingPlatformType;
 
 return [
