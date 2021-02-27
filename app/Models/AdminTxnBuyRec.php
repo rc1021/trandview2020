@@ -16,6 +16,13 @@ class AdminTxnBuyRec extends Model
         'position_done_at',
     ];
 
+    // user
+    public function user()
+    {
+        return $this->belongsTo(AdminUser::class, 'user_id');
+    }
+
+
     public function txnEntryRec()
     {
         return $this->belongsTo(AdminTxnEntryRec::class, 'txn_entry_id');

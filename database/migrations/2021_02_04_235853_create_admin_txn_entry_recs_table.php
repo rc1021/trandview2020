@@ -20,30 +20,46 @@ class CreateAdminTxnEntryRecsTable extends Migration
             $table->foreignId('user_id');
             $table->foreignId('signal_history_id');
 
-            $table->dateTime('position_at', 0); // 應開倉日期時間
-            $table->float('avaiable_total_funds', 24, 8)->default(0); // 交易前可交易總資金
-            $table->tinyInteger('tranding_long_short')->default(TxnDirectType::SHORT); // 交易方向(多/空)
-            $table->float('funds_risk', 24, 8)->default(0); // 資金風險(%)
-            $table->string('transaction_matching')->default(SymbolType::BTCUSDT); // 交易配對
-            $table->tinyInteger('leverage')->default(0); // 槓桿使用
-            $table->tinyInteger('prededuct_handling_fee')->default(0); // 預先扣除手續費
-            $table->float('transaction_fee', 24, 8)->default(0); // 交易手續費
-            $table->float('risk_start_price', 24, 8)->default(0); // 起始風險價位(止損價位)
-            $table->float('hight_position_price', 24, 8)->default(0); // 開倉價格容差(最高價位)
-            $table->float('low_position_price', 24, 8)->default(0); // 開倉價格容差(最低價位)
-            $table->float('entry_price', 24, 8)->default(0); // Entry訊號價位(當時的價位)
-            $table->float('funds_risk_amount', 24, 8)->default(0); // 資金風險金額
-            $table->float('risk_start', 24, 8)->default(0); // 起始風險%(1R)
-            $table->float('position_price', 24, 8)->default(0); // 應開倉部位大小(未加上槓桿量)
-            $table->float('leverage_power', 24, 8)->default(0); // 應使用槓桿(倍數)
-            $table->float('leverage_price', 24, 8)->default(0); // 應使用槓桿(金額)
-            $table->float('leverage_position_price', 24, 8)->default(0); // 應開倉部位大小(加上槓桿量)
-            $table->float('position_few', 24, 8)->default(0); // 應開倉(幾口)
-            $table->float('tranding_fee_amount', 24, 8)->default(0); // 交易手續費
-            $table->float('position_few_amount', 24, 8)->default(0); // 應開倉(預先扣除手續費)
-            $table->float('position_price_with_fee', 24, 8)->default(0); // 應開倉部位大小(預先扣除手續費)
-            $table->float('leverage_price_with_fee', 24, 8)->default(0); // 應使用槓桿(金額)(預先扣除手續費)
-            $table->float('leverage_power_with_fee', 24, 8)->default(0); // 應使用槓桿(倍數)(預先扣除手續費)
+            // == 預先設定的參數&接收到的數據 ==
+            $table->dateTime('B30', 0);    // 應開倉日期時間
+            $table->float('B31', 24, 8)->default(0);    // 交易前可交易總資金
+            $table->string('B32')->default(TxnDirectType::SHORT);    // 交易方向(多/空)
+            $table->float('B33', 24, 8)->default(0);    // 資金風險(%)
+            $table->string('B34')->default(SymbolType::BTCUSDT);    // 交易配對
+            $table->tinyInteger('B35')->default(0);     // 槓桿使用
+            $table->tinyInteger('B36')->default(1);     // 預先扣除手續費
+            $table->float('B37', 24, 8)->default(0);    // 交易手續費
+            $table->float('B38', 24, 8)->nullable();    // 起始風險價位(止損價位)
+            $table->float('B39', 24, 8)->default(0);    // 開倉價格容差(最高價位)
+            $table->float('B40', 24, 8)->default(0);    // 開倉價格容差(最低價位)
+            $table->float('B41', 24, 8)->default(0);    // Entry訊號價位(當時的價位)
+            // == 計算起始風險&預備金應加碼&應借款計算 ==
+            $table->float('B43', 24, 8)->default(0);    // 資金風險金額
+            $table->float('B44', 24, 8)->nullable();    // 起始風險%(1R)
+            $table->float('B45', 24, 8)->default(0);    // 可開倉的部位大小(美元)
+            $table->float('B46', 24, 8)->default(0);    // 應加碼金額(美元)
+            $table->float('B47', 24, 8)->default(0);    // 應動用預備金加碼(美元)
+            $table->float('B48', 24, 8)->default(0);    // 應借款金額(美元)
+            $table->float('B49', 24, 8)->default(0);    // 應總共動用帳戶內多少資金(美元)
+            // == 計算槓桿風險率 ==
+            $table->float('D30', 24, 8)->default(0);    // 借款利息%預估
+            $table->float('D31', 24, 8)->default(0);    // 借款利息預估(貨幣單位依照多空)
+            $table->float('D32', 24, 8)->default(0);    // 風險率(加上利息)
+            $table->integer('D33')->default(0);         // 查表排序
+            $table->float('D34', 24, 8)->default(0);    // 對應的級別
+            $table->float('D35', 24, 8)->default(0);    // 對應的強平線
+            $table->tinyInteger('D36')->default(0);     // 此筆交易可否使用槓桿執行 0:不可以; 1:可以
+            // == 做多 ==
+            $table->float('D38', 24, 8)->default(0);    // 應借款金額(美元)
+            $table->float('D39', 24, 8)->default(0);    // 總共應動用帳戶內多少資金(美元)
+            $table->float('D40', 24, 8)->default(0);    // 買入BTC總共應有多少成交額(美元)
+            // == 做空 ==
+            $table->float('D42', 24, 8)->default(0);    // 應借款金額(BTC)
+            $table->float('D43', 24, 8)->default(0);    // 動用帳戶內多少資金(BTC)
+            $table->float('D44', 24, 8)->default(0);    // 總共應借入且賣出多少BTC
+            // == 止盈止損單 ==
+            $table->float('D46', 24, 8)->default(0);    // 觸發價
+            $table->float('D47', 24, 8)->default(0);    // 限價
             $table->timestamps();
         });
     }

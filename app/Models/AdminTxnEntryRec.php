@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\AdminTxnEntryRec as AdminTxnEntryRecTrait;
-use App\Models\AdminTxnBuyRec;
-use App\Models\AdminTxnExitRec;
 
 class AdminTxnEntryRec extends Model
 {
@@ -16,8 +14,14 @@ class AdminTxnEntryRec extends Model
         'position_at',
     ];
 
+    // user
+    public function user()
+    {
+        return $this->belongsTo(AdminUser::class, 'user_id');
+    }
+
     // tranding view 傳入的訊號
-    public function SignalHistory()
+    public function signal()
     {
         return $this->belongsTo(SignalHistory::class, 'signal_history_id');
     }

@@ -19,8 +19,8 @@ class CreateAdminTxnExitRecsTable extends Migration
             $table->foreignId('txn_entry_id');
             $table->foreignId('signal_history_id');
 
-            $table->dateTime('liquidation_at'); // 應平倉日期時間
-            $table->float('liquidation_price', 24, 8)->default(0); // Exit訊號價位(當時的價位)
+            $table->dateTime('H29'); // 應平倉日期時間
+            $table->float('H30', 24, 8)->default(0); // Exit訊號價位(當時的價位)
             $table->timestamps();
         });
     }
