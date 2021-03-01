@@ -68,6 +68,10 @@
         {
             "type": "path",
             "url": "./extra-pkgs/rc1021/binance-api"
+        },
+        {
+            "type": "vcs",
+            "url":  "git@github.com:rc1021/php-binance-api.git"
         }
     ]
 }

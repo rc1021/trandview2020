@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7df70ec288d845d55baffbf495fdf5a",
+    "content-hash": "8ae5379443bbedc4ee6cc9879d1adca3",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1848,13 +1848,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/jaggedsoft/php-binance-api.git",
-                "reference": "9be83419c8864643a84ed4c9885c0c5e97388552"
+                "url": "https://github.com/rc1021/php-binance-api.git",
+                "reference": "56d0643462b7f2f94a78b1d7338b86d125e1641d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jaggedsoft/php-binance-api/zipball/9be83419c8864643a84ed4c9885c0c5e97388552",
-                "reference": "9be83419c8864643a84ed4c9885c0c5e97388552",
+                "url": "https://api.github.com/repos/rc1021/php-binance-api/zipball/56d0643462b7f2f94a78b1d7338b86d125e1641d",
+                "reference": "56d0643462b7f2f94a78b1d7338b86d125e1641d",
                 "shasum": ""
             },
             "require": {
@@ -1872,25 +1872,24 @@
             "type": "library",
             "autoload": {
                 "classmap": [
+                    "extensions/",
                     "php-binance-api.php",
                     "php-binance-api-rate-limiter.php"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "PHP Binance API is an asynchronous PHP library for the Binance API designed to be easy to use.",
             "keywords": [
-                "binance",
-                "cryptocurrency",
-                "websocket"
+                "Binance",
+                "WebSocket",
+                "cryptocurrency"
             ],
             "support": {
-                "issues": "https://github.com/jaggedsoft/php-binance-api/issues",
-                "source": "https://github.com/jaggedsoft/php-binance-api/tree/master"
+                "source": "https://github.com/rc1021/php-binance-api/tree/master"
             },
-            "time": "2021-02-26T15:27:29+00:00"
+            "time": "2021-03-01T04:42:24+00:00"
         },
         {
             "name": "khanamiryan/qrcode-detector-decoder",
