@@ -16,7 +16,6 @@ class CreateAdminTxnExitRecsTable extends Migration
         Schema::create('admin_txn_exit_recs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
-            $table->foreignId('txn_entry_id');
             $table->foreignId('signal_history_id');
 
             $table->dateTime('H29'); // 應平倉日期時間

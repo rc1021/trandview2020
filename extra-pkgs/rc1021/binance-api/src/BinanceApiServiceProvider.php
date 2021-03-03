@@ -13,8 +13,5 @@ class BinanceApiServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(BinanceApiManager::class, function ($app, $params) {
-            return new BinanceApiManager($params['key'], $params['secret']);
-        });
     }
 }

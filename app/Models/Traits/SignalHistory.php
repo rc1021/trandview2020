@@ -46,11 +46,11 @@ trait SignalHistory
         {
             case "Long Exit":
             case "Short Exit":
-                return TxnExchangeType::SELLING;
+                return TxnExchangeType::Exit;
                 break;
             case "Short Entry":
             case "Long Entry":
-                return TxnExchangeType::BUYING;
+                return TxnExchangeType::Entry;
                 break;
         }
     }

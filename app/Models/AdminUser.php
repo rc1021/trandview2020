@@ -6,13 +6,14 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Encore\Admin\Auth\Database\Administrator;
-use App\Models\KeySecret;
-use App\Models\AdminTxnSetting;
-use App\Models\AdminTxnStatus;
-use App\Models\AdminTxnEntryRec;
-use App\Models\AdminTxnBuyRec;
-use App\Models\AdminTxnExitRec;
-use App\Models\AdminTxnSellRec;
+// use App\Models\KeySecret;
+// use App\Models\AdminTxnSetting;
+// use App\Models\AdminTxnStatus;
+// use App\Models\AdminTxnEntryRec;
+// use App\Models\AdminTxnBuyRec;
+// use App\Models\AdminTxnExitRec;
+// use App\Models\AdminTxnSellRec;
+// use App\Models\TxnMarginOrder;
 
 class AdminUser extends Administrator
 {
@@ -53,6 +54,16 @@ class AdminUser extends Administrator
     public function keysecrets()
     {
         return $this->hasMany(KeySecret::class, 'user_id');
+    }
+
+    /**
+     * 取得用戶未關閉的止損單
+     *
+     * @return void
+     */
+    public function stopLossLimits()
+    {
+        return $this->hasMany(TxnMarginOrder::class, 'user_id')->stopLossLimit();
     }
 
     public function keysecret()

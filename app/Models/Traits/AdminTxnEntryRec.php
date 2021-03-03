@@ -19,23 +19,23 @@ trait AdminTxnEntryRec
         $rec->signal_history_id = $signal->id;
 
         // 輸入資訊
-        $rec->B30 = $signal->position_at;
-        $rec->B31 = $user->transactionSetting->initial_tradable_total_funds;
-        $rec->B32 = $signal->txn_direct_type;
-        $rec->B33 = $user->transactionSetting->initial_capital_risk;
-        $rec->B34 = $user->transactionSetting->transaction_matching;
-        $rec->B35 = $user->transactionSetting->lever_switch;
-        $rec->B36 = $user->transactionSetting->prededuct_handling_fee;
-        $rec->B37 = $user->transactionSetting->transaction_fees;
-        $rec->B38 = $signal->risk_start_price;
+        $rec->B30 = date('Y-m-d H:i:s', $signal->position_at);
+        // $rec->B31 = $user->transactionSetting->initial_tradable_total_funds;
+        // $rec->B32 = $signal->txn_direct_type;
+        // $rec->B33 = $user->transactionSetting->initial_capital_risk;
+        // $rec->B34 = $user->transactionSetting->transaction_matching;
+        // $rec->B35 = $user->transactionSetting->lever_switch;
+        // $rec->B36 = $user->transactionSetting->prededuct_handling_fee;
+        // $rec->B37 = $user->transactionSetting->transaction_fees;
+        // $rec->B38 = $signal->risk_start_price;
         $rec->B39 = $signal->hight_position_price;
-        $rec->B40 = $signal->low_position_price;
-        $rec->B41 = $signal->entry_price;
+        // $rec->B40 = $signal->low_position_price;
+        // $rec->B41 = $signal->entry_price;
 
         // 檢查必要資料是否存在
 
         // 計算其它數據
-        $rec->calculate();
+        // $rec->calculate();
 
         $rec->save();
         return $rec;

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use BinanceApi\Enums\SymbolType;
-use BinanceApi\Models\BinanceApi;
+use BinanceApi\BinanceApiManager;
 
 class AdminTxnSetting extends Model
 {
@@ -27,7 +27,7 @@ class AdminTxnSetting extends Model
         if(is_null($this->_transaction_fees)) {
             $this->_transaction_fees = 0.001;
             $symbol = SymbolType::fromValue(SymbolType::BTCUSDT);
-            $trade_fee = app()->makeWith(BinanceApi::class, $this->user->keysecret()->toArray())->tradeFee($symbol->key);
+            $trade_fee = app()->makeWith(BinanceApiManager::class, $this->user->keysecret()->toArray())->tradeFee($symbol->key);
             if(data_get($trade_fee, 'success', false))
                 $this->_transaction_fees = data_get($trade_fee, 'tradeFee.0.taker', $this->_trade_fee);
         }

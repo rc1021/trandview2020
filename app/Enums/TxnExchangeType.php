@@ -12,6 +12,6 @@ use BenSampo\Enum\Contracts\LocalizedEnum;
  */
 final class TxnExchangeType extends Enum implements LocalizedEnum
 {
-    const BUYING = 1;
-    const SELLING = 2;
+    const Entry = 1;
+    const Exit = 2;
 }

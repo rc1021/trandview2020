@@ -17,6 +17,8 @@ class CreateAdminTxnBuyRecsTable extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('txn_entry_id');
+            $table->foreignId('ord_id');
+            $table->foreignId('stop_ord_id');
 
             $table->dateTime('F29');	// 	開倉交易起始日期時間
             $table->dateTime('F30');	// 	開倉交易完成日期時間

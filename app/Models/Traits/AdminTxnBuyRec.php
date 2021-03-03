@@ -9,6 +9,7 @@ use BinanceApi\BinanceApiManager;
 use Exception;
 use App\Models\AdminUser;
 use App\Models\AdminTxnEntryRec;
+use App\Models\TxnMarginOrder;
 
 trait AdminTxnBuyRec
 {
@@ -24,9 +25,12 @@ trait AdminTxnBuyRec
         $position_start_at = date("Y-m-d H:i:s", $start_at);
 
         // 購買虛擬幣
-        $api = app()->makeWith(BinanceApiManager::class, $user->keysecret()->toArray());
+        $ks = $user->keysecret()->toArray();
+        $api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));
         $symbol = SymbolType::coerce((int)$user->transactionSetting->transaction_matching);
-        list($err, $order, $stop_order) = $api->do1($symbol, $entry->quantity, $entry->price);
+        // list($err, $order, $stop_order) = $api->doLongEntry($symbol, $entry->quantity, $entry->price, $entry->stop_price, $entry->sell_price);
+        var_dump($entry->B39);
+        list($err, $order, $stop_order) = $api->doLongEntry($symbol, 0.006575, $entry->B39, 47900.00000, 47852.10000);
 
         // 結束時間
         $done_at = time();
@@ -40,7 +44,28 @@ trait AdminTxnBuyRec
         if(!is_null($err))
             throw $err;
 
-        $rec->calculate();
+        $txnOrder = TxnMarginOrder::create([
+            'user_id' => $user->id,
+            'symbol' => $symbol->value,
+            'orderId' => $order['orderId'],
+            'type' => $order['type'],
+            'result' => json_encode($order)
+        ]);
+
+        $txnStopOrder = TxnMarginOrder::create([
+            'user_id' => $user->id,
+            'symbol' => $symbol->value,
+            'orderId' => $stop_order['orderId'],
+            'type' => $stop_order['type'],
+            'result' => json_encode($stop_order)
+        ]);
+
+        var_dump([$txnOrder->id, $txnStopOrder->id]);
+
+        $rec->ord_id = $txnOrder->id;
+        $rec->stop_ord_id = $txnStopOrder->id;
+
+        // $rec->calculate();
         $rec->save();
 
         // 變更用戶狀態

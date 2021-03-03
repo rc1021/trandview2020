@@ -49,7 +49,7 @@ class BinanceTrandingWorker implements ShouldQueue
         $this->user->transactionStatus->save();
         $exchange = TxnExchangeType::fromValue($this->signal->txn_exchange_type);
         // 買入
-        if($exchange->is(TxnExchangeType::BUYING))
+        if($exchange->is(TxnExchangeType::Entry))
         {
             try {
                 // Entry訊號接收到時數據
@@ -63,8 +63,18 @@ class BinanceTrandingWorker implements ShouldQueue
             }
         }
         // 賣出
-        elseif($exchange->is(TxnExchangeType::SELLING))
+        elseif($exchange->is(TxnExchangeType::Exit))
         {
+            try {
+                // Exit訊號接收到時數據
+                $exit = AdminTxnExitRec::createRec($this->user, $this->signal);
+                // 建立實際賣出訊號
+                $buy = AdminTxnSellRec::createRec($exit, $this->user);
+            }
+            catch(Exception $e) {
+                $this->signal->error = $e->getMessage();
+                $this->signal->save();
+            }
         }
         $this->user->transactionStatus->trading_program_status = 0;
         $this->user->transactionStatus->save();
