@@ -63,8 +63,8 @@ class Setting extends Form
     public function data() : AdminTxnSetting
     {
         $user = AdminUser::find(Admin::user()->id);
-        $setting = $user->transactionSetting()->firstOrCreate();
-        return $user->transactionSetting;
+        $setting = $user->txnSetting()->firstOrCreate();
+        return $user->txnSetting;
     }
 
     private function commonSwitch()

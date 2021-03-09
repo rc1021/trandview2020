@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Traits\SignalHistory as SignalHistoryTrait;
+use App\Models\Traits\SignalHistoryTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,5 +33,15 @@ class SignalHistory extends Model
         if(!is_null($key))
             return $this->_signal[$key];
         return $this->_signal;
+    }
+
+    public function txnEntryRecs()
+    {
+        return $this->hasMany(AdminTxnEntryRec::class, 'signal_history_id');
+    }
+
+    public function txnExitRecs()
+    {
+        return $this->hasMany(AdminTxnExitRec::class, 'signal_history_id');
     }
 }

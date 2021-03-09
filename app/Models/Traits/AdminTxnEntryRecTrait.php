@@ -7,9 +7,10 @@ use App\Enums\TxnDirectType;
 use Illuminate\Support\Arr;
 use Exception;
 use App\Models\AdminUser;
+use App\Models\AdminTxnBuyRec;
 use App\Models\SignalHistory;
 
-trait AdminTxnEntryRec
+trait AdminTxnEntryRecTrait
 {
     // 建立Entry訊號接收到時數據
     public static function createRec(AdminUser $user, SignalHistory $signal)
@@ -20,13 +21,13 @@ trait AdminTxnEntryRec
 
         // 輸入資訊
         $rec->B30 = date('Y-m-d H:i:s', $signal->position_at);
-        // $rec->B31 = $user->transactionSetting->initial_tradable_total_funds;
-        // $rec->B32 = $signal->txn_direct_type;
-        // $rec->B33 = $user->transactionSetting->initial_capital_risk;
-        // $rec->B34 = $user->transactionSetting->transaction_matching;
-        // $rec->B35 = $user->transactionSetting->lever_switch;
-        // $rec->B36 = $user->transactionSetting->prededuct_handling_fee;
-        // $rec->B37 = $user->transactionSetting->transaction_fees;
+        // $rec->B31 = $user->txnSetting->initial_tradable_total_funds;
+        // $rec->B32 = $signal->txn_direct_type->value;
+        // $rec->B33 = $user->txnSetting->initial_capital_risk;
+        // $rec->B34 = $user->txnSetting->transaction_matching;
+        // $rec->B35 = $user->txnSetting->lever_switch;
+        // $rec->B36 = $user->txnSetting->prededuct_handling_fee;
+        // $rec->B37 = $user->txnSetting->transaction_fees;
         // $rec->B38 = $signal->risk_start_price;
         $rec->B39 = $signal->hight_position_price;
         // $rec->B40 = $signal->low_position_price;
@@ -36,9 +37,10 @@ trait AdminTxnEntryRec
 
         // 計算其它數據
         // $rec->calculate();
-
         $rec->save();
-        return $rec;
+
+        // 建立實際購買訊號
+        AdminTxnBuyRec::createRec($rec, $user, $signal);
     }
 
     public function getQuantityAttribute()

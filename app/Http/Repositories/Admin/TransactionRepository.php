@@ -16,10 +16,10 @@ class TransactionRepository
         $content->title('機器人交易設定');
 
         // 狀態 & 總交易紀錄
-        $status = AdminUser::find(Admin::user()->id)->transactionStatus;
+        $status = AdminUser::find(Admin::user()->id)->txnStatus;
         if(is_null($status)) {
-            AdminUser::find(Admin::user()->id)->transactionStatus()->create();
-            $status = AdminUser::find(Admin::user()->id)->transactionStatus;
+            AdminUser::find(Admin::user()->id)->txnStatus()->create();
+            $status = AdminUser::find(Admin::user()->id)->txnStatus;
         }
         $box = new Box('狀態', Admin::component('admin.transaction.status', compact('status')));
         $box->style('info');

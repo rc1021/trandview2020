@@ -5,11 +5,11 @@ namespace App\Models\Traits;
 use Illuminate\Support\Arr;
 use App\Enums\TradingPlatformType;
 use BinanceApi\Enums\SymbolType;
-use App\Enums\TxnDirectType;
+use BinanceApi\Enums\DirectType;
 use App\Enums\TxnExchangeType;
 use App\Jobs\ProcessSignal;
 
-trait SignalHistory
+trait SignalHistoryTrait
 {
     // 建立一筆訊號，並執行訊息內容
     public static function parseAndPlay($clock, $message)
@@ -24,33 +24,33 @@ trait SignalHistory
     }
 
     // 0	=>	交易執行類別: 交易方向
-    public function getTxnDirectTypeAttribute()
+    public function getTxnDirectTypeAttribute() : DirectType
     {
         switch($this->getSignal('交易執行類別'))
         {
             case "Short Exit":
             case "Short Entry":
-                return TxnDirectType::SHORT;
+                return DirectType::fromValue(DirectType::SHORT);
                 break;
             case "Long Exit":
             case "Long Entry":
-                return TxnDirectType::LONG;
+                return DirectType::fromValue(DirectType::LONG);
                 break;
         }
     }
 
     // 0	=>	交易執行類別: 買入/賣出
-    public function getTxnExchangeTypeAttribute()
+    public function getTxnExchangeTypeAttribute() : TxnExchangeType
     {
         switch($this->getSignal('交易執行類別'))
         {
             case "Long Exit":
             case "Short Exit":
-                return TxnExchangeType::Exit;
+                return TxnExchangeType::fromValue(TxnExchangeType::Exit);
                 break;
             case "Short Entry":
             case "Long Entry":
-                return TxnExchangeType::Entry;
+                return TxnExchangeType::fromValue(TxnExchangeType::Entry);
                 break;
         }
     }
@@ -89,11 +89,11 @@ trait SignalHistory
     // 7	=>	做空起始風險價位
     public function getRiskStartPriceAttribute()
     {
-        $type = TxnDirectType::fromValue($this->getTxnDirectTypeAttribute());
-        if($type->is(TxnDirectType::LONG)) {
+        $type = DirectType::fromValue($this->getTxnDirectTypeAttribute());
+        if($type->is(DirectType::LONG)) {
             return floatval($this->getSignal('做多起始風險價位'));
         }
-        elseif ($type->is(TxnDirectType::SHORT)) {
+        elseif ($type->is(DirectType::SHORT)) {
             return floatval($this->getSignal('做空起始風險價位'));
         }
         return null;

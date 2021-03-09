@@ -18,10 +18,22 @@ class CreateTxnMarginOrdersTable extends Migration
             $table->id();
             $table->foreignId('user_id');
 
-            $table->string('symbol')->default(SymbolType::BTCUSDT);
-            $table->bigInteger('orderId');
-            $table->string('type');
-            $table->text('result');
+            $table->string("symbol");
+            $table->bigInteger("orderId");
+            $table->string("clientOrderId")->nullable();
+            $table->timestamp("transactTime", 0);
+            $table->string("price")->nullable();
+            $table->string("origQty")->nullable();
+            $table->string("executedQty")->nullable();
+            $table->string("cummulativeQuoteQty")->nullable();
+            $table->string("status")->nullable();
+            $table->string("timeInForce")->nullable();
+            $table->string("type")->nullable();
+            $table->string("side")->nullable();
+            $table->string("fills")->nullable();
+            $table->string("marginBuyBorrowAsset")->nullable();
+            $table->string("marginBuyBorrowAmount")->nullable();
+            $table->boolean("isIsolated")->nullable();
             $table->string('error')->nullable();
             $table->softDeletes();
             $table->timestamps();

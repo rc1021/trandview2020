@@ -10,7 +10,7 @@ class TxnMarginOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['user_id', 'symbol', 'orderId', 'type', 'result'];
+    protected $fillable = ["user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
 
     protected $dates = [
         'transactTime',
@@ -43,6 +43,11 @@ class TxnMarginOrder extends Model
     public function scopeStopLossLimit($query)
     {
         return $query->where('type', 'STOP_LOSS_LIMIT');
+    }
+
+    public function txnSellRec()
+    {
+        return $this->hasMany(AdminTxnSellRec::class, 'stop_ord_id');
     }
 
     //datetime

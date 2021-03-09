@@ -22,11 +22,16 @@ class AdminTxnSetting extends Model
         'prededuct_handling_fee',
     ];
 
+    function getTxnSymbolTypeAttribute() : SymbolType
+    {
+        return SymbolType::coerce((int)$this->attributes['transaction_matching']);
+    }
+
     function getTransactionFeesAttribute()
     {
         if(is_null($this->_transaction_fees)) {
             $this->_transaction_fees = 0.001;
-            $symbol = SymbolType::fromValue(SymbolType::BTCUSDT);
+            $symbol = $this->TxnSymbolType;
             $trade_fee = app()->makeWith(BinanceApiManager::class, $this->user->keysecret()->toArray())->tradeFee($symbol->key);
             if(data_get($trade_fee, 'success', false))
                 $this->_transaction_fees = data_get($trade_fee, 'tradeFee.0.taker', $this->_trade_fee);

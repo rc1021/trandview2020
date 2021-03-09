@@ -45,17 +45,15 @@ class BinanceTrandingWorker implements ShouldQueue
     public function handle()
     {
         $this->user->refresh();
-        $this->user->transactionStatus->trading_program_status = 1;
-        $this->user->transactionStatus->save();
-        $exchange = TxnExchangeType::fromValue($this->signal->txn_exchange_type);
+        $this->user->txnStatus->trading_program_status = 1;
+        $this->user->txnStatus->save();
+        $exchange = $this->signal->txn_exchange_type;
         // 買入
         if($exchange->is(TxnExchangeType::Entry))
         {
             try {
                 // Entry訊號接收到時數據
-                $entry = AdminTxnEntryRec::createRec($this->user, $this->signal);
-                // 建立實際購買訊號
-                $buy = AdminTxnBuyRec::createRec($entry, $this->user);
+                AdminTxnEntryRec::createRec($this->user, $this->signal);
             }
             catch(Exception $e) {
                 $this->signal->error = $e->getMessage();
@@ -66,17 +64,24 @@ class BinanceTrandingWorker implements ShouldQueue
         elseif($exchange->is(TxnExchangeType::Exit))
         {
             try {
-                // Exit訊號接收到時數據
-                $exit = AdminTxnExitRec::createRec($this->user, $this->signal);
-                // 建立實際賣出訊號
-                $buy = AdminTxnSellRec::createRec($exit, $this->user);
+                // 將資料庫所有止損單進行取消，然後將數量賣出
+                $this->user->load('txnBuyRecs', 'txnBuyRecs.stopLossLimit');
+                $arrTxnBuyRecs = $this->user->txnBuyRecs->where('stopLossLimit.deleted_at', null);
+                if($arrTxnBuyRecs->count() > 0)
+                {
+                    foreach ($arrTxnBuyRecs as $key => $buy)
+                    {
+                        // Exit訊號接收到時數據
+                        AdminTxnExitRec::createRec($this->user, $this->signal, $buy);
+                    }
+                }
             }
             catch(Exception $e) {
                 $this->signal->error = $e->getMessage();
                 $this->signal->save();
             }
         }
-        $this->user->transactionStatus->trading_program_status = 0;
-        $this->user->transactionStatus->save();
+        $this->user->txnStatus->trading_program_status = 0;
+        $this->user->txnStatus->save();
     }
 }

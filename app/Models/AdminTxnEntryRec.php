@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\AdminTxnEntryRec as AdminTxnEntryRecTrait;
+use App\Models\Traits\AdminTxnEntryRecTrait;
 
 class AdminTxnEntryRec extends Model
 {
@@ -35,13 +35,14 @@ class AdminTxnEntryRec extends Model
     // Exit訊號接收到時數據
     public function txnExitRec()
     {
-        return $this->hasOne(AdminTxnExitRec::class, 'txn_entry_id');
-    }
-
-    // 實際賣出
-    public function txnSellRec()
-    {
-        return $this->hasOneThrough(AdminTxnSellRec::class, AdminTxnExitRec::class, 'txn_entry_id', 'txn_exit_id');
+        return $this->hasOneThrough(
+            AdminTxnExitRec::class,
+            AdminTxnBuyRec::class,
+            'txn_entry_id',
+            'txn_buy_id',
+            'id',
+            'id'
+        );
     }
 
 }

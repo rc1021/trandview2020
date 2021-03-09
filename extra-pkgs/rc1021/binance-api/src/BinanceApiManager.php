@@ -3,6 +3,8 @@
 namespace BinanceApi;
 
 use BinanceApi\Enums\SymbolType;
+use BinanceApi\Enums\DirectType;
+use BinanceApi\Enums\SideType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\OrderTypeRespType;
 use BinanceApi\Enums\SideEffectType;
@@ -12,7 +14,7 @@ use Exception;
 
 class BinanceApiManager
 {
-    protected $key, $secret, $api;
+    protected $key, $secret, $api, $direct;
 
     public function __call($name, $arguments)
     {
@@ -38,6 +40,21 @@ class BinanceApiManager
     }
 
     /**
+     * 做多做空的買賣陣列
+     *
+     * @return string containing the response
+     * @throws \Exception
+     */
+    private function getSideKey($ind=0)
+    {
+        // 做多做空
+        $side = ($this->direct->is(DirectType::LONG))
+                    ? [SideType::fromValue(SideType::BUY)->key, SideType::fromValue(SideType::SELL)->key]
+                    : [SideType::fromValue(SideType::SELL)->key, SideType::fromValue(SideType::BUY)->key];
+        return $side[$ind];
+    }
+
+    /**
      * BTC/USDT 槓桿逐倉市價賣出(自动还款交易订单)
      *
      * @param $symbol ENUM
@@ -45,18 +62,21 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doLongExit(SymbolType $symbol, array $stopLossLimit)
+    public function doIsolateExit(SymbolType $symbol, DirectType $direct, string $stopOrderId)
     {
         try {
-            $stopOrder = $this->marginGetIsIsolatedOrder($symbol->key, $stopLossLimit['orderId']);
+            // 記錄做單方向
+            $this->direct = $direct;
+
+            $stopOrder = $this->marginGetIsIsolatedOrder($symbol->key, $stopOrderId);
 
             // 一些历史订单的 cummulativeQuoteQty < 0, 是指当前数据不存在。
             $cummulativeQuoteQty = floatval(data_get($stopOrder, 'cummulativeQuoteQty', 0));
             if($cummulativeQuoteQty < 0)
-                throw new Exception("數據不存在");
+                throw new Exception("數據不存在, cummulativeQuoteQty 小於 0");
 
             $freeQuantity = data_get($stopOrder, 'origQty', 0);
-            $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopLossLimit['orderId']), 'status', '');
+            $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopOrderId), 'status', '');
             if(strtoupper($status) !== "CANCELED")
                 throw new Exception("Delete StopLossLimit failure. origQty: $freeQuantity");
 
@@ -65,7 +85,7 @@ class BinanceApiManager
             $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
             $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
             $force = TimeInForce::fromValue(TimeInForce::GTC);
-            $order = $this->api->marginIsolatedOrder($symbol->key, 'SELL', $type->key, $this->floor_dec($freeQuantity, 5), null, null, null, null, null, $resp->key, $effect->key, $force->key);
+            $order = $this->api->marginIsolatedOrder($symbol->key, $this->getSideKey(1), $type->key, $this->floor_dec($freeQuantity, 5), null, null, null, null, null, $resp->key, $effect->key, $force->key);
 
             return array_values(array_merge(['error' => null], compact('order')));
         }
@@ -81,6 +101,7 @@ class BinanceApiManager
      * BTC/USDT 槓桿逐倉下單(自動借貸) + 市價止損單
      *
      * @param $symbol ENUM
+     * @param $direct ENUM 做單方向
      * @param $quantity DECIMAL 下單數量
      * @param $price DECIMAL 限價
      * @param $stop_price DECIMAL 止盈止損單-觸發價
@@ -88,28 +109,34 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doLongEntry(SymbolType $symbol, $quantity, $price, $stop_price, $sell_price) : array
+    public function doIsolateEntry(SymbolType $symbol, DirectType $direct, $quantity, $price, $stop_price, $sell_price) : array
     {
+        // 記錄做單方向
+        $this->direct = $direct;
+
+        $result = [
+            'error' => null,
+            'order' => null,
+            'stop_order' => null,
+        ];
+
         try {
             // 槓桿逐倉下單(自動借貸)
-            $order = $this->doLongEntryBuy($symbol, $quantity, $price);
+            $result['order'] = $this->doIsolateEntryBuy($symbol, $quantity, $price);
             // 止損單
-            $sell_quantity = collect(data_get($order, 'fills', []))->sum('qty');
-            $stop_order = $this->doLongEntryStop($symbol, $sell_quantity, $stop_price, $sell_price);
-            // 回傳結果
-            return array_values([
-                'error' => null,
-                'order' => $order,
-                'stop_order' => $stop_order,
-            ]);
+            $sell_quantity = collect(data_get($result['order'], 'fills', []))->sum('qty');
+            $result['stop_order'] = $this->doIsolateEntryStop($symbol, $sell_quantity, $stop_price, $sell_price);
         }
         catch(Exception $e) {
-            return array_values([
-                'error' => $e,
-                'order' => null,
-                'stop_order' => null,
-            ]);
+            $result['error'] = $e;
+
+            // TODO: 如果 order 存在，表示止損單建立失敗，需要通知用戶
+            if(!is_null($result['order'])) {
+
+            }
         }
+        // 回傳結果
+        return array_values($result);
     }
 
     /**
@@ -121,13 +148,13 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doLongEntryBuy(SymbolType $symbol, $quantity, $price)
+    private function doIsolateEntryBuy(SymbolType $symbol, $quantity, $price)
     {
         $type = OrderType::fromValue(OrderType::LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        $order = $this->api->marginIsolatedOrder($symbol->key, 'BUY', $type->key, $quantity, null, $this->floor_dec($price, 5), null, null, null, $resp->key, $effect->key, $force->key);
+        $order = $this->api->marginIsolatedOrder($symbol->key, $this->getSideKey(), $type->key, $quantity, null, $this->floor_dec($price, 5), null, null, null, $resp->key, $effect->key, $force->key);
         if(is_null($order) or count($order['fills']) == 0) {
             $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
             throw new Exception('未立即完成訂單(撤單)');
@@ -145,10 +172,10 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doLongEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
+    private function doIsolateEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
     {
         $type = OrderType::fromValue(OrderType::STOP_LOSS_LIMIT);
-        $resp = OrderTypeRespType::fromValue(OrderTypeRespType::ACK);
+        $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
 
@@ -156,7 +183,7 @@ class BinanceApiManager
         $freeQuantity = $this->getFreeQuantity($symbol);
         $freeQuantity = ($freeQuantity < $quantity) ? $freeQuantity : $this->floor_dec($quantity, 5);
 
-        return $this->api->marginIsolatedOrder($symbol->key, 'SELL', $type->key, $freeQuantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
+        return $this->api->marginIsolatedOrder($symbol->key, $this->getSideKey(1), $type->key, $freeQuantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**

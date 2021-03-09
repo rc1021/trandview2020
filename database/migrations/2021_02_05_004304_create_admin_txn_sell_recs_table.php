@@ -17,6 +17,7 @@ class CreateAdminTxnSellRecsTable extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('txn_exit_id');
+            $table->foreignId('ord_id')->default(0);
 
             $table->dateTime('J29'); // 平倉交易起始日期時間
             $table->dateTime('J30'); // 平倉交易結束日期時間
