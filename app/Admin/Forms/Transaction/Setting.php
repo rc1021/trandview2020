@@ -46,12 +46,16 @@ class Setting extends Form
      */
     public function form()
     {
+        $rate_func = function ($value) {
+            return $value * 100;
+        };
         $states = $this->commonSwitch();
-        $this->text('initial_tradable_total_funds', __('admin.txn.initial_tradable_total_funds'))->rules('required|numeric');
+        $this->rate('initial_tradable_total_funds', __('admin.txn.initial_tradable_total_funds'))->rules('required|numeric')->customFormat($rate_func);
         $this->select('transaction_matching', __('admin.txn.transaction_matching'))->options(SymbolType::asSelectArray())->rules('required');
         $this->switch('lever_switch', __('admin.txn.lever_switch'))->rules('required')->states($states);
-        $this->rate('initial_capital_risk', __('admin.txn.initial_capital_risk'))->rules('required|numeric');
-        $this->rate('transaction_fees', __('admin.txn.transaction_fees'))->rules('required|numeric');
+        $this->rate('initial_capital_risk', __('admin.txn.initial_capital_risk'))->rules('required|numeric')->customFormat($rate_func);
+        $this->rate('btc_daily_interest', __('admin.txn.btc_daily_interest'))->rules('required|numeric')->customFormat($rate_func);
+        $this->rate('usdt_daily_interest', __('admin.txn.usdt_daily_interest'))->rules('required|numeric')->customFormat($rate_func);
         $this->switch('prededuct_handling_fee', __('admin.txn.prededuct_handling_fee'))->rules('required')->states($states);
     }
 

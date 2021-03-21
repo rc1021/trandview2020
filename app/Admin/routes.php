@@ -17,5 +17,9 @@ Route::group([
     $router->put('auth/key-secrets', 'AuthController@putKeySecret');
 
     $router->get('auth/transaction/setting', TransactionController::class.'@setting')->name('transaction.setting');
+    $router->get('auth/transaction/logs/calc/{signal_history}', TransactionLogController::class.'@calc')->name('logs.calc');
     $router->resource('auth/transaction/logs', TransactionLogController::class);
+
+    $router->get('formula-tables/{key}/preview', FormulaTableController::class.'@preview')->name('formula.preview');
+    $router->resource('formula-tables', FormulaTableController::class);
 });

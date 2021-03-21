@@ -17,6 +17,7 @@
         "khanamiryan/qrcode-detector-decoder": "^1.0",
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
+        "phpoffice/phpspreadsheet": "^1.17",
         "rc1021/binance-api": "dev-master"
     },
     "require-dev": {
@@ -43,7 +44,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "helpers/string_helper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

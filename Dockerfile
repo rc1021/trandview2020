@@ -4,7 +4,11 @@ RUN apk add --no-cache nginx supervisor wget
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd mysqli pdo_mysql
+RUN install-php-extensions gd mysqli pdo_mysql zip mbstring xml
+
+# fix work iconv library with alphine
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv
+ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 RUN mkdir -p /run/nginx
 

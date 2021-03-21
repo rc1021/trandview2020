@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use App\Models\Traits\SignalHistoryTrait;
+use App\Models\TxnMarginOrder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Encore\Admin\Facades\Admin;
 
 class SignalHistory extends Model
 {
@@ -12,6 +15,8 @@ class SignalHistory extends Model
 
     // 解構訊號內容
     protected $_signal = [];
+
+    protected $dates = ['created_at'];
 
     public function setMessageAttribute($value)
     {
@@ -35,13 +40,36 @@ class SignalHistory extends Model
         return $this->_signal;
     }
 
-    public function txnEntryRecs()
+    public function getCalcLogPathAttribute()
     {
-        return $this->hasMany(AdminTxnEntryRec::class, 'signal_history_id');
+        if (!Admin::user())
+            return null;
+        $path = "excel-logs/".Admin::user()->id."/{$this->id}/index.html";
+        if(!Storage::disk('local')->exists($path))
+            return null;
+        return $path;
     }
 
-    public function txnExitRecs()
+    public function getCalcLogHtmlAttribute()
     {
-        return $this->hasMany(AdminTxnExitRec::class, 'signal_history_id');
+        $path = $this->calc_log_path;
+        if($path) {
+            $html = Storage::disk('local')->get($path);
+            $html = str_replace('gridlines', 'gridlines table table-bordered', $html);
+            return $html;
+        }
+        return null;
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(AdminUser::class, 'signal_history_user');
+    }
+
+    public function txnOrders()
+    {
+        if(!Admin::user())
+            return $this->hasMany(TxnMarginOrder::class, 'signal_id')->where('user_id', 0);
+        return $this->hasMany(TxnMarginOrder::class, 'signal_id')->where('user_id', Admin::user()->id);
     }
 }

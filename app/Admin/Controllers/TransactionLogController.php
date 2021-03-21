@@ -2,12 +2,23 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\AdminTxnEntryRec;
+use App\Models\SignalHistory;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
+use Carbon\Carbon;
+use BenSampo\Enum\Enum;
+use BinanceApi\Enums\OrderType;
+use BinanceApi\Enums\DirectType;
+use App\Enums\TxnExchangeType;
+use Illuminate\Support\Facades\Storage;
+use Encore\Admin\Layout\Content;
+use Encore\Admin\Widgets\Box;
+use Encore\Admin\Widgets\Table;
+use App\Admin\Models\TransactionLog\ShowTxnOrder;
+use App\Admin\Models\TransactionLog\ShowCalcLog;
 
 class TransactionLogController extends AdminController
 {
@@ -16,7 +27,7 @@ class TransactionLogController extends AdminController
      *
      * @var string
      */
-    protected $title = 'AdminTxnEntryRec';
+    protected $title = 'SignalHistory';
 
     /**
      * Make a grid builder.
@@ -25,12 +36,66 @@ class TransactionLogController extends AdminController
      */
     protected function grid()
     {
-        $grid = new Grid(new AdminTxnEntryRec());
+        \Encore\Admin\Admin::style('td[class^=column] { min-width: 125px; }');
 
-        $grid->column('Entry數據')->style('width: 30%;')->view('admin.transaction.log.grid.entry');
-        $grid->column('txnBuyRec', '實際開倉紀錄')->style('width: 25%;')->view('admin.transaction.log.grid.buy');
-        $grid->column('txnExitRec', 'Exit數據')->style('width: 20%;')->view('admin.transaction.log.grid.exit');
-        $grid->column('txnExitRec.txnEntryRec', '實際平倉紀錄')->style('width: 25%;')->view('admin.transaction.log.grid.sell');
+        $instance = new SignalHistory();
+        $grid = new Grid($instance);
+
+        $grid->column('created_at', __('admin.rec.signal.created_at'))->display(function($created_at) {
+            $html = <<<HTML
+                <i class="fa fa-fw fa-check text-success"></i>
+            HTML;
+            if(!empty($this->error)) {
+                $err = $this->error;
+                $html = <<<HTML
+                    <i class="fa fa-fw fa-exclamation-circle text-danger" data-toggle="tooltip" title="$err"></i>
+                HTML;
+            }
+            return $html . '&nbsp;' . Carbon::parse($created_at)->format('Y-m-d H:i:s');
+        });
+
+        $dynamic_columns = [ 'txn_type', 'symbol_type', 'entry_price', 'risk_start_price', 'position_price', 'auto_liquidation_at'];
+        foreach ($dynamic_columns as $column) {
+            $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
+                if($column->getName() == 'txn_type')
+                    return sprintf('%s %s'
+                            , DirectType::fromValue($this->txn_direct_type)->description
+                            , TxnExchangeType::fromValue($this->txn_exchange_type)->description);
+                $data = $this[$column->getName()];
+                if($data instanceof Enum)
+                    return $data->description;
+                return $data;
+            });
+        }
+
+        $grid->column('txnOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnOrders) {
+            $count = count($txnOrders);
+            return __('admin.rec.signal.txn_order.count', compact('count'));
+        })->expand(function ($model) {
+            $only = ['orderId', 'type', 'transactTime', 'price', 'origQty', 'executedQty', 'cummulativeQuoteQty', 'timeInForce', 'marginBuyBorrowAmount'];
+            $txnOrders = $model->txnOrders()->get()->map(function ($origin) use ($only) {
+                $order = $origin->only($only);
+                $order['type'] = OrderType::fromKey($order['type'])->description;
+                $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
+                return $order;
+            })->toArray();
+            $columns = collect($only)->map(function ($column) {
+                return __('admin.txn.order.'.$column);
+            })->toArray();
+            return new Table($columns, $txnOrders);
+        });
+
+        $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
+            if($this->calc_log_path)
+                return __('admin.rec.signal.detail');
+            return 'No Data';
+        })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
+
+        $grid->actions(function ($actions) {
+            $actions->disableDelete();
+            $actions->disableEdit();
+            $actions->disableView();
+        });
 
         $grid->filter(function($filter) {
             $filter->disableIdFilter();
@@ -38,11 +103,13 @@ class TransactionLogController extends AdminController
             $filter->expand();
         });
 
-        $grid->model()->where('user_id', Admin::user()->id);
+        $grid->model()->join('signal_history_user', function ($join) use ($instance) {
+            $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
+                ->where('admin_user_id', Admin::user()->id);
+        });
         $grid->model()->orderBy('id', 'desc');
         $grid->disableCreateButton();
         $grid->disableRowSelector();
-        $grid->disableActions();
         $grid->disableExport();
         $grid->disableColumnSelector();
         $grid->paginate(50);
@@ -58,69 +125,23 @@ class TransactionLogController extends AdminController
      */
     protected function detail($id)
     {
-        $show = new Show(AdminTxnEntryRec::findOrFail($id));
+        $show = new Show(SignalHistory::findOrFail($id));
 
-        $show->field('id', __('Id'));
-        $show->field('user_id', __('User id'));
-        $show->field('position_at', __('Position at'));
-        $show->field('avaiable_total_funds', __('Avaiable total funds'));
-        $show->field('tranding_long_short', __('Tranding long short'));
-        $show->field('funds_risk', __('Funds risk'));
-        $show->field('transaction_matching', __('Transaction matching'));
-        $show->field('leverage', __('Leverage'));
-        $show->field('prededuct_handling_fee', __('Prededuct handling fee'));
-        $show->field('transaction_fee', __('Transaction fee'));
-        $show->field('risk_start_price', __('Risk start price'));
-        $show->field('hight_position_price', __('Hight position price'));
-        $show->field('low_position_price', __('Low position price'));
-        $show->field('entry_price', __('Entry price'));
-        $show->field('funds_risk_amount', __('Funds risk amount'));
-        $show->field('risk_start', __('Risk start'));
-        $show->field('position_price', __('Position price'));
-        $show->field('leverage_power', __('Leverage power'));
-        $show->field('leverage_price', __('Leverage price'));
-        $show->field('leverage_position_price', __('Leverage position price'));
-        $show->field('position_few', __('Position few'));
-        $show->field('tranding_fee_amount', __('Tranding fee amount'));
-        $show->field('position_few_amount', __('Position few amount'));
-        $show->field('created_at', __('Created at'));
-        $show->field('updated_at', __('Updated at'));
+        $show->field('created_at', __('admin.rec.signal.created_at'));
+        $show->field('message', __('admin.rec.signal.message'));
+        $show->field('error', __('admin.rec.signal.error'));
 
         return $show;
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
-    protected function form()
+    public function calc(SignalHistory $signal_history, Content $content)
     {
-        $form = new Form(new AdminTxnEntryRec());
-
-        $form->number('user_id', __('User id'));
-        $form->datetime('position_at', __('Position at'))->default(date('Y-m-d H:i:s'));
-        $form->number('avaiable_total_funds', __('Avaiable total funds'));
-        $form->switch('tranding_long_short', __('Tranding long short'))->default(1);
-        $form->decimal('funds_risk', __('Funds risk'))->default(0.0000000000);
-        $form->text('transaction_matching', __('Transaction matching'))->default('1');
-        $form->switch('leverage', __('Leverage'));
-        $form->switch('prededuct_handling_fee', __('Prededuct handling fee'));
-        $form->decimal('transaction_fee', __('Transaction fee'))->default(0.0000000000);
-        $form->decimal('risk_start_price', __('Risk start price'))->default(0.0000000000);
-        $form->decimal('hight_position_price', __('Hight position price'))->default(0.0000000000);
-        $form->decimal('low_position_price', __('Low position price'))->default(0.0000000000);
-        $form->decimal('entry_price', __('Entry price'))->default(0.0000000000);
-        $form->number('funds_risk_amount', __('Funds risk amount'));
-        $form->decimal('risk_start', __('Risk start'))->default(0.0000000000);
-        $form->decimal('position_price', __('Position price'))->default(0.0000000000);
-        $form->decimal('leverage_power', __('Leverage power'))->default(0.0000000000);
-        $form->decimal('leverage_price', __('Leverage price'))->default(0.0000000000);
-        $form->decimal('leverage_position_price', __('Leverage position price'))->default(0.0000000000);
-        $form->decimal('position_few', __('Position few'))->default(0.0000000000);
-        $form->decimal('tranding_fee_amount', __('Tranding fee amount'))->default(0.0000000000);
-        $form->decimal('position_few_amount', __('Position few amount'))->default(0.0000000000);
-
-        return $form;
+        $html = $signal_history->calc_log_html;
+        if($html) {
+            $box = new Box(null, $html);
+            $box = str_replace('box-body', 'box-body table-responsive no-padding', $box);
+            return $content->body($box);
+        }
+        abort(404);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Encore\Admin\Auth\Database\Administrator;
-// use App\Models\KeySecret;
+use App\Models\SignalHistory;
 // use App\Models\AdminTxnSetting;
 // use App\Models\AdminTxnStatus;
 // use App\Models\AdminTxnEntryRec;
@@ -17,6 +17,11 @@ use Encore\Admin\Auth\Database\Administrator;
 
 class AdminUser extends Administrator
 {
+    public function signals()
+    {
+        return $this->belongsToMany(SignalHistory::class, 'signal_history_user');
+    }
+
     // Entry訊號接收到時數據
     public function txnEntryRecs()
     {

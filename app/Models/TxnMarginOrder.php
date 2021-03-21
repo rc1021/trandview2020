@@ -10,7 +10,7 @@ class TxnMarginOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ["user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
+    protected $fillable = ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
 
     protected $dates = [
         'transactTime',
@@ -48,72 +48,5 @@ class TxnMarginOrder extends Model
     public function txnSellRec()
     {
         return $this->hasMany(AdminTxnSellRec::class, 'stop_ord_id');
-    }
-
-    //datetime
-    public function getTransactTimeAttribute()
-    {
-        return $this->transactTime;
-    }
-
-    public function getSideAttribute()
-    {
-        return $this->side;
-    }
-
-    public function getIsIsolatedAttribute() : bool
-    {
-        return $this->isIsolated;
-    }
-
-    public function getPriceAttribute()
-    {
-        return $this->price;
-    }
-
-    public function getOrigQtyAttribute()
-    {
-        return $this->origQty;
-    }
-
-    public function getExecutedQtyAttribute()
-    {
-        return $this->executedQty;
-    }
-
-    public function getCummulativeQuoteQtyAttribute()
-    {
-        return $this->cummulativeQuoteQty;
-    }
-
-    public function getStatusAttribute()
-    {
-        return $this->status;
-    }
-
-    public function getTimeInForceAttribute()
-    {
-        return $this->timeInForce;
-    }
-
-    public function getMarginBuyBorrowAssetAttribute()
-    {
-        return $this->marginBuyBorrowAsset;
-    }
-
-    public function getMarginBuyBorrowAmountAttribute()
-    {
-        return $this->marginBuyBorrowAmount;
-    }
-
-    public function getFillsAttribute() : array
-    {
-        $fills = [];
-        foreach ($this->fills as $key => $value) {
-            $fill = new TxnMarginOrderFill;
-            $fill->data = $value;
-            array_push($fills, $fill);
-        }
-        return $fills;
     }
 }

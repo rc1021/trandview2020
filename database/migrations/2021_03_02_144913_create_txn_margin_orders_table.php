@@ -21,7 +21,7 @@ class CreateTxnMarginOrdersTable extends Migration
             $table->string("symbol");
             $table->bigInteger("orderId");
             $table->string("clientOrderId")->nullable();
-            $table->timestamp("transactTime", 0);
+            $table->timestamp("transactTime", 0)->nullable();
             $table->string("price")->nullable();
             $table->string("origQty")->nullable();
             $table->string("executedQty")->nullable();
@@ -30,7 +30,7 @@ class CreateTxnMarginOrdersTable extends Migration
             $table->string("timeInForce")->nullable();
             $table->string("type")->nullable();
             $table->string("side")->nullable();
-            $table->string("fills")->nullable();
+            $table->text("fills")->nullable();
             $table->string("marginBuyBorrowAsset")->nullable();
             $table->string("marginBuyBorrowAmount")->nullable();
             $table->boolean("isIsolated")->nullable();

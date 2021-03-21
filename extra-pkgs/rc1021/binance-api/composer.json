@@ -5,7 +5,10 @@
     "autoload": {
         "psr-4": {
             "BinanceApi\\": "src/"
-        }
+        },
+        "files": [
+          "src/helpers.php"
+        ]
     },
     "require": {
         "guzzlehttp/guzzle": "^7.0.1",
