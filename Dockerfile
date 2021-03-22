@@ -10,6 +10,8 @@ RUN install-php-extensions gd mysqli pdo_mysql zip mbstring xml
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv
 ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
+RUN apk add certbot certbot-nginx
+
 RUN mkdir -p /run/nginx
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
