@@ -279,7 +279,7 @@ class BinanceTrandingWorker implements ShouldQueue
         });
 
         if(array_key_exists('error', $result) and $result['error'])
-            throw $result['error'];
+            throw new Exception($result['error']);
 
         // 變更用戶狀態
         $this->user->txnStatus->current_state = 1;
@@ -325,18 +325,18 @@ class BinanceTrandingWorker implements ShouldQueue
                 }
             }
 
-            if(array_key_exists('rm_stop_orders', $result) and $result['rm_stop_orders']) {
-                foreach ($result['rm_stop_orders'] as $rm_stop_orders) {
-                    TxnMarginOrder::create(array_merge([
-                        'user_id' => $this->user->id,
-                        'signal_id' => $this->signal->id,
-                    ], Arr::only($rm_stop_orders, $fetch_keys)));
-                }
-            }
+            // if(array_key_exists('rm_stop_orders', $result) and $result['rm_stop_orders']) {
+            //     foreach ($result['rm_stop_orders'] as $rm_stop_orders) {
+            //         TxnMarginOrder::create(array_merge([
+            //             'user_id' => $this->user->id,
+            //             'signal_id' => $this->signal->id,
+            //         ], Arr::only($rm_stop_orders, $fetch_keys)));
+            //     }
+            // }
         });
 
         if(array_key_exists('error', $result) and $result['error'])
-            throw $result['error'];
+            throw new Exception($result['error']);
 
         // 變更用戶狀態
         $this->user->txnStatus->current_state = 0;

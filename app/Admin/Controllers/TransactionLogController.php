@@ -46,7 +46,7 @@ class TransactionLogController extends AdminController
                 <i class="fa fa-fw fa-check text-success"></i>
             HTML;
             if(!empty($this->error)) {
-                $err = $this->error;
+                $err = htmlspecialchars($this->error);
                 $html = <<<HTML
                     <i class="fa fa-fw fa-exclamation-circle text-danger" data-toggle="tooltip" title="$err"></i>
                 HTML;

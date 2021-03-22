@@ -105,7 +105,7 @@ class BinanceApiManager
             $result['rm_stop_orders'] = $rm_stop_orders->all();
         }
         catch(Exception $e) {
-            $result['error'] = $e;
+            $result['error'] = $e->getMessage();
         }
 
         return $result;
@@ -139,7 +139,7 @@ class BinanceApiManager
             $result['order_sell'] = $order;
         }
         catch(Exception $e) {
-            $result['error'] = $e;
+            $result['error'] = $e->getMessage();
         }
 
         return $result;
@@ -173,11 +173,12 @@ class BinanceApiManager
             $result['order'] = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
             // 止損單
             $stop_quantity = collect(data_get($result['order'], 'fills', []))->sum('qty');
+            $stop_price = $this->floor_dec($stop_price, 2);
+            $sell_price = $this->floor_dec($sell_price, 2);
             $result['stop_order'] = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($this->direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
         }
         catch(Exception $e) {
-            $result['error'] = $e;
-
+            $result['error'] = $e->getMessage();
             // TODO: 如果 order 存在，表示止損單建立失敗，需要通知用戶
             if(!is_null($result['order'])) {
 
@@ -202,7 +203,7 @@ class BinanceApiManager
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        $order = $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 5), null, null, null, $resp->key, $effect->key, $force->key);
+        $order = $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
         if(is_null($order) or count($order['fills']) == 0) {
             $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
             throw new Exception('未立即完成訂單(撤單)');
@@ -226,7 +227,8 @@ class BinanceApiManager
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        $order = $this->api->marginIsolatedOrder($symbol->key, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 5), null, null, null, $resp->key, $effect->key, $force->key);
+        $order = $this->api->marginIsolatedOrder($symbol->key, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
+
         if(is_null($order) or count($order['fills']) == 0) {
             $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
             throw new Exception('未立即完成訂單(撤單)');
@@ -255,9 +257,6 @@ class BinanceApiManager
         $freeQuantity = $this->getFreeQuantity($symbol);
         $freeQuantity = ($freeQuantity < $quantity) ? $freeQuantity : $this->floor_dec($quantity, 5);
 
-        $stop_price = $this->floor_dec($stop_price, 2);
-        $sell_price = $this->floor_dec($sell_price, 2);
-
         return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::SELL)->key, $type->key, $freeQuantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
     }
 
@@ -281,10 +280,6 @@ class BinanceApiManager
         // 取得目前帳戶 $symbol 數量
         $freeQuantity = $this->getFreeQuantity($symbol);
         $freeQuantity = ($freeQuantity < $quantity) ? $freeQuantity : $this->floor_dec($quantity, 5);
-
-        $stop_price = $this->floor_dec($stop_price, 2);
-        $sell_price = $this->floor_dec($sell_price, 2);
-
         return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $freeQuantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
     }
 
