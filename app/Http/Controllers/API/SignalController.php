@@ -15,8 +15,8 @@ class SignalController extends Controller
         $this->m_rep = $rep;
     }
 
-    public function fire($clock, Request $request)
+    public function fire(Request $request)
     {
-        $this->m_rep->doFire($clock, $request);
+        $this->m_rep->doFire($request);
     }
 }

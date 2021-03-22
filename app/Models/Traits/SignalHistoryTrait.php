@@ -12,11 +12,11 @@ use App\Jobs\ProcessSignal;
 trait SignalHistoryTrait
 {
     // 建立一筆訊號，並執行訊息內容
-    public static function parseAndPlay($clock, $message)
+    public static function parseAndPlay($message)
     {
         // 記錄訊息
         $rec = new \App\Models\SignalHistory;
-        $rec->clock = $clock;
+        $rec->clock = '1';
         $rec->message = $message;
         $rec->save();
 

@@ -18,4 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('signal/{clock}', [App\Http\Controllers\API\SignalController::class, 'fire'])->name('signal');
+Route::post('signal', [App\Http\Controllers\API\SignalController::class, 'fire'])->name('signal');

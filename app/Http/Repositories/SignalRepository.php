@@ -6,9 +6,9 @@ use App\Models\SignalHistory;
 class SignalRepository
 {
 
-    public function doFire($clock, $request)
+    public function doFire($request)
     {
-        SignalHistory::parseAndPlay($clock, $request->getContent());
+        SignalHistory::parseAndPlay($request->getContent());
     }
 
     public function getHistoryModel($request)
