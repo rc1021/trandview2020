@@ -16,6 +16,8 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "khanamiryan/qrcode-detector-decoder": "^1.0",
         "laravel-admin-ext/backup": "^1.1",
+        "laravel-admin-ext/log-viewer": "^1.0",
+        "laravel-admin-ext/scheduling": "^1.1",
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
         "phpoffice/phpspreadsheet": "^1.17",
