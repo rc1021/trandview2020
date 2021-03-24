@@ -72,8 +72,6 @@ class BinanceTrandingWorker implements ShouldQueue
     public function handle()
     {
         try {
-            $this->user->signals()->attach($this->signal);
-            $this->user->save();
             $this->user->load('txnSetting')->refresh();
 
             $this->user->txnStatus->trading_program_status = 1;
@@ -104,6 +102,9 @@ class BinanceTrandingWorker implements ShouldQueue
 
         $this->time_duration = $this->timer;
         $this->signal->save();
+        
+        $this->user->signals()->attach($this->signal);
+        $this->user->save();
 
         $this->user->txnStatus->trading_program_status = 0;
         $this->user->txnStatus->save();
