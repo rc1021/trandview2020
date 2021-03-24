@@ -15,10 +15,12 @@
         "google/cloud-secret-manager": "^1.2",
         "guzzlehttp/guzzle": "^7.0.1",
         "khanamiryan/qrcode-detector-decoder": "^1.0",
+        "laravel-admin-ext/backup": "^1.1",
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
         "phpoffice/phpspreadsheet": "^1.17",
-        "rc1021/binance-api": "dev-master"
+        "rc1021/binance-api": "dev-master",
+        "spatie/laravel-backup": "^6.15"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.5",
