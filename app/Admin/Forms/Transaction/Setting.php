@@ -56,7 +56,6 @@ class Setting extends Form
         $this->text('initial_capital_risk', __('admin.txn.initial_capital_risk'))->rules('required|numeric');
         $this->text('btc_daily_interest', __('admin.txn.btc_daily_interest'))->rules('required|numeric');
         $this->text('usdt_daily_interest', __('admin.txn.usdt_daily_interest'))->rules('required|numeric');
-        $this->switch('prededuct_handling_fee', __('admin.txn.prededuct_handling_fee'))->rules('required')->states($states);
     }
 
     /**

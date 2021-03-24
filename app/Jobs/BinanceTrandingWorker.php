@@ -134,12 +134,6 @@ class BinanceTrandingWorker implements ShouldQueue
         $sheet->setCellValue($formulaTable->setcol1, data_get($account, "assets.$symbol_key.quoteAsset.free"));
         // 當前總資金(標的幣)
         $sheet->setCellValue($formulaTable->setcol2, data_get($account, "assets.$symbol_key.baseAsset.free"));
-
-        // $trade_fee = $this->api->tradeFee($this->signal->symbolType->key);
-        // // 交易手續費(maker)
-        // $sheet->setCellValue($formulaTable->setcol3, data_get($trade_fee, 'tradeFee.maker', 0.001));
-        // // 交易手續費(taker)
-        // $sheet->setCellValue($formulaTable->setcol4, data_get($trade_fee, 'tradeFee.taker', 0.001));
         // 標的幣借款利息(24h)
         $sheet->setCellValue($formulaTable->setcol5, $this->user->txnSetting->btc_daily_interest);
         // 計價幣借款利息(24h)
