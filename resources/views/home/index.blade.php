@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/03/25</h2>
+        <ul>
+            <li>修正<code>做空止損單</code>下單失敗問題</li>
+        </ul>
         <h2>2021/03/23</h2>
         <ul>
             <li>設定 Tradingview webhook 位址 <a href="{{ route('signal') }}">{{ route('signal') }}</a></li>
