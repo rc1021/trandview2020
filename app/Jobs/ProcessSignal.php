@@ -47,7 +47,7 @@ class ProcessSignal implements ShouldQueue
                 foreach ($users as $user)
                 {
                     if($type->is(TradingPlatformType::BINANCE)) {
-                        BinanceTrandingWorker::dispatchSync($user, $this->signal);
+                        BinanceTrandingWorker::dispatch($user, $this->signal);
                     }
                     else {
                         // else if
