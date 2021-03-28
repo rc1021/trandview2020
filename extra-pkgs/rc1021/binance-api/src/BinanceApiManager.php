@@ -40,6 +40,66 @@ class BinanceApiManager
     }
 
     /**
+     * 做空止損單被觸發後手動还款不足的借款
+     *
+     * @param $symbol_key string
+     * @param $account array symbol_key帳戶內容
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public function IsolatedBaseAssetRepay($symbol_key, $account = null)
+    {
+        $result = [
+            'error' => null,
+            'orders' => [],
+        ];
+
+        try {
+            if(is_null($account))
+                $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+
+            $asset_key = data_get($account, "assets.$symbol_key.baseAsset.asset", substr($symbol_key, 0, 3));
+            $borrowed = data_get($account, "assets.$symbol_key.baseAsset.borrowed", 0);
+
+            // 沒有借款，不需要執行
+            if($borrowed == 0)
+                return $result;
+
+            // 計算買多少標的幣
+            $quantity = $borrowed;
+            $minq = 10 / data_get($this->api->marginPriceIndex("BTCUSDT"), 'price');
+            if($minq > $quantity)
+                $quantity = $minq;
+            $quantity = $this->ceil_dec($quantity, 5);
+
+            // 買入足夠還款標的幣(自動還款)
+            $side = SideType::fromValue(SideType::BUY);
+            $type = OrderType::fromValue(OrderType::MARKET);
+            $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
+            $force = TimeInForce::fromValue(TimeInForce::GTC);
+            $order1 = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, null, $effect->key, $force->key);
+            array_push($result['orders'], $order1);
+
+            // 把標地幣多餘的數量賣掉
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $free = $this->floor_dec(data_get($account, "assets.$symbol_key.baseAsset.free", 0), 5);
+            if($free > 0) {
+                $side = SideType::fromValue(SideType::SELL);
+                $type = OrderType::fromValue(OrderType::MARKET);
+                $effect = SideEffectType::fromValue(SideEffectType::NO_SIDE_EFFECT);
+                $force = TimeInForce::fromValue(TimeInForce::GTC);
+                $order2 = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $free, null, null, null, null, null, null, $effect->key, $force->key);
+                array_push($result['orders'], $order2);
+            }
+        }
+        catch(Exception $e) {
+            $result['error'] = $e->getMessage();
+        }
+
+        return $result;
+    }
+
+    /**
      * BTC/USDT 槓桿逐倉市價賣出(自动还款交易订单)
      *
      * @param $symbol ENUM

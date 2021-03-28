@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use BinanceApi\Enums\OrderStatusType;
+use BinanceApi\Enums\OrderType;
 
 class TxnMarginOrder extends Model
 {
@@ -40,9 +42,14 @@ class TxnMarginOrder extends Model
         return null;
     }
 
+    public function scopeStatusNew($query)
+    {
+        return $query->where('status', OrderStatusType::fromValue(OrderStatusType::NEW)->key);
+    }
+
     public function scopeStopLossLimit($query)
     {
-        return $query->where('type', 'STOP_LOSS_LIMIT');
+        return $query->where('type', OrderType::fromValue(OrderType::STOP_LOSS_LIMIT)->key);
     }
 
     public function txnSellRec()

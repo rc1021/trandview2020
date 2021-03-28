@@ -51,7 +51,7 @@ class TransactionLogController extends AdminController
                     <i class="fa fa-fw fa-exclamation-circle text-danger" data-toggle="tooltip" title="$err"></i>
                 HTML;
             }
-            return $html . '&nbsp;' . Carbon::parse($created_at)->format('Y-m-d H:i:s');
+            return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
         });
 
         $dynamic_columns = [ 'txn_type', 'symbol_type', 'entry_price', 'risk_start_price', 'position_price', 'auto_liquidation_at'];
@@ -77,6 +77,7 @@ class TransactionLogController extends AdminController
                 $order = $origin->only($only);
                 $order['type'] = OrderType::fromKey($order['type'])->description;
                 $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
+                $order['transactTime'] = Carbon::parse($origin['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
                 return $order;
             })->toArray();
             $columns = collect($only)->map(function ($column) {
