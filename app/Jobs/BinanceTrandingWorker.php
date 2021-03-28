@@ -71,6 +71,7 @@ class BinanceTrandingWorker implements ShouldQueue
      */
     public function handle()
     {
+        $error = null;
         try {
             $this->user->load('txnSetting')->refresh();
 
@@ -97,13 +98,16 @@ class BinanceTrandingWorker implements ShouldQueue
             }
         }
         catch(Exception $e) {
-            $this->signal->error = $e->getMessage();
+            $error = $e->getMessage();
         }
 
         $this->time_duration = $this->timer;
         $this->signal->save();
-        
-        $this->user->signals()->attach($this->signal);
+
+        if(!is_null($error))
+            $this->user->signals()->attach($this->signal, compact('error'));
+        else
+            $this->user->signals()->attach($this->signal);
         $this->user->save();
 
         $this->user->txnStatus->trading_program_status = 0;

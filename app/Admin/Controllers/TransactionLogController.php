@@ -104,7 +104,7 @@ class TransactionLogController extends AdminController
             $filter->expand();
         });
 
-        $grid->model()->join('signal_history_user', function ($join) use ($instance) {
+        $grid->model()->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
             $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
                 ->where('admin_user_id', Admin::user()->id);
         });
