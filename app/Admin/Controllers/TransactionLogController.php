@@ -48,7 +48,7 @@ class TransactionLogController extends AdminController
             if(!empty($this->error)) {
                 $err = htmlspecialchars($this->error);
                 $html = <<<HTML
-                    <i class="fa fa-fw fa-exclamation-circle text-danger" data-toggle="tooltip" title="$err"></i>
+                    <i class="fa fa-fw fa-exclamation-circle text-danger" onclick="console.log('$err');"></i>
                 HTML;
             }
             return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
@@ -72,7 +72,7 @@ class TransactionLogController extends AdminController
             $count = count($txnOrders);
             return __('admin.rec.signal.txn_order.count', compact('count'));
         })->expand(function ($model) {
-            $only = ['orderId', 'type', 'transactTime', 'price', 'origQty', 'executedQty', 'cummulativeQuoteQty', 'timeInForce', 'marginBuyBorrowAmount'];
+            $only = ['orderId', 'type', 'fills', 'transactTime', 'price', 'origQty', 'executedQty', 'cummulativeQuoteQty', 'timeInForce', 'marginBuyBorrowAmount'];
             $txnOrders = $model->txnOrders()->get()->map(function ($origin) use ($only) {
                 $order = $origin->only($only);
                 $order['type'] = OrderType::fromKey($order['type'])->description;
