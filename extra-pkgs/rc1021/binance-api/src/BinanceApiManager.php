@@ -235,6 +235,8 @@ class BinanceApiManager
                 $this->marginDeleteIsolatedOrder($result['order']['symbol'], $result['order']['orderId']);
                 throw new Exception('未立即完成訂單(撤單). 訂單細節: '.print_r($this->getLastRequest()));
             }
+            // 停止 1 秒後再做止損單
+            sleep(1);
             // 止損單
             $stop_quantity = $this->floor_dec(collect(data_get($result['order'], 'fills', []))->sum('qty'), 5);
             $stop_price = $this->floor_dec($stop_price, 2);
