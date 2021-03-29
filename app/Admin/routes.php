@@ -22,4 +22,7 @@ Route::group([
 
     $router->get('formula-tables/{key}/preview', FormulaTableController::class.'@preview')->name('formula.preview');
     $router->resource('formula-tables', FormulaTableController::class);
+
+    $router->get('notify-cancel', 'AuthController@lineNotifyCancel')->name('admin-line-notify.cancel');
+    $router->get('notify-callback', 'AuthController@lineNotifyCallback')->name('admin-line-notify.callback');
 });

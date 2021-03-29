@@ -19,3 +19,7 @@
  */
 
 Encore\Admin\Form::forget(['map', 'editor']);
+
+Encore\Admin\Admin::favicon('/favicon.ico');
+
+Encore\Admin\Form::extend('linenotify', App\Admin\Extensions\Form\LINENotifyBinder::class);

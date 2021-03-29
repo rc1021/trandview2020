@@ -2,6 +2,9 @@
 
 return [
 
+    'line_notify_client_id' => env('LINE_NOTIFY_CLIENT_ID', ''),
+    'line_notify_client_secret' => env('LINE_NOTIFY_SECRET', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

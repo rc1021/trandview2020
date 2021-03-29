@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/03/30</h2>
+        <ul>
+            <li>新增 Line notify 服務，欲收到持平倉訊息，請到 <a href="{{ route('admin.setting') }}">設定</a>  完成 Line 帳號連動</li>
+        </ul>
         <h2>2021/03/29</h2>
         <ul>
             <li>修正下止損單的時機
