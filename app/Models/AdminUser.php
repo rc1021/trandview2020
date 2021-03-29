@@ -17,6 +17,25 @@ use App\Models\SignalHistory;
 
 class AdminUser extends Administrator
 {
+    public function notify($message)
+    {
+        if(!empty($this->line_notify_token)) {
+            $apiUrl = "https://notify-api.line.me/api/notify";
+            $params = [
+                'message' => $message,
+            ];
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->line_notify_token
+            ]);
+            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            $output = curl_exec($ch);
+            curl_close($ch);
+        }
+    }
+
     public function signals()
     {
         return $this->belongsToMany(SignalHistory::class, 'signal_history_user');

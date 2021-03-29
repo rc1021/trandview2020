@@ -54,6 +54,11 @@ class BinanceIsolatedStopLossLimitCheck implements ShouldQueue
 
             TxnMarginOrder::where('id', $this->order_id)
                     ->update(Arr::only($current, ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"]));
+
+            $notify_message  = "止損單狀態改變 from " . $order->status . " to " . $current['status'] . "\n";
+            $notify_message .= "詳情: \n";
+            $notify_message .= print_r($current, true);
+            $user->notif(print_r($notify_message, true));
         }
     }
 }

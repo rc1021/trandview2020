@@ -35,7 +35,7 @@ class BinanceTrandingWorker implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $signal, $user, $spreadsheet, $sheet, $api, $formulaTable, $timer = [];
+    protected $signal, $user, $spreadsheet, $sheet, $api, $formulaTable, $notifyMessage, $timer = [];
 
     /**
      * Create a new job instance.
@@ -44,6 +44,7 @@ class BinanceTrandingWorker implements ShouldQueue
      */
     public function __construct(AdminUser $user, SignalHistory $signal)
     {
+        $this->notifyMessage = '';
         $this->user = $user->withoutRelations();
         $this->signal = $signal->withoutRelations();
     }
@@ -109,6 +110,8 @@ class BinanceTrandingWorker implements ShouldQueue
         else
             $this->user->signals()->attach($this->signal);
         $this->user->save();
+
+        $this->user->notif(print_r($this->notifyMessage, true));
 
         $this->user->txnStatus->trading_program_status = 0;
         $this->user->txnStatus->save();
@@ -211,6 +214,13 @@ class BinanceTrandingWorker implements ShouldQueue
                 $symbol = SymbolType::fromKey($symbol);
                 if($sell_quantity != '-') {
                     $result = $this->api->doIsolateEntryButSell($symbol, floatval($sell_quantity));
+                    $this->notifyMessage  = "賣出過多標的幣 " . $sell_quantity . "\n";
+                    $this->notifyMessage .= "結果: \n";
+                    $this->notifyMessage .= print_r($result['order_sell'], true) . "\n";
+                    if(is_null($result['error'])) {
+                        $this->notifyMessage .= "--- Error ---\n";
+                        $this->notifyMessage .= print_r($result['error'], true);
+                    }
                 }
                 else {
                     $quantity = $capital / $current;
@@ -222,6 +232,15 @@ class BinanceTrandingWorker implements ShouldQueue
                         $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
                         $this->signal->auto_liquidation_at = $at;
                         $this->signal->save();
+                    }
+                    $this->notifyMessage  = 'Long Entry' . "\n";
+                    $this->notifyMessage .= "進場下單: \n";
+                    $this->notifyMessage .= print_r($result['order'], true) . "\n";
+                    $this->notifyMessage .= "止損單: \n";
+                    $this->notifyMessage .= print_r($result['stop_order'], true) . "\n";
+                    if(is_null($result['error'])) {
+                        $this->notifyMessage .= "--- Error ---\n";
+                        $this->notifyMessage .= print_r($result['error'], true);
                     }
                 }
             }
@@ -244,6 +263,15 @@ class BinanceTrandingWorker implements ShouldQueue
                     $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
                     $this->signal->auto_liquidation_at = $at;
                     $this->signal->save();
+                }
+                $this->notifyMessage  = 'Short Entry' . "\n";
+                $this->notifyMessage .= "進場下單: \n";
+                $this->notifyMessage .= print_r($result['order'], true) . "\n";
+                $this->notifyMessage .= "止損單: \n";
+                $this->notifyMessage .= print_r($result['stop_order'], true) . "\n";
+                if(is_null($result['error'])) {
+                    $this->notifyMessage .= "--- Error ---\n";
+                    $this->notifyMessage .= print_r($result['error'], true);
                 }
             }
         });
@@ -302,6 +330,14 @@ class BinanceTrandingWorker implements ShouldQueue
         $this->timer['isolate_exit'] = self::DuringTimer(function () use (&$result) {
             $result = $this->api->doIsolateExit($this->signal->symbolType, $this->signal->txnDirectType);
         });
+
+        $this->notifyMessage  = $this->signal->txnDirectType . "\n";
+        $this->notifyMessage .= "出場: \n";
+        $this->notifyMessage .= print_r($result['order'], true) . "\n";
+        if(is_null($result['error'])) {
+            $this->notifyMessage .= "--- Error ---\n";
+            $this->notifyMessage .= print_r($result['error'], true);
+        }
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
         {
