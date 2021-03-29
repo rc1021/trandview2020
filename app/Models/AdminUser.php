@@ -22,30 +22,6 @@ class AdminUser extends Administrator
         return $this->belongsToMany(SignalHistory::class, 'signal_history_user');
     }
 
-    // Entry訊號接收到時數據
-    public function txnEntryRecs()
-    {
-        return $this->hasMany(AdminTxnEntryRec::class, 'user_id');
-    }
-
-    // 實際開倉紀錄
-    public function txnBuyRecs()
-    {
-        return $this->hasMany(AdminTxnBuyRec::class, 'user_id');
-    }
-
-    // Exit訊號接收到時數據
-    public function txnExitRecs()
-    {
-        return $this->hasMany(AdminTxnExitRec::class, 'user_id');
-    }
-
-    // 實際平倉紀錄
-    public function txnSellRecs()
-    {
-        return $this->hasMany(AdminTxnSellRec::class, 'user_id');
-    }
-
     public function txnSetting()
     {
         return $this->hasOne(AdminTxnSetting::class, 'user_id');

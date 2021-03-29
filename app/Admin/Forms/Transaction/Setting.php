@@ -32,7 +32,6 @@ class Setting extends Form
         $states = $this->commonSwitch();
         $request->merge([
             'lever_switch' => Arr::get($states, $request->lever_switch, ['value' => 0])['value'],
-            'prededuct_handling_fee' => Arr::get($states, $request->prededuct_handling_fee, ['value' => 0])['value'],
         ]);
 
         $setting = $this->data();
@@ -51,7 +50,6 @@ class Setting extends Form
         // };
         $states = $this->commonSwitch();
         $this->text('initial_tradable_total_funds', __('admin.txn.initial_tradable_total_funds'))->rules('required|numeric');
-        $this->select('transaction_matching', __('admin.txn.transaction_matching'))->options(SymbolType::asSelectArray())->rules('required');
         $this->switch('lever_switch', __('admin.txn.lever_switch'))->rules('required')->states($states);
         $this->text('initial_capital_risk', __('admin.txn.initial_capital_risk'))->rules('required|numeric');
         $this->text('btc_daily_interest', __('admin.txn.btc_daily_interest'))->rules('required|numeric');

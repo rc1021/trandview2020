@@ -11,32 +11,17 @@ class AdminTxnSetting extends Model
 {
     use HasFactory;
 
-    private $_transaction_fees;
-
     protected $fillable = [
         'initial_tradable_total_funds',
-        'transaction_matching',
         'initial_capital_risk',
         'lever_switch',
-        'transaction_fees',
-        'prededuct_handling_fee',
+        'btn_daily_interest',
+        'usdt_daily_interest',
     ];
 
     function getTxnSymbolTypeAttribute() : SymbolType
     {
         return SymbolType::coerce((int)$this->attributes['transaction_matching']);
-    }
-
-    function getTransactionFeesAttribute()
-    {
-        if(is_null($this->_transaction_fees)) {
-            $this->_transaction_fees = 0.001;
-            $symbol = $this->TxnSymbolType;
-            $trade_fee = app()->makeWith(BinanceApiManager::class, $this->user->keysecret()->toArray())->tradeFee($symbol->key);
-            if(data_get($trade_fee, 'success', false))
-                $this->_transaction_fees = data_get($trade_fee, 'tradeFee.0.taker', $this->_trade_fee);
-        }
-        return $this->_transaction_fees;
     }
 
     // 初始資金風險
