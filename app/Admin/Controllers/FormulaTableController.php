@@ -229,6 +229,7 @@ class FormulaTableController extends AdminController implements Renderable
                         continue;
                     $new->$key = $value;
                 }
+                $new->user_id = Admin::user()->id;
                 $new->save();
 
                 $row->timestamps = false;
