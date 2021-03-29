@@ -245,7 +245,7 @@ class BinanceApiManager
             $result['error'] = $e->getMessage();
             // TODO: 如果 order 存在，表示止損單建立失敗，需要通知用戶
             if(!is_null($result['order'])) {
-
+                $result['error'] .= "\n" . print_r($result['order'], true);
             }
         }
         // 回傳結果
