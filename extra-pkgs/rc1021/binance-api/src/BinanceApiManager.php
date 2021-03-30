@@ -229,8 +229,10 @@ class BinanceApiManager
             $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
             array_push($result['orders'], $order);
             if(is_null($order) or count($order['fills']) == 0) {
+                $msg  = "未立即完成訂單(撤單). \n訂單細節: ".print_r($this->getLastRequest());
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
-                throw new Exception("未立即完成訂單(撤單). \n訂單細節: ".print_r($this->getLastRequest()));
+                $msg .= "\n撤單內容: ".print_r($this->getLastRequest());
+                throw new Exception($msg);
             }
             // 停止 1 秒後再做止損單
             sleep(1);

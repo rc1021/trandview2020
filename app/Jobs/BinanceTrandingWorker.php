@@ -106,10 +106,7 @@ class BinanceTrandingWorker implements ShouldQueue
         $this->time_duration = $this->timer;
         $this->signal->save();
 
-        if(!is_null($error))
-            $this->user->signals()->attach($this->signal, compact('error'));
-        else
-            $this->user->signals()->attach($this->signal);
+        $this->user->signals()->attach($this->signal, !is_null($error) ? compact('error') : []);
         $this->user->save();
 
         $this->user->txnStatus->trading_program_status = 0;
@@ -195,7 +192,8 @@ class BinanceTrandingWorker implements ShouldQueue
     {
         $result = [];
 
-        $this->timer['isolate_entry'] = self::DuringTimer(function () use (&$result) {
+        $this->timer['isolate_entry'] = self::DuringTimer(function () use (&$result)
+        {
             $direct = $this->signal->txn_direct_type;
 
             if($direct->is(DirectType::LONG)) {
@@ -219,12 +217,6 @@ class BinanceTrandingWorker implements ShouldQueue
                     if($quantity <= 0)
                         throw new Exception(sprintf('數量小於 0(%.5f)', $quantity));
                     $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
-                    // 設定自動賣出時間
-                    if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
-                        $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
-                        $this->signal->auto_liquidation_at = $at;
-                        $this->signal->save();
-                    }
                 }
             }
             else {
@@ -241,12 +233,12 @@ class BinanceTrandingWorker implements ShouldQueue
 
                 $symbol = SymbolType::fromKey($symbol);
                 $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
-                // 設定自動賣出時間
-                if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
-                    $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
-                    $this->signal->auto_liquidation_at = $at;
-                    $this->signal->save();
-                }
+            }
+            // 設定自動賣出時間
+            if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
+                $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
+                $this->signal->auto_liquidation_at = $at;
+                $this->signal->save();
             }
         });
 
