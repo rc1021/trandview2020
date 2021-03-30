@@ -14,8 +14,7 @@ class TxnMarginOrderObserver
      */
     public function created(TxnMarginOrder $txnMarginOrder)
     {
-        $content = '';
-        $txnMarginOrder->user->notify($content);
+        $txnMarginOrder->user->notify(print_r($txnMarginOrder->toArray(), true));
     }
 
     /**

@@ -100,6 +100,7 @@ class BinanceTrandingWorker implements ShouldQueue
         }
         catch(Exception $e) {
             $error = $e->getMessage();
+            $this->user->notify(print_r($error, true));
         }
 
         $this->time_duration = $this->timer;
@@ -110,8 +111,6 @@ class BinanceTrandingWorker implements ShouldQueue
         else
             $this->user->signals()->attach($this->signal);
         $this->user->save();
-
-        $this->user->notif(print_r($this->notifyMessage, true));
 
         $this->user->txnStatus->trading_program_status = 0;
         $this->user->txnStatus->save();
