@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\TxnMarginOrder;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class TxnMarginOrderObserver
 {
@@ -14,7 +16,12 @@ class TxnMarginOrderObserver
      */
     public function created(TxnMarginOrder $txnMarginOrder)
     {
-        $txnMarginOrder->user->notify(print_r($txnMarginOrder->toArray(), true));
+        try {
+            $txnMarginOrder->user->notify(print_r($txnMarginOrder->toArray(), true));
+        }
+        catch(Exception $e) {
+            Log::warning($e->getMessage());
+        }
     }
 
     /**
