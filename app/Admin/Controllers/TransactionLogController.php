@@ -102,13 +102,14 @@ class TransactionLogController extends AdminController
             return 'No Data';
         })->expand(function ($model) {
             $title = __('admin.rec.signal.error');
+            $content = nl2br($model->error);
             return <<<HTML
             <div class="box">
                 <div class="box-header">
                     <i class="fa fa-warning text-red"></i> $title
                 </div>
                 <div class="box-body">
-                    <pre>$model->error</pre>
+                    <div style="white-space: pre-wrap;background: #333;color: #fff; padding: 10px;">$content</div>
                 </div>
             </div>
             HTML;

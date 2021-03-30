@@ -20,7 +20,7 @@ trait LINENotifyFunc
         if (!empty($admin['line_notify_token'])) {
             $this->lineNotifyRevoke($username, $admin);
             session()->flash('status', '解除連動');
-            return redirect()->route('admin.setting ');
+            return redirect()->route('admin.setting');
         }
 
         return redirect()->route('admin.setting');
