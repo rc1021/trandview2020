@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use BinanceApi\Enums\OrderStatusType;
 use BinanceApi\Enums\OrderType;
 use App\Models\AdminUser;
+use App\Models\SignalHistory;
 
 class TxnMarginOrder extends Model
 {
@@ -39,5 +40,10 @@ class TxnMarginOrder extends Model
     public function user()
     {
         return $this->belongsTo(AdminUser::class, 'user_id');
+    }
+
+    public function signal()
+    {
+        return $this->belongsTo(SignalHistory::class, 'signal_id');
     }
 }

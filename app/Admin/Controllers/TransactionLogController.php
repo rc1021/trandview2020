@@ -74,14 +74,14 @@ class TransactionLogController extends AdminController
             return __('admin.rec.signal.txn_order.count', compact('count'));
         })->expand(function ($model) {
             // "symbol", "clientOrderId", "origClientOrderId"
-            $only = ["orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset"];
+            $only = ["orderId", "type", "side", "created_at", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount"];
             $txnOrders = $model->txnOrders()->get()->map(function ($origin) use ($only) {
                 $order = $origin->only($only);
                 $order['side'] = SideType::fromKey($order['side'])->description;
                 $order['type'] = OrderType::fromKey($order['type'])->description;
                 $order['status'] = OrderStatusType::fromKey($order['status'])->description;
                 $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
-                $order['transactTime'] = Carbon::parse($origin['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
+                // $order['transactTime'] = Carbon::parse($origin['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
                 return $order;
             })->toArray();
             $columns = collect($only)->map(function ($column) {
@@ -118,8 +118,7 @@ class TransactionLogController extends AdminController
 
         $grid->filter(function($filter) {
             $filter->disableIdFilter();
-            $filter->between('position_at', __('admin.rec.entry.position_at'))->datetime();
-            $filter->expand();
+            $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
         $grid->model()->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {

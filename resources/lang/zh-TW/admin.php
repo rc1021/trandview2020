@@ -120,6 +120,8 @@ return [
             'orderId' => '下單編號',
             'type' => '下單類型',
             'transactTime' => '執行時間',
+            'created_at' => '建立時間',
+            'symbol' => '交易配對',
             'price' => '單價',
             'origQty' => '數量',
             'executedQty' => '成交數量',

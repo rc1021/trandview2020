@@ -36,7 +36,7 @@ class FormulaTableController extends AdminController implements Renderable
         $grid->column('id', __('admin.txn.formula.id'))->sortable();
         $grid->column('file_path', __('admin.txn.formula.file_path'))->sortable()
              ->display(function ($file_path) {
-                return substr($file_path, 0, 10) . substr($file_path, 34);
+                return substr($file_path, 0, 6) . substr($file_path, 34);
              })
              ->modal(__('admin.txn.formula.file_preview'), FormulaTableController::class);
         $grid->column('commit', __('admin.txn.formula.commit'))->sortable();
