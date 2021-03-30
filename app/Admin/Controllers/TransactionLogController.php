@@ -108,7 +108,7 @@ class TransactionLogController extends AdminController
                     <i class="fa fa-warning text-red"></i> $title
                 </div>
                 <div class="box-body">
-                    $model->error
+                    <pre>$model->error</pre>
                 </div>
             </div>
             HTML;
