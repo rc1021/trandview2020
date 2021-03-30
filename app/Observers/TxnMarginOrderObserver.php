@@ -17,7 +17,9 @@ class TxnMarginOrderObserver
     public function created(TxnMarginOrder $txnMarginOrder)
     {
         try {
-            $txnMarginOrder->user->notify(print_r($txnMarginOrder->toArray(), true));
+            $txnMarginOrder->withoutRelations();
+            $data = print_r($txnMarginOrder->toArray(), true);
+            $txnMarginOrder->user->notify($data);
         }
         catch(Exception $e) {
             Log::warning($e->getMessage());

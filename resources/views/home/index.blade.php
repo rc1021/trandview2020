@@ -1,5 +1,11 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/03/31</h2>
+        <ul>
+            <li>重新裝潢有 Logo 了</li>
+            <li>修改一些文字呈現的內容</li>
+            <li>調整槓桿逐倉交易記錄欄位列表，以及錯誤呈現方式</li>
+        </ul>
         <h2>2021/03/30</h2>
         <ul>
             <li>新增 Line notify 服務，欲收到持平倉訊息，請到 <a href="{{ route('admin.setting') }}">設定</a>  完成 Line 帳號連動</li>

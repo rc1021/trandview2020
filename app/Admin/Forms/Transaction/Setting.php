@@ -18,7 +18,7 @@ class Setting extends Form
      *
      * @var string
      */
-    public $title = '交易設置';
+    public $title = '槓桿交易設置';
 
     /**
      * Handle the form request.

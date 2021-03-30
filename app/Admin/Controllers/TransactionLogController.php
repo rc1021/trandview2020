@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use BenSampo\Enum\Enum;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\DirectType;
+use BinanceApi\Enums\SideType;
+use BinanceApi\Enums\OrderStatusType;
 use App\Enums\TxnExchangeType;
 use Illuminate\Support\Facades\Storage;
 use Encore\Admin\Layout\Content;
@@ -27,7 +29,7 @@ class TransactionLogController extends AdminController
      *
      * @var string
      */
-    protected $title = 'SignalHistory';
+    protected $title = '交易紀錄';
 
     /**
      * Make a grid builder.
@@ -46,9 +48,8 @@ class TransactionLogController extends AdminController
                 <i class="fa fa-fw fa-check text-success"></i>
             HTML;
             if(!empty($this->error)) {
-                $err = htmlspecialchars($this->error);
                 $html = <<<HTML
-                    <i class="fa fa-fw fa-exclamation-circle text-danger" onclick="console.log('$err');"></i>
+                    <i class="fa fa-fw fa-exclamation-circle text-danger"></i>
                 HTML;
             }
             return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
@@ -58,7 +59,7 @@ class TransactionLogController extends AdminController
         foreach ($dynamic_columns as $column) {
             $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
                 if($column->getName() == 'txn_type')
-                    return sprintf('%s %s'
+                    return sprintf('%s%s'
                             , DirectType::fromValue($this->txn_direct_type)->description
                             , TxnExchangeType::fromValue($this->txn_exchange_type)->description);
                 $data = $this[$column->getName()];
@@ -72,10 +73,13 @@ class TransactionLogController extends AdminController
             $count = count($txnOrders);
             return __('admin.rec.signal.txn_order.count', compact('count'));
         })->expand(function ($model) {
-            $only = ['orderId', 'type', 'fills', 'transactTime', 'price', 'origQty', 'executedQty', 'cummulativeQuoteQty', 'timeInForce', 'marginBuyBorrowAmount'];
+            // "symbol", "clientOrderId", "origClientOrderId"
+            $only = ["orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset"];
             $txnOrders = $model->txnOrders()->get()->map(function ($origin) use ($only) {
                 $order = $origin->only($only);
+                $order['side'] = SideType::fromKey($order['side'])->description;
                 $order['type'] = OrderType::fromKey($order['type'])->description;
+                $order['status'] = OrderStatusType::fromKey($order['status'])->description;
                 $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
                 $order['transactTime'] = Carbon::parse($origin['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
                 return $order;
@@ -92,11 +96,25 @@ class TransactionLogController extends AdminController
             return 'No Data';
         })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
 
-        $grid->actions(function ($actions) {
-            $actions->disableDelete();
-            $actions->disableEdit();
-            $actions->disableView();
+        $grid->column('error', __('admin.rec.signal.error'))->display(function($log) {
+            if($this->error)
+                return __('admin.rec.signal.detail');
+            return 'No Data';
+        })->expand(function ($model) {
+            $title = __('admin.rec.signal.error');
+            return <<<HTML
+            <div class="box">
+                <div class="box-header">
+                    <i class="fa fa-warning text-red"></i> $title
+                </div>
+                <div class="box-body">
+                    $model->error
+                </div>
+            </div>
+            HTML;
         });
+
+        $grid->disableActions();
 
         $grid->filter(function($filter) {
             $filter->disableIdFilter();

@@ -13,39 +13,13 @@ class TxnMarginOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
+    protected $fillable = ["user_id", "signal_id", "symbol", "clientOrderId", "origClientOrderId", "orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset"];
 
-    protected $dispatchesEvents = [
-        'saving' => TxnMarginOrderSaving::class,
-    ];
+    protected $hidden = ['user_id', 'signal_id', 'updated_at'];
 
     protected $dates = [
         'transactTime',
     ];
-
-    private $data = null;
-
-    public function __get($name)
-    {
-        if (array_key_exists($name, $this->attributes)) {
-            return $this->attributes[$name];
-        }
-
-        if(is_null($this->data) and !empty($this->result))
-            $this->data = json_decode($this->result, true);
-
-        if (array_key_exists($name, $this->data)) {
-            return $this->data[$name];
-        }
-
-        $trace = debug_backtrace();
-        trigger_error(
-            'Undefined property via __get(): ' . $name .
-            ' in ' . $trace[0]['file'] .
-            ' on line ' . $trace[0]['line'],
-            E_USER_NOTICE);
-        return null;
-    }
 
     public function scopeStatusNew($query)
     {

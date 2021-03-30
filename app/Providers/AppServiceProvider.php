@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\TxnMarginOrder;
+use App\Observers\TxnMarginOrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        TxnMarginOrder::observe(TxnMarginOrderObserver::class);
     }
 }

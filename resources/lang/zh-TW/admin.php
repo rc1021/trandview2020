@@ -128,6 +128,8 @@ return [
             'fills' => '細節',
             'marginBuyBorrowAsset' => '借款單位',
             'marginBuyBorrowAmount' => '借款金額',
+            'side' => '方向',
+            'status' => '狀態',
         ],
         'switch' => [
             'on' => '開啟',

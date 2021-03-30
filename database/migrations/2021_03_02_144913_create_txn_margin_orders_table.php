@@ -34,7 +34,6 @@ class CreateTxnMarginOrdersTable extends Migration
             $table->string("marginBuyBorrowAsset")->nullable();
             $table->string("marginBuyBorrowAmount")->nullable();
             $table->boolean("isIsolated")->nullable();
-            $table->string('error')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

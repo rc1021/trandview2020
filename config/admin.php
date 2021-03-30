@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => '自動交易機器人',
+    'name' => 'bosytradingbot',
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>自動交易</b> 機器人',
+    'logo' => '<img src="/logo.png" width=50 height=50 alt="bosytradingbot">',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>Txn</b>',
+    'logo-mini' => '<img src="/logo.png" width=50 height=50 alt="bosytradingbot">',
 
     /*
     |--------------------------------------------------------------------------
