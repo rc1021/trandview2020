@@ -31,7 +31,7 @@ use App\Enums\TradingPlatformType;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
 use Exception;
 
-class BinanceTrandingWorker implements ShouldQueue
+class BinanceIsolatedTrandingWorker implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

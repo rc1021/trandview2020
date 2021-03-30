@@ -5,6 +5,7 @@ namespace BinanceApi;
 use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\SideType;
+use BinanceApi\Enums\OrderStatusType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\OrderTypeRespType;
 use BinanceApi\Enums\SideEffectType;
@@ -228,11 +229,17 @@ class BinanceApiManager
             // 槓桿逐倉下單(自動借貸)
             $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
             array_push($result['orders'], $order);
-            if(is_null($order) or count($order['fills']) == 0) {
-                $msg  = "未立即完成訂單(撤單). \n訂單細節: ".print_r($this->getLastRequest());
+            if(!OrderStatusType::fromKey($order['fills'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
-                $msg .= "\n撤單內容: ".print_r($this->getLastRequest());
-                throw new Exception($msg);
+                $ord = print_r($order, true);
+                $req = print_r($this->getLastRequest(), true);
+                throw new Exception(<<<EOF
+                    未立即完成訂單(撤單)
+                    訂單細節:
+                        $ord
+                    撤單內容:
+                        $req
+                EOF);
             }
             // 停止 1 秒後再做止損單
             sleep(1);
@@ -265,8 +272,7 @@ class BinanceApiManager
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        $order = $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
-        return $order;
+        return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
@@ -285,8 +291,7 @@ class BinanceApiManager
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        $order = $this->api->marginIsolatedOrder($symbol->key, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
-        return $order;
+        return $this->api->marginIsolatedOrder($symbol->key, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
