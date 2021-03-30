@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\BinanceIsolatedStopLossLimitCheck;
 use App\Models\TxnMarginOrder;
+use App\Models\AdminUser;
 
 class Kernel extends ConsoleKernel
 {
@@ -38,6 +39,16 @@ class Kernel extends ConsoleKernel
                 }
             });
         })->cron('59 * * * *');
+
+        $schedule->call(function () {
+            // 取得所有尚未結束的止損單
+            AdminUser::whereNotNull('line_notify_token')->chunk(200, function ($users) {
+                foreach ($users as $user)
+                {
+                    $user->notify("嗨，該更新Binance金鑰囉!\n(為了該每次的交易更安全，每月第1天請記得更新金鑰)\n\n奉上網址\nhttps://www.binance.com/zh-TW/my/settings/api-management\n\n更換網址\nhttps://bosytradingbot.com/admin/auth/key-secrets");
+                }
+            });
+        })->cron('0 0 1 * *');
     }
 
     /**
