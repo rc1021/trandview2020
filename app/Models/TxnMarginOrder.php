@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use BinanceApi\Enums\OrderStatusType;
 use BinanceApi\Enums\OrderType;
+use App\Models\AdminUser;
 
 class TxnMarginOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
+
+    protected $dispatchesEvents = [
+        'saving' => TxnMarginOrderSaving::class,
+    ];
 
     protected $dates = [
         'transactTime',
@@ -55,5 +60,10 @@ class TxnMarginOrder extends Model
     public function txnSellRec()
     {
         return $this->hasMany(AdminTxnSellRec::class, 'stop_ord_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(AdminUser::class, 'user_id');
     }
 }

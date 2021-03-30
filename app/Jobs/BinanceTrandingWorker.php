@@ -214,13 +214,6 @@ class BinanceTrandingWorker implements ShouldQueue
                 $symbol = SymbolType::fromKey($symbol);
                 if($sell_quantity != '-') {
                     $result = $this->api->doIsolateEntryButSell($symbol, floatval($sell_quantity));
-                    $this->notifyMessage  = "賣出過多標的幣 " . $sell_quantity . "\n";
-                    $this->notifyMessage .= "結果: \n";
-                    $this->notifyMessage .= print_r($result['order_sell'], true) . "\n";
-                    if(is_null($result['error'])) {
-                        $this->notifyMessage .= "--- Error ---\n";
-                        $this->notifyMessage .= print_r($result['error'], true);
-                    }
                 }
                 else {
                     $quantity = $capital / $current;
@@ -228,19 +221,10 @@ class BinanceTrandingWorker implements ShouldQueue
                         throw new Exception(sprintf('數量小於 0(%.5f)', $quantity));
                     $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
                     // 設定自動賣出時間
-                    if($auto_liquidation > 0 and array_key_exists('order', $result) and $result['order']) {
+                    if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
                         $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
                         $this->signal->auto_liquidation_at = $at;
                         $this->signal->save();
-                    }
-                    $this->notifyMessage  = 'Long Entry' . "\n";
-                    $this->notifyMessage .= "進場下單: \n";
-                    $this->notifyMessage .= print_r($result['order'], true) . "\n";
-                    $this->notifyMessage .= "止損單: \n";
-                    $this->notifyMessage .= print_r($result['stop_order'], true) . "\n";
-                    if(is_null($result['error'])) {
-                        $this->notifyMessage .= "--- Error ---\n";
-                        $this->notifyMessage .= print_r($result['error'], true);
                     }
                 }
             }
@@ -259,49 +243,24 @@ class BinanceTrandingWorker implements ShouldQueue
                 $symbol = SymbolType::fromKey($symbol);
                 $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
                 // 設定自動賣出時間
-                if($auto_liquidation > 0 and array_key_exists('order', $result) and $result['order']) {
+                if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
                     $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
                     $this->signal->auto_liquidation_at = $at;
                     $this->signal->save();
-                }
-                $this->notifyMessage  = 'Short Entry' . "\n";
-                $this->notifyMessage .= "進場下單: \n";
-                $this->notifyMessage .= print_r($result['order'], true) . "\n";
-                $this->notifyMessage .= "止損單: \n";
-                $this->notifyMessage .= print_r($result['stop_order'], true) . "\n";
-                if(is_null($result['error'])) {
-                    $this->notifyMessage .= "--- Error ---\n";
-                    $this->notifyMessage .= print_r($result['error'], true);
                 }
             }
         });
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
         {
-            $fetch_keys = ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
-
-            if(array_key_exists('order_sell', $result) and $result['order_sell']) {
-                TxnMarginOrder::create(array_merge([
-                    'user_id' => $this->user->id,
-                    'signal_id' => $this->signal->id,
-                    'fills' => json_encode($result['order']['fills'])
-                ], Arr::only($result['order_sell'], $fetch_keys)));
-            }
-
-            if(array_key_exists('order', $result) and $result['order']) {
-                TxnMarginOrder::create(array_merge([
-                    'user_id' => $this->user->id,
-                    'signal_id' => $this->signal->id,
-                    'fills' => json_encode($result['order']['fills'])
-                ], Arr::only($result['order'], $fetch_keys)));
-            }
-
-            if(array_key_exists('stop_order', $result) and $result['stop_order']) {
-                TxnMarginOrder::create(array_merge([
-                    'user_id' => $this->user->id,
-                    'signal_id' => $this->signal->id,
-                    'fills' => json_encode($result['stop_order']['fills'])
-                ], Arr::only($result['stop_order'], $fetch_keys)));
+            if(array_key_exists('orders', $result) and $result['orders']) {
+                foreach ($result['orders'] as $order) {
+                    TxnMarginOrder::create(array_merge([
+                        'user_id' => $this->user->id,
+                        'signal_id' => $this->signal->id,
+                        'fills' => json_encode($order['fills'])
+                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
+                }
             }
         });
 
@@ -331,43 +290,17 @@ class BinanceTrandingWorker implements ShouldQueue
             $result = $this->api->doIsolateExit($this->signal->symbolType, $this->signal->txnDirectType);
         });
 
-        $this->notifyMessage  = $this->signal->txnDirectType . "\n";
-        $this->notifyMessage .= "出場: \n";
-        $this->notifyMessage .= print_r($result['order'], true) . "\n";
-        if(is_null($result['error'])) {
-            $this->notifyMessage .= "--- Error ---\n";
-            $this->notifyMessage .= print_r($result['error'], true);
-        }
-
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
         {
-            $fetch_keys = ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"];
-
-            if(array_key_exists('order', $result) and $result['order']) {
-                TxnMarginOrder::create(array_merge([
-                    'user_id' => $this->user->id,
-                    'signal_id' => $this->signal->id,
-                    'fills' => json_encode($result['order']['fills'])
-                ], Arr::only($result['order'], $fetch_keys)));
-            }
-
-            if(array_key_exists('stop_orders', $result) and $result['stop_orders']) {
-                foreach ($result['stop_orders'] as $stop_order) {
+            if(array_key_exists('orders', $result) and $result['orders']) {
+                foreach ($result['orders'] as $order) {
                     TxnMarginOrder::create(array_merge([
                         'user_id' => $this->user->id,
                         'signal_id' => $this->signal->id,
-                    ], Arr::only($stop_order, $fetch_keys)));
+                        'fills' => json_encode($order['fills'])
+                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
                 }
             }
-
-            // if(array_key_exists('rm_stop_orders', $result) and $result['rm_stop_orders']) {
-            //     foreach ($result['rm_stop_orders'] as $rm_stop_orders) {
-            //         TxnMarginOrder::create(array_merge([
-            //             'user_id' => $this->user->id,
-            //             'signal_id' => $this->signal->id,
-            //         ], Arr::only($rm_stop_orders, $fetch_keys)));
-            //     }
-            // }
         });
 
         if(array_key_exists('error', $result) and $result['error'])

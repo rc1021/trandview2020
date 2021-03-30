@@ -111,9 +111,7 @@ class BinanceApiManager
     {
         $result = [
             'error' => null,
-            'order' => null,
-            'stop_orders' => null,
-            'rm_stop_orders' => null,
+            'orders' => [],
         ];
 
         try {
@@ -160,9 +158,8 @@ class BinanceApiManager
             // $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopOrderId), 'status', '');
             // if(strtoupper($status) !== "CANCELED")
             //     throw new Exception("Delete StopLossLimit failure. origQty: $freeQuantity");
-            $result['order'] = $order;
-            $result['stop_orders'] = $stop_orders->all();
-            $result['rm_stop_orders'] = $rm_stop_orders->all();
+            array_push($result['orders'], $order);
+            $result['orders'] = array_merge($result['orders'], $rm_stop_orders->all());
         }
         catch(Exception $e) {
             $result['error'] = $e->getMessage();
@@ -183,7 +180,7 @@ class BinanceApiManager
     {
         $result = [
             'error' => null,
-            'order_sell' => null
+            'orders' => [],
         ];
 
         try {
@@ -196,7 +193,7 @@ class BinanceApiManager
             $force = TimeInForce::fromValue(TimeInForce::GTC);
             $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $this->floor_dec($sell_quantity, 5), null, null, null, null, null, $resp->key, $effect->key, $force->key);
 
-            $result['order_sell'] = $order;
+            array_push($result['orders'], $order);
         }
         catch(Exception $e) {
             $result['error'] = $e->getMessage();
@@ -224,31 +221,28 @@ class BinanceApiManager
 
         $result = [
             'error' => null,
-            'order' => null,
-            'stop_order' => null,
+            'orders' => [],
         ];
 
         try {
             // 槓桿逐倉下單(自動借貸)
-            $result['order'] = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
-            if(is_null($result['order']) or count($result['order']['fills']) == 0) {
-                $this->marginDeleteIsolatedOrder($result['order']['symbol'], $result['order']['orderId']);
-                throw new Exception('未立即完成訂單(撤單). 訂單細節: '.print_r($this->getLastRequest()));
+            $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
+            array_push($result['orders'], $order);
+            if(is_null($order) or count($order['fills']) == 0) {
+                $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
+                throw new Exception("未立即完成訂單(撤單). \n訂單細節: ".print_r($this->getLastRequest()));
             }
             // 停止 1 秒後再做止損單
             sleep(1);
             // 止損單
-            $stop_quantity = $this->floor_dec(collect(data_get($result['order'], 'fills', []))->sum('qty'), 5);
+            $stop_quantity = $this->floor_dec(collect(data_get($order, 'fills', []))->sum('qty'), 5);
             $stop_price = $this->floor_dec($stop_price, 2);
             $sell_price = $this->floor_dec($sell_price, 2);
-            $result['stop_order'] = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($this->direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
+            $stop_order = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($this->direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
+            array_push($result['orders'], $stop_order);
         }
         catch(Exception $e) {
             $result['error'] = $e->getMessage();
-            // TODO: 如果 order 存在，表示止損單建立失敗，需要通知用戶
-            if(!is_null($result['order'])) {
-                $result['error'] .= "\n" . print_r($result['order'], true);
-            }
         }
         // 回傳結果
         return $result;
