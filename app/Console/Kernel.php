@@ -7,6 +7,7 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Jobs\BinanceIsolatedStopLossLimitCheck;
 use App\Models\TxnMarginOrder;
 use App\Models\AdminUser;
+use App\Jobs\DailySummary;
 
 class Kernel extends ConsoleKernel
 {
@@ -30,6 +31,8 @@ class Kernel extends ConsoleKernel
         // $schedule->exec('echo 5')->everyMinute();
         // $schedule->command('backup:clean')->daily()->at('01:00');
         // $schedule->command('backup:run')->daily()->at('01:30');
+        // $schedule->job(new DailySummary)->cron('0 16 * * *');
+
         $schedule->call(function () {
             // 取得所有尚未結束的止損單
             TxnMarginOrder::stopLossLimit()->statusNew()->chunk(200, function ($orders) {

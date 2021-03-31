@@ -39,7 +39,10 @@ class FormulaTableController extends AdminController implements Renderable
                 return substr($file_path, 0, 6) . substr($file_path, 34);
              })
              ->modal(__('admin.txn.formula.file_preview'), FormulaTableController::class);
-        $grid->column('commit', __('admin.txn.formula.commit'))->sortable();
+        $grid->column('commit', __('admin.txn.formula.commit'))->sortable()
+                ->display(function ($commit) {
+                    return nl2br($commit);
+                });
         $grid->column('user_id', __('admin.txn.formula.user_id'))->display(function($userId) {
             return AdminUser::find($userId)->name;
         })->sortable();
