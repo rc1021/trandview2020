@@ -287,8 +287,7 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
                 foreach ($result['orders'] as $order) {
                     TxnMarginOrder::create(array_merge([
                         'user_id' => $this->user->id,
-                        'signal_id' => $this->signal->id,
-                        'fills' => json_encode($order['fills'])
+                        'signal_id' => $this->signal->id
                     ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
                 }
             }
