@@ -233,7 +233,7 @@ class BinanceApiManager
 
         try {
             // 槓桿逐倉下單(自動借貸)
-            $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
+            $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($direct->key))], [$symbol, $quantity, $price]);
             array_push($result['orders'], $order);
             if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
@@ -247,13 +247,17 @@ class BinanceApiManager
                         $req
                 EOF);
             }
-            // 停止 1 秒後再做止損單
-            sleep(1);
             // 止損單
             $stop_quantity = $this->floor_dec(collect(data_get($order, 'fills', []))->sum('qty'), 5);
+            // 做多時，先查看總資產有多少數量的標的幣
+            if($direct->is(DirectType::LONG)) {
+                $symbol_key = $order['symbol'];
+                $account = $this->marginIsolatedAccountByKey($symbol_key);
+                $stop_quantity = $this->floor_dec(data_get($account, "assets.$symbol_key.baseAsset.free"), 5);
+            }
             $stop_price = $this->floor_dec($stop_price, 2);
             $sell_price = $this->floor_dec($sell_price, 2);
-            $stop_order = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($this->direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
+            $stop_order = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
             array_push($result['orders'], $stop_order);
         }
         catch(Exception $e) {
