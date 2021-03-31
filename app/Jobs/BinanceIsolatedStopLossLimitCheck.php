@@ -58,7 +58,7 @@ class BinanceIsolatedStopLossLimitCheck implements ShouldQueue
             $notify_message  = "止損單狀態改變 from " . $order->status . " to " . $current['status'] . "\n";
             $notify_message .= "詳情: \n";
             $notify_message .= print_r($current, true);
-            $user->notif(print_r($notify_message, true));
+            $user->notify(print_r($notify_message, true));
         }
     }
 }
