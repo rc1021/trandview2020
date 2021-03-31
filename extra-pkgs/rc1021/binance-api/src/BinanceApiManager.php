@@ -135,25 +135,31 @@ class BinanceApiManager
             $free = floatval(data_get($account, "assets.$symbol_key.baseAsset.free"));
             if($direct->is(DirectType::LONG))
             {
-                // 市價賣出
-                $side = SideType::fromValue(SideType::SELL);
-                $type = OrderType::fromValue(OrderType::MARKET);
-                $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
-                $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
-                $force = TimeInForce::fromValue(TimeInForce::GTC);
-                $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $this->floor_dec($borrowed + $free, 5), null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                $quantity = $this->floor_dec($borrowed + $free, 5);
+                if($quantity > 0) {
+                    // 市價賣出
+                    $side = SideType::fromValue(SideType::SELL);
+                    $type = OrderType::fromValue(OrderType::MARKET);
+                    $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
+                    $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
+                    $force = TimeInForce::fromValue(TimeInForce::GTC);
+                    $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                }
             }
             else {
                 // 計算數量 + 手續費
                 $trade_fee = $this->api->tradeFee($symbol_key);
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
-                // 市價賣出
-                $side = SideType::fromValue(SideType::BUY);
-                $type = OrderType::fromValue(OrderType::MARKET);
-                $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
-                $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
-                $force = TimeInForce::fromValue(TimeInForce::GTC);
-                $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $this->ceil_dec(($borrowed + $free) * (1 + $taker), 5), null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                $quantity = $this->ceil_dec(($borrowed + $free) * (1 + $taker), 5);
+                if($quantity > 0) {
+                    // 市價賣出
+                    $side = SideType::fromValue(SideType::BUY);
+                    $type = OrderType::fromValue(OrderType::MARKET);
+                    $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
+                    $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
+                    $force = TimeInForce::fromValue(TimeInForce::GTC);
+                    $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                }
             }
             // $freeQuantity = data_get($stopOrder, 'origQty', 0);
             // $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopOrderId), 'status', '');

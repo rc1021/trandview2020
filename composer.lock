@@ -1308,16 +1308,16 @@
         },
         {
             "name": "google/cloud-secret-manager",
-            "version": "v1.3.0",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-cloud-php-secret-manager.git",
-                "reference": "4a33ffd39878f177def772d7753423278480842b"
+                "reference": "d5f395f9665867168eccf2297c04722289dd7aac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-cloud-php-secret-manager/zipball/4a33ffd39878f177def772d7753423278480842b",
-                "reference": "4a33ffd39878f177def772d7753423278480842b",
+                "url": "https://api.github.com/repos/googleapis/google-cloud-php-secret-manager/zipball/d5f395f9665867168eccf2297c04722289dd7aac",
+                "reference": "d5f395f9665867168eccf2297c04722289dd7aac",
                 "shasum": ""
             },
             "require": {
@@ -1354,9 +1354,9 @@
             ],
             "description": "Secret Manager Client for PHP",
             "support": {
-                "source": "https://github.com/googleapis/google-cloud-php-secret-manager/tree/v1.3.0"
+                "source": "https://github.com/googleapis/google-cloud-php-secret-manager/tree/v1.4.0"
             },
-            "time": "2021-02-11T16:53:33+00:00"
+            "time": "2021-03-30T23:50:12+00:00"
         },
         {
             "name": "google/common-protos",
@@ -2409,16 +2409,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v8.35.0",
+            "version": "v8.35.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "476d06a41d109a355cb3a376bd09f21b7d83ebda"
+                "reference": "d118c0df39e7524131176aaf76493eae63a8a602"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/476d06a41d109a355cb3a376bd09f21b7d83ebda",
-                "reference": "476d06a41d109a355cb3a376bd09f21b7d83ebda",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/d118c0df39e7524131176aaf76493eae63a8a602",
+                "reference": "d118c0df39e7524131176aaf76493eae63a8a602",
                 "shasum": ""
             },
             "require": {
@@ -2573,7 +2573,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2021-03-30T14:09:34+00:00"
+            "time": "2021-03-30T21:34:17+00:00"
         },
         {
             "name": "laravel/tinker",
