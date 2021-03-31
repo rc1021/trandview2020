@@ -4492,7 +4492,7 @@
             "dist": {
                 "type": "path",
                 "url": "./extra-pkgs/rc1021/binance-api",
-                "reference": "6fbfb8aecc485e6e5ba04ff30c33e77e8993dbfb"
+                "reference": "5fd83954a9eb2f7d209499a820c3d3e366dea83a"
             },
             "require": {
                 "bensampo/laravel-enum": "^3.2",

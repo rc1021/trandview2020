@@ -31,11 +31,13 @@ class TxnMarginOrderObserver
             $order['side'] = SideType::fromKey($order['side'])->description;
             $order['type'] = OrderType::fromKey($order['type'])->description;
             $order['status'] = OrderStatusType::fromKey($order['status'])->description;
-            $order['marginBuyBorrowAmount'] .= ' '.$order['marginBuyBorrowAsset'];
+            if(array_key_exists('marginBuyBorrowAmount', $order) and array_key_exists('marginBuyBorrowAsset', $order)) {
+                $order['marginBuyBorrowAmount'] .= ' '.$order['marginBuyBorrowAsset'];
+                unset($order['marginBuyBorrowAsset']);
+            }
             // $order['transactTime'] = Carbon::parse($order['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
             $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
             unset($order['transactTime']);
-            unset($order['marginBuyBorrowAsset']);
             unset($order['clientOrderId']);
             unset($order['id']);
             foreach ($order as $key => $value) {

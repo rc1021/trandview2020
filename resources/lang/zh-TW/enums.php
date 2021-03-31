@@ -45,9 +45,9 @@ return [
 
     OrderStatusType::class => [
         OrderStatusType::NEW => '新訂單',
-        OrderStatusType::PARTIALLY_FILLED => '部分訂單被成交',
-        OrderStatusType::FILLED => '訂單完全成交',
-        OrderStatusType::CANCELED => '用戶撤銷了訂單',
+        OrderStatusType::PARTIALLY_FILLED => '部分成交',
+        OrderStatusType::FILLED => '完全成交',
+        OrderStatusType::CANCELED => '撤銷訂單',
         OrderStatusType::PENDING_CANCEL => '撤銷中',
         OrderStatusType::REJECTED => '訂單沒有被交易引擎接受，也沒被處理',
         OrderStatusType::EXPIRED => '訂單被交易引擎取消',
