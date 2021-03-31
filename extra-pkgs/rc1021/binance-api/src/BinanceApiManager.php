@@ -235,7 +235,7 @@ class BinanceApiManager
             // 槓桿逐倉下單(自動借貸)
             $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($this->direct->key))], [$symbol, $quantity, $price]);
             array_push($result['orders'], $order);
-            if(!OrderStatusType::fromKey($order['fills'])->is(OrderStatusType::FILLED)) {
+            if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
                 $ord = print_r($order, true);
                 $req = print_r($this->getLastRequest(), true);
