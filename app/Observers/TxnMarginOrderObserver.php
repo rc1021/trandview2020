@@ -25,26 +25,21 @@ class TxnMarginOrderObserver
         try {
             $txnMarginOrder->withoutRelations();
             $data = '';
+
+
             $order = $txnMarginOrder->toArray();
-            if(array_key_exists('side', $order))
-                $order['side'] = SideType::fromKey($order['side'])->description;
-            if(array_key_exists('type', $order))
-                $order['type'] = OrderType::fromKey($order['type'])->description;
-            if(array_key_exists('status', $order))
-                $order['status'] = OrderStatusType::fromKey($order['status'])->description;
+            $order['side'] = SideType::fromKey($order['side'])->description;
+            $order['type'] = OrderType::fromKey($order['type'])->description;
+            $order['status'] = OrderStatusType::fromKey($order['status'])->description;
             if(array_key_exists('marginBuyBorrowAmount', $order) and array_key_exists('marginBuyBorrowAsset', $order)) {
                 $order['marginBuyBorrowAmount'] .= ' '.$order['marginBuyBorrowAsset'];
                 unset($order['marginBuyBorrowAsset']);
             }
             // $order['transactTime'] = Carbon::parse($order['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
-            if(array_key_exists('created_at', $order))
-                $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
-            if(array_key_exists('transactTime', $order))
-                unset($order['transactTime']);
-            if(array_key_exists('clientOrderId', $order))
-                unset($order['clientOrderId']);
-            if(array_key_exists('id', $order))
-                unset($order['id']);
+            $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
+            unset($order['transactTime']);
+            unset($order['clientOrderId']);
+            unset($order['id']);
             foreach ($order as $key => $value) {
                 $data .= "\n" . __('admin.txn.order.'.$key) . ': ' . $value;
             }
