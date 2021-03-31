@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
+use BinanceApi\Enums\OrderType;
+use BinanceApi\Enums\SideType;
 use BinanceApi\BinanceApiManager;
 use App\Models\TxnMarginOrder;
 use App\Models\SignalHistory;
@@ -285,6 +287,13 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         {
             if(array_key_exists('orders', $result) and $result['orders']) {
                 foreach ($result['orders'] as $order) {
+
+                    if($order['price'] == 0
+                    and OrderType::fromKey($order['type'])->is(OrderType::MARKET)
+                    and  SideType::fromKey($order['side'])->is(SideType::SELL)) {
+                        $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
+                    }
+
                     TxnMarginOrder::create(array_merge([
                         'user_id' => $this->user->id,
                         'signal_id' => $this->signal->id

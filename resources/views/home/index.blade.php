@@ -7,6 +7,7 @@
             <li>調整槓桿逐倉交易記錄欄位列表，以及錯誤呈現方式</li>
             <li>修正出場訊號來臨時，標的幣數量為 0 發生的錯誤</li>
             <li>修正下單狀態字碼轉換錯誤的問題</li>
+            <li>如果是市價賣出, 就用 <code>cummulativeQuoteQty / executedQty</code> 算回當初的賣價</li>
         </ul>
         <h2>2021/03/30</h2>
         <ul>
