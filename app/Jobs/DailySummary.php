@@ -41,29 +41,10 @@ class DailySummary implements ShouldQueue
         AdminUser::chunk(200, function ($users) {
             foreach ($users as $user)
             {
-                // 取得交易記錄
-                $arr = [];
-                $orders = $user->load(['orders' => function ($query) {
-                    return $query->whereBetween('created_at', [
-                            $this->start->format('Y-m-d H:i:s'),
-                            $this->end->format('Y-m-d H:i:s')
-                        ])
-                        ->orderBy('created_at', 'asc');
-                }, 'orders.signal'])->get();
-                if($orders->count() > 0)
-                {
-                    // 如果第一筆資料不是 Entry 的話，就再抓取前一天的資料，找到前一筆Entry
-                    if(!$orders->first()->signal->txnExchangeType->is(TxnExchangeType::Entry)) {
-                        $orders->prepend(TxnMarginOrder::with(['signal'])->whereHas('signal', function (Builder $query) {
-                            $query->where('message', 'like', '交易執行類別=%Entry%');
-                        })->where('created_at', '<', $this->start->format('Y-m-d H:i:s'))->first());
-                    }
-
-                    // 計算進出差額
-                }
-
+                // 取得槓桿交易記錄
+                $content = $this->isolatedDailySummary($user);
                 // 發通知訊息
-                $user->notify($this->content_format($arr));
+                $user->notify($content);
             }
         });
     }
@@ -71,5 +52,33 @@ class DailySummary implements ShouldQueue
     private function content_format($arr)
     {
 
+    }
+
+    private function isoLatedDailySummary(AdminUser $user)
+    {
+        $arr = [];
+        $orders = $user->load(['orders' => function ($query) {
+            return $query->whereBetween('created_at', [
+                    $this->start->format('Y-m-d H:i:s'),
+                    $this->end->format('Y-m-d H:i:s')
+                ])
+                ->orderBy('created_at', 'asc');
+        }, 'orders.signal'])->get();
+        if($orders->count() > 0)
+        {
+            // 如果第一筆資料不是 Entry 的話，就再抓取前一天的資料，找到前一筆Entry
+            if(!$orders->first()->signal->txnExchangeType->is(TxnExchangeType::Entry)) {
+                $orders->prepend(TxnMarginOrder::with(['signal'])->whereHas('signal', function (Builder $query) {
+                    $query->where('message', 'like', '交易執行類別=%Entry%');
+                })->where('created_at', '<', $this->start->format('Y-m-d H:i:s'))->first());
+            }
+
+            // 取得限價單和市價單
+            $$orders->filter(function ($value, $key) {
+                return $value > 2;
+            });
+
+            // 計算進出差額
+        }
     }
 }

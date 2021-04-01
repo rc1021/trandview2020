@@ -1,5 +1,11 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/01</h2>
+        <ul>
+            <li>下止損單時發現標的幣的數量為 0 時，將記錄當下資產詳情以便未來除錯</li>
+            <li>恢復止損單下單時機，等待 1 秒之後才執行</li>
+            <li>當遇到 <code>-3045, The system does not have enough asset now.</code> 幣安當下無法借貸時，先重新下單幾次，如果一直無法借貸則立刻使用原有資產下單</li>
+        </ul>
         <h2>2021/03/31</h2>
         <ul>
             <li>重新裝潢有 Logo 了</li>

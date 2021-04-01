@@ -1942,12 +1942,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/rc1021/php-binance-api.git",
-                "reference": "89bb10dda311afa9e294ec2ea6f8252cc33315d8"
+                "reference": "5a0efc097bee236aaf5f4df6151e6b57de3a95fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rc1021/php-binance-api/zipball/89bb10dda311afa9e294ec2ea6f8252cc33315d8",
-                "reference": "89bb10dda311afa9e294ec2ea6f8252cc33315d8",
+                "url": "https://api.github.com/repos/rc1021/php-binance-api/zipball/5a0efc097bee236aaf5f4df6151e6b57de3a95fb",
+                "reference": "5a0efc097bee236aaf5f4df6151e6b57de3a95fb",
                 "shasum": ""
             },
             "require": {
@@ -1982,7 +1982,7 @@
             "support": {
                 "source": "https://github.com/rc1021/php-binance-api/tree/master"
             },
-            "time": "2021-03-28T15:57:44+00:00"
+            "time": "2021-04-01T15:43:40+00:00"
         },
         {
             "name": "khanamiryan/qrcode-detector-decoder",
@@ -4492,7 +4492,7 @@
             "dist": {
                 "type": "path",
                 "url": "./extra-pkgs/rc1021/binance-api",
-                "reference": "5fd83954a9eb2f7d209499a820c3d3e366dea83a"
+                "reference": "6fbfb8aecc485e6e5ba04ff30c33e77e8993dbfb"
             },
             "require": {
                 "bensampo/laravel-enum": "^3.2",
@@ -7910,16 +7910,16 @@
         },
         {
             "name": "facade/flare-client-php",
-            "version": "1.4.0",
+            "version": "1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facade/flare-client-php.git",
-                "reference": "ef0f5bce23b30b32d98fd9bb49c6fa37b40eb546"
+                "reference": "9dd6f2b56486d939c4467b3f35475d44af57cf17"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facade/flare-client-php/zipball/ef0f5bce23b30b32d98fd9bb49c6fa37b40eb546",
-                "reference": "ef0f5bce23b30b32d98fd9bb49c6fa37b40eb546",
+                "url": "https://api.github.com/repos/facade/flare-client-php/zipball/9dd6f2b56486d939c4467b3f35475d44af57cf17",
+                "reference": "9dd6f2b56486d939c4467b3f35475d44af57cf17",
                 "shasum": ""
             },
             "require": {
@@ -7963,7 +7963,7 @@
             ],
             "support": {
                 "issues": "https://github.com/facade/flare-client-php/issues",
-                "source": "https://github.com/facade/flare-client-php/tree/1.4.0"
+                "source": "https://github.com/facade/flare-client-php/tree/1.5.0"
             },
             "funding": [
                 {
@@ -7971,7 +7971,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-02-16T12:42:06+00:00"
+            "time": "2021-03-31T07:32:54+00:00"
         },
         {
             "name": "facade/ignition",

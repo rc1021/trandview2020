@@ -15,7 +15,7 @@ use Exception;
 
 class BinanceApiManager
 {
-    protected $key, $secret, $api, $direct;
+    protected $key, $secret, $api, $direct, $redo_times=0;
 
     public function __call($name, $arguments)
     {
@@ -238,30 +238,52 @@ class BinanceApiManager
             if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
                 $ord = print_r($order, true);
-                $req = print_r($this->getLastRequest(), true);
                 throw new Exception(<<<EOF
                     未立即完成訂單(撤單)
                     訂單細節:
-                        $ord
-                    撤單內容:
-                        $req
+                    $ord
                 EOF);
             }
+            // 等一下再去下止損單
+            sleep(1);
             // 止損單
             $stop_quantity = $this->floor_dec(collect(data_get($order, 'fills', []))->sum('qty'), 5);
             // 做多時，先查看總資產有多少數量的標的幣
             if($direct->is(DirectType::LONG)) {
                 $symbol_key = $order['symbol'];
                 $account = $this->marginIsolatedAccountByKey($symbol_key);
-                $stop_quantity = $this->floor_dec(data_get($account, "assets.$symbol_key.baseAsset.free"), 5);
+                $stop_quantity = $this->floor_dec(data_get($account, "assets.$symbol_key.baseAsset.free", 0), 5);
+                if($stop_quantity == 0) {
+                    $account_detail = print_r($account, true);
+                    throw new Exception(<<<EOF
+                        下止損單時發現標的幣的數量為 0
+                        當下資產詳情:
+                        $account_detail
+                    EOF);
+                }
             }
             $stop_price = $this->floor_dec($stop_price, 2);
             $sell_price = $this->floor_dec($sell_price, 2);
             $stop_order = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
             array_push($result['orders'], $stop_order);
         }
-        catch(Exception $e) {
-            $result['error'] = $e->getMessage();
+        catch(Exception $e)
+        {
+            $req = $this->getLastRequest();
+            // if The system does not have enough asset now.
+            if(data_get($req, 'output.code', 0) == -3045) {
+                if($this->redo_times++ < 3) {
+                    return $this->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
+                }
+                else {
+                    // 超過 10 次，就用帳戶資產購買，不用槓桿
+                    $symbol_key = $symbol->key;
+                    $account = $this->marginIsolatedAccountByKey($symbol_key);
+                    $netAssetOfBtc = $this->floor_dec(data_get($account, "assets.$symbol_key.quoteAsset.netAssetOfBtc", 0), 5);
+                    return $this->doIsolateEntry($symbol, $direct, $netAssetOfBtc, $price, $stop_price, $sell_price);
+                }
+            }
+            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
         }
         // 回傳結果
         return $result;
