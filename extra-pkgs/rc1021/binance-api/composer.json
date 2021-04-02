@@ -1,6 +1,6 @@
 {
     "name": "rc1021/binance-api",
-    "description": "自動交易程式-BinanceApi Binder",
+    "description": "自動交易程式-BinanceApi Extender",
     "type": "library",
     "autoload": {
         "psr-4": {

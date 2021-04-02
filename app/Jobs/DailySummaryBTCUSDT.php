@@ -13,12 +13,13 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\AdminUser;
 use App\Models\TxnMarginOrder;
 use App\Enums\TxnExchangeType;
+use BinanceApi\BinanceApiManager;
 
-class DailySummary implements ShouldQueue
+class DailySummaryBTCUSDT implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $start, $end;
+    protected $start, $end, $symbol = 'BTCUSDT';
 
     /**
      * Create a new job instance.
@@ -56,29 +57,9 @@ class DailySummary implements ShouldQueue
 
     private function isoLatedDailySummary(AdminUser $user)
     {
-        $arr = [];
-        $orders = $user->load(['orders' => function ($query) {
-            return $query->whereBetween('created_at', [
-                    $this->start->format('Y-m-d H:i:s'),
-                    $this->end->format('Y-m-d H:i:s')
-                ])
-                ->orderBy('created_at', 'asc');
-        }, 'orders.signal'])->get();
-        if($orders->count() > 0)
-        {
-            // 如果第一筆資料不是 Entry 的話，就再抓取前一天的資料，找到前一筆Entry
-            if(!$orders->first()->signal->txnExchangeType->is(TxnExchangeType::Entry)) {
-                $orders->prepend(TxnMarginOrder::with(['signal'])->whereHas('signal', function (Builder $query) {
-                    $query->where('message', 'like', '交易執行類別=%Entry%');
-                })->where('created_at', '<', $this->start->format('Y-m-d H:i:s'))->first());
-            }
-
-            // 取得限價單和市價單
-            $$orders->filter(function ($value, $key) {
-                return $value > 2;
-            });
-
-            // 計算進出差額
-        }
+        $ks = $user->keysecret()->toArray();
+        $api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));
+        $startms = (int) ($this->start->getTimestamp() . $this->start->format('v'));
+        $arr = $api->marginGetIsolatedAllOrders($this->symbol, null, $startms);
     }
 }

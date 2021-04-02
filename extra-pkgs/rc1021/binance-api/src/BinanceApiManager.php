@@ -94,7 +94,8 @@ class BinanceApiManager
             }
         }
         catch(Exception $e) {
-            $result['error'] = $e->getMessage();
+            $req = $this->getLastRequest();
+            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);;
         }
 
         return $result;
@@ -144,6 +145,7 @@ class BinanceApiManager
                     $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
                     $force = TimeInForce::fromValue(TimeInForce::GTC);
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                    array_push($result['orders'], $order);
                 }
             }
             else {
@@ -159,17 +161,18 @@ class BinanceApiManager
                     $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
                     $force = TimeInForce::fromValue(TimeInForce::GTC);
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
+                    array_push($result['orders'], $order);
                 }
             }
             // $freeQuantity = data_get($stopOrder, 'origQty', 0);
             // $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopOrderId), 'status', '');
             // if(strtoupper($status) !== "CANCELED")
             //     throw new Exception("Delete StopLossLimit failure. origQty: $freeQuantity");
-            array_push($result['orders'], $order);
-            $result['orders'] = array_merge($result['orders'], $rm_stop_orders->all());
+            $result['orders'] = array_merge($rm_stop_orders->all(), $result['orders']);
         }
         catch(Exception $e) {
-            $result['error'] = $e->getMessage();
+            $req = $this->getLastRequest();
+            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
         }
 
         return $result;
@@ -255,10 +258,14 @@ class BinanceApiManager
                 $stop_quantity = $this->floor_dec(data_get($account, "assets.$symbol_key.baseAsset.free", 0), 5);
                 if($stop_quantity == 0) {
                     $account_detail = print_r($account, true);
+                    $account2 = $this->marginIsolatedAccountByKey($symbol_key);
+                    $account_detail2 = print_r($account2, true);
                     throw new Exception(<<<EOF
                         下止損單時發現標的幣的數量為 0
                         當下資產詳情:
                         $account_detail
+                        --1秒後的詳情--
+                        $account_detail2
                     EOF);
                 }
             }

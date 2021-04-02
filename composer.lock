@@ -4492,7 +4492,7 @@
             "dist": {
                 "type": "path",
                 "url": "./extra-pkgs/rc1021/binance-api",
-                "reference": "6fbfb8aecc485e6e5ba04ff30c33e77e8993dbfb"
+                "reference": "48989559021944ce44c3354c3e6e8007bb78e88d"
             },
             "require": {
                 "bensampo/laravel-enum": "^3.2",
@@ -4521,7 +4521,7 @@
                     "email": "rc.701021@gmail.com"
                 }
             ],
-            "description": "自動交易程式-BinanceApi Binder",
+            "description": "自動交易程式-BinanceApi Extender",
             "transport-options": {
                 "relative": true
             }
