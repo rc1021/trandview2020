@@ -14,12 +14,13 @@ use App\Models\AdminUser;
 use App\Models\TxnMarginOrder;
 use App\Enums\TxnExchangeType;
 use BinanceApi\BinanceApiManager;
+use BinanceApi\Enums\SymbolType;
 
-class DailySummaryBTCUSDT implements ShouldQueue
+class DailySummary implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $start, $end, $symbol = 'BTCUSDT';
+    protected $build_at;
 
     /**
      * Create a new job instance.
@@ -28,8 +29,7 @@ class DailySummaryBTCUSDT implements ShouldQueue
      */
     public function __construct()
     {
-        $this->end   = new DateTime();
-        $this->start = $this->end->modify('-1 day');
+        $this->build_at = new DateTime();
     }
 
     /**
@@ -43,9 +43,9 @@ class DailySummaryBTCUSDT implements ShouldQueue
             foreach ($users as $user)
             {
                 // 取得槓桿交易記錄
-                $content = $this->isolatedDailySummary($user);
+                $report_daily_summary = $this->isolatedDailySummary($user);
                 // 發通知訊息
-                $user->notify($content);
+                $user->notify($report_daily_summary);
             }
         });
     }
@@ -59,7 +59,11 @@ class DailySummaryBTCUSDT implements ShouldQueue
     {
         $ks = $user->keysecret()->toArray();
         $api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));
-        $startms = (int) ($this->start->getTimestamp() . $this->start->format('v'));
-        $arr = $api->marginGetIsolatedAllOrders($this->symbol, null, $startms);
+        $start = $this->build_at->modify('-1 day');
+        $startms = (int) (($start->getTimestamp() + 1) . $start->format('v'));
+
+        foreach (SymbolType::getKeys() as $symbol) {
+            $orders = $api->marginGetIsolatedAllOrders($symbol, null, $startms);
+        }
     }
 }
