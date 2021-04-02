@@ -1,5 +1,10 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/02</h2>
+        <ul>
+            <li>介面穿新衣，但還不完整，欲修改介面 style 請到 <a href="https://github.com/rc1021/AdminLTE">https://github.com/rc1021/AdminLTE</a> 下載最新版型</li>
+            <li>修正出場時找不到 <code>order</code> 變數的問題</li>
+        </ul>
         <h2>2021/04/01</h2>
         <ul>
             <li>下止損單時發現標的幣的數量為 0 時，將記錄當下資產詳情以便未來除錯</li>
