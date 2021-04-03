@@ -113,12 +113,14 @@ class DailySummary implements ShouldQueue
                 $total = $api->floor_dec($total, 2);
                 $times = (int) floor(($buy_times + $sell_times) / 2);
                 $less = $sell_times - $buy_times;
-                if($less > 0) {
+                var_dump($less);
+                if($less != 0) {
                     return <<<EOF
                     每日統計
                     本日營收：$total
                     進出次數：$times
-                    目前尚有持倉未出場
+
+                    *目前尚有持倉未出場
                     EOF;
                 }
                 return <<<EOF
