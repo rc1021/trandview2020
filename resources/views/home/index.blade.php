@@ -1,5 +1,11 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/03</h2>
+        <ul>
+            <li>換應用程式Logo<br>
+                for collapse&nbsp;&nbsp;<img src="/logo_lg.png" height="50" /><br>
+                for mini&nbsp;&nbsp;<img src="/logo_mini.png" height="50" /></li>
+        </ul>
         <h2>2021/04/02</h2>
         <ul>
             <li>介面穿新衣，但還不完整，欲修改介面 style 請到 <a href="https://github.com/rc1021/AdminLTE">https://github.com/rc1021/AdminLTE</a> 下載最新版型</li>

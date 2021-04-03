@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<img src="/logo.png" width=50 height=50 alt="bosytradingbot">',
+    'logo' => '<img src="/logo_lg.png" height=50 alt="bosytradingbot">',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<img src="/logo.png" width=50 height=50 alt="bosytradingbot">',
+    'logo-mini' => '<img src="/logo_mini.png" height=50 alt="bosytradingbot">',
 
     /*
     |--------------------------------------------------------------------------
