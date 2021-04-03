@@ -16,7 +16,7 @@ class TxnMarginOrder extends Model
 
     protected $fillable = ["user_id", "signal_id", "symbol", "clientOrderId", "origClientOrderId", "orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset", "fills"];
 
-    protected $hidden = ['user_id', 'signal_id', 'updated_at', 'fills'];
+    protected $hidden = ['user_id', 'signal_id', 'updated_at', 'fills', 'isIsolated', 'error', 'deleted_at'];
 
     protected $dates = [
         'transactTime',

@@ -32,16 +32,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('backup:clean')->daily()->at('01:00');
         // $schedule->command('backup:run')->daily()->at('01:30');
         $schedule->job(new DailySummary)->cron('0 16 * * *');
-
-        $schedule->call(function () {
-            // 取得所有尚未結束的止損單
-            TxnMarginOrder::stopLossLimit()->statusNew()->chunk(200, function ($orders) {
-                foreach ($orders as $order)
-                {
-                    BinanceIsolatedStopLossLimitCheck::dispatch($order->id);
-                }
-            });
-        })->cron('59 * * * *');
+        $schedule->job(new BinanceIsolatedStopLossLimitCheck)->cron('59 * * * *');
 
         $schedule->call(function () {
             // 取得所有尚未結束的止損單

@@ -2786,6 +2786,12 @@
     border: 0px solid #ddd;
   }
 }
+.skin-bosy-midnight .btn-primary {
+  color: #fff;
+}
+.skin-bosy-midnight .btn-primary:hover {
+  color: #fff;
+}
 .login-box-body,
 .register-box-body {
   background: #1e2226 !important;
