@@ -95,7 +95,6 @@ class DailySummary implements ShouldQueue
                 $buy_times = 0;
                 $sell_times = 0;
                 $total = $orders->reduce(function ($carry, $order) use (&$buy_times, &$sell_times) {
-                    // $type = data_get($order, 'type');
                     $side = data_get($order, 'side');
                     $cummulative = data_get($order, 'cummulativeQuoteQty');
 
@@ -113,7 +112,10 @@ class DailySummary implements ShouldQueue
                 $total = $api->floor_dec($total, 2);
                 $times = (int) floor(($buy_times + $sell_times) / 2);
                 $less = $sell_times - $buy_times;
-                var_dump($less);
+
+                $last = $orders->last();
+                $type = data_get($last, 'type');
+
                 if($less != 0) {
                     return <<<EOF
                     每日統計
