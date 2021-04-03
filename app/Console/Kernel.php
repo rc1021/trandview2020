@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         // $schedule->exec('echo 5')->everyMinute();
         // $schedule->command('backup:clean')->daily()->at('01:00');
         // $schedule->command('backup:run')->daily()->at('01:30');
-        // $schedule->job(new DailySummary)->cron('0 16 * * *');
+        $schedule->job(new DailySummary)->cron('0 16 * * *');
 
         $schedule->call(function () {
             // 取得所有尚未結束的止損單

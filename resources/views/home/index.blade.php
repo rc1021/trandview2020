@@ -2,6 +2,7 @@
     <div class="box-body">
         <h2>2021/04/03</h2>
         <ul>
+            <li>新增每日營收通知訊息</li>
             <li>換應用程式Logo<br>
                 for collapse&nbsp;&nbsp;<img src="/logo_lg.png" height="50" /><br>
                 for mini&nbsp;&nbsp;<img src="/logo_mini.png" height="50" /></li>
