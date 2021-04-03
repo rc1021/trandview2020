@@ -2786,3 +2786,11 @@
     border: 0px solid #ddd;
   }
 }
+.login-box-body,
+.register-box-body {
+  background: #1e2226 !important;
+}
+.login-page,
+.register-page {
+  background: #353c42 !important;
+}
