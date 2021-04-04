@@ -25,9 +25,9 @@ Route::group([
     });
 
     Route::group([
-        'prefix'        => 'txn',
+        'prefix'        => 'txn/margin/isolated',
         'namespace'     => 'Transaction',
-        'as'            => 'txn.',
+        'as'            => 'txn.margin.isolated.',
     ], function (Router $router) {
         $router->get('logs/calc/{signal_history}', LogController::class.'@calc')->name('logs.calc');
         $router->resource('logs', LogController::class);
