@@ -34,11 +34,11 @@ class FormulaController extends AdminController implements Renderable
         $grid = new Grid(new FormulaTable);
 
         $grid->column('id', __('admin.txn.margin.isolated.formula.id'))->sortable();
-        $grid->column('file_path', __('admin.txn.margin.isolated.formula.file_path'))->sortable()
-             ->display(function ($file_path) {
-                return substr($file_path, strrpos($file_path, '/') + 1);
-             })
-             ->modal(__('admin.txn.margin.isolated.formula.file_preview'), FormulaController::class);
+        // $grid->column('file_path', __('admin.txn.margin.isolated.formula.file_path'))->sortable()
+        //      ->display(function ($file_path) {
+        //         return substr($file_path, strrpos($file_path, '/') + 1);
+        //      })
+        //      ->modal(__('admin.txn.margin.isolated.formula.file_preview'), FormulaController::class);
         $grid->column('commit', __('admin.txn.margin.isolated.formula.commit'))->sortable()
                 ->display(function ($commit) {
                     return nl2br($commit);
