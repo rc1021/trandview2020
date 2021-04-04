@@ -13,7 +13,7 @@ class TransactionRepository
 {
     public function getSetting(Content $content)
     {
-        $content->title('機器人交易設定');
+        $content->title('訂單交易設定');
 
         // 狀態 & 總交易紀錄
         // $status = AdminUser::find(Admin::user()->id)->txnStatus;
