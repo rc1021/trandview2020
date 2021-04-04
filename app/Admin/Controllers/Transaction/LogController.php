@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\Controllers;
+namespace App\Admin\Controllers\Transaction;
 
 use App\Models\SignalHistory;
 use Encore\Admin\Controllers\AdminController;
@@ -22,7 +22,7 @@ use Encore\Admin\Widgets\Table;
 use App\Admin\Models\TransactionLog\ShowTxnOrder;
 use App\Admin\Models\TransactionLog\ShowCalcLog;
 
-class TransactionLogController extends AdminController
+class LogController extends AdminController
 {
     /**
      * Title for current resource.

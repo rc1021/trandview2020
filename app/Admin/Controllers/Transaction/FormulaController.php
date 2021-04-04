@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Admin\Controllers;
+namespace App\Admin\Controllers\Transaction;
 
 use App\Models\AdminUser;
 use App\Models\FormulaTable;
@@ -14,14 +14,14 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
 
-class FormulaTableController extends AdminController implements Renderable
+class FormulaController extends AdminController implements Renderable
 {
     /**
      * Title for current resource.
      *
      * @var string
      */
-    protected $title = 'FormulaTable';
+    protected $title = 'Formula';
 
     /**
      * Make a grid builder.
@@ -31,14 +31,14 @@ class FormulaTableController extends AdminController implements Renderable
     protected function grid()
     {
         \Encore\Admin\Admin::style('td[class^=column] { min-width: 125px; }');
-        $grid = new Grid(new FormulaTable());
+        $grid = new Grid(new FormulaTable);
 
         $grid->column('id', __('admin.txn.formula.id'))->sortable();
         $grid->column('file_path', __('admin.txn.formula.file_path'))->sortable()
              ->display(function ($file_path) {
                 return substr($file_path, strrpos($file_path, '/') + 1);
              })
-             ->modal(__('admin.txn.formula.file_preview'), FormulaTableController::class);
+             ->modal(__('admin.txn.formula.file_preview'), FormulaController::class);
         $grid->column('commit', __('admin.txn.formula.commit'))->sortable()
                 ->display(function ($commit) {
                     return nl2br($commit);
@@ -81,7 +81,7 @@ class FormulaTableController extends AdminController implements Renderable
 
         $show->field('file_path', __('admin.txn.formula.file_path'))->file()->as(function ($render) {
             $preview = __('admin.txn.formula.file_preview');
-            $link = route('admin.formula.preview', $this);
+            $link = route('admin.txn.formula.preview', $this);
             return <<<Html
             <span>
                 <a href="$link" class="btn btn-link" target="_blank">$preview <i class="fa fa-external-link"></i></a>

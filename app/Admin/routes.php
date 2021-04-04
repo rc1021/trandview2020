@@ -12,17 +12,26 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index')->name('home');
-
-    $router->get('auth/key-secrets', 'AuthController@getKeySecret')->name('keysecret');
-    $router->put('auth/key-secrets', 'AuthController@putKeySecret');
-
-    $router->get('auth/transaction/setting', TransactionController::class.'@setting')->name('transaction.setting');
-    $router->get('auth/transaction/logs/calc/{signal_history}', TransactionLogController::class.'@calc')->name('logs.calc');
-    $router->resource('auth/transaction/logs', TransactionLogController::class);
-
-    $router->get('formula-tables/{key}/preview', FormulaTableController::class.'@preview')->name('formula.preview');
-    $router->resource('formula-tables', FormulaTableController::class);
-
     $router->get('notify-cancel', 'AuthController@lineNotifyCancel')->name('admin-line-notify.cancel');
     $router->get('notify-callback', 'AuthController@lineNotifyCallback')->name('admin-line-notify.callback');
+
+    Route::group([
+        'prefix'        => 'txn',
+        'as'            => 'txn.',
+    ], function (Router $router) {
+        $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret');
+        $router->put('key-secrets', AuthController::class.'@putKeySecret')->name('keysecret');
+        $router->get('setting', TransactionController::class.'@setting')->name('setting');
+    });
+
+    Route::group([
+        'prefix'        => 'txn',
+        'namespace'     => 'Transaction',
+        'as'            => 'txn.',
+    ], function (Router $router) {
+        $router->get('logs/calc/{signal_history}', LogController::class.'@calc')->name('logs.calc');
+        $router->resource('logs', LogController::class);
+        $router->get('formula/{key}/preview', FormulaController::class.'@preview')->name('formula.preview');
+        $router->resource('formula', FormulaController::class);
+    });
 });

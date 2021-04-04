@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/04</h2>
+        <ul>
+            <li>更新命名空間和路由，調整了 Menu / 網址 的位置</li>
+        </ul>
         <h2>2021/04/03</h2>
         <ul>
             <li>新的登入頁面</li>
@@ -75,7 +79,7 @@
             <li>新增交易紀錄</li>
             <li>新增帳戶交易設定
               <ul>
-                <li>記得去<a href="https://www.binance.com/zh-TW/my/settings/api-management">Binance API管理</a>取得金鑰後，將資料上傳到<a href="{{ route('admin.keysecret') }}">設定金鑰</a>功能才能有權限進行自動交易</li>
+                <li>記得去<a href="https://www.binance.com/zh-TW/my/settings/api-management">Binance API管理</a>取得金鑰後，將資料上傳到<a href="{{ route('admin.txn.keysecret') }}">設定金鑰</a>功能才能有權限進行自動交易</li>
                 <li>到<a href="https://www.binance.com/zh-TW/my/settings/api-management">機器人交易設定</a>設定以下資料
                     <code>初始可交易總資金%</code>
                     <code>槓桿開關</code>

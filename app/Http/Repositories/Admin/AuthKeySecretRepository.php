@@ -80,7 +80,7 @@ class AuthKeySecretRepository
         }
         catch (\JsonException $e) {
             admin_toastr(__('QR Code parse error.'), 'warning');
-            return redirect(admin_url('auth/key-secrets'));
+            return redirect(admin_url('txn/key-secrets'));
         }
         catch(Exception $e) { /* fetch qr code from image error */ }
         finally { $request->files->remove('qrcode'); }
@@ -92,7 +92,7 @@ class AuthKeySecretRepository
     protected function keySecretForm()
     {
         $form = new Form(new KeySecret());
-        $form->setAction(admin_url('auth/key-secrets'));
+        $form->setAction(admin_url('txn/key-secrets'));
 
         // $form->display('type', __('admin.auth.keysecret.type'))->with(function ($value) {
         //     return PerformanceApiType::getDescription($value);
@@ -104,7 +104,7 @@ class AuthKeySecretRepository
 
         $form->saved(function () {
             admin_toastr(trans('admin.update_succeeded'));
-            return redirect(admin_url('auth/key-secrets'));
+            return redirect(admin_url('txn/key-secrets'));
         });
 
         return $form;
