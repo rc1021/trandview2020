@@ -105,7 +105,7 @@ return [
 
     'auth' => [
         'keysecret' => [
-            'title' => 'API金鑰',
+            'title' => '設定金鑰',
             'type' => '金鑰來源',
             'alias' => '金鑰別名',
             'alias_unique' => '金鑰別名是唯一值',

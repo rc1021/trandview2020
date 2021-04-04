@@ -11,7 +11,7 @@ use App\Models\AdminTxnEntryRec;
 
 class TransactionController extends BaseAuthController
 {
-    protected $title = 'TransactionTitle';
+    protected $title = '訂單交易設定';
 
     public function setting(Content $content, TransactionRepository $rep)
     {
