@@ -29,9 +29,9 @@ Route::group([
         'namespace'     => 'Transaction',
         'as'            => 'txn.margin.isolated.',
     ], function (Router $router) {
-        $router->get('logs/calc/{signal_history}', LogController::class.'@calc')->name('logs.calc');
-        $router->resource('logs', LogController::class);
-        $router->get('formula/{key}/preview', FormulaController::class.'@preview')->name('formula.preview');
-        $router->resource('formula', FormulaController::class);
+        $router->get('logs/calc/{signal_history}', MarginIsolatedLogController::class.'@calc')->name('logs.calc');
+        $router->resource('logs', MarginIsolatedLogController::class);
+        $router->get('formula/{key}/preview', MarginIsolatedFormulaController::class.'@preview')->name('formula.preview');
+        $router->resource('formula', MarginIsolatedFormulaController::class);
     });
 });

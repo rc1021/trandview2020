@@ -14,7 +14,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
 
-class FormulaController extends AdminController implements Renderable
+class MarginIsolatedFormulaController extends AdminController implements Renderable
 {
     /**
      * Title for current resource.
@@ -38,7 +38,7 @@ class FormulaController extends AdminController implements Renderable
         //      ->display(function ($file_path) {
         //         return substr($file_path, strrpos($file_path, '/') + 1);
         //      })
-        //      ->modal(__('admin.txn.margin.isolated.formula.file_preview'), FormulaController::class);
+        //      ->modal(__('admin.txn.margin.isolated.formula.file_preview'), MarginIsolatedFormulaController::class);
         $grid->column('commit', __('admin.txn.margin.isolated.formula.commit'))->sortable()
                 ->display(function ($commit) {
                     return nl2br($commit);

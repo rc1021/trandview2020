@@ -22,7 +22,7 @@ use Encore\Admin\Widgets\Table;
 use App\Admin\Models\TransactionLog\ShowTxnOrder;
 use App\Admin\Models\TransactionLog\ShowCalcLog;
 
-class LogController extends AdminController
+class MarginIsolatedLogController extends AdminController
 {
     /**
      * Title for current resource.

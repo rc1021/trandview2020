@@ -678,6 +678,19 @@
 .skin-bosy-midnight .btn-primary:hover {
   color: #fff;
 }
+.skin-bosy-midnight .dd-handle {
+  color: #bec5cb;
+  background: #353c42;
+  border: 1px solid #353c42;
+}
+.skin-bosy-midnight .dd-handle:hover {
+  color: #bec5cb;
+  background: #272c30;
+}
+.skin-bosy-midnight .dd-placeholder {
+  background: #272c30;
+  border: 1px dashed #bec5cb;
+}
 .login-box-body,
 .register-box-body {
   background: #1e2226 !important;
