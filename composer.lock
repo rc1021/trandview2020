@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "476c0088bd9e761651646afc9a8925f2",
+    "content-hash": "ddbbaccf6c88bec7f9d8065af4c6b666",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2233,64 +2233,6 @@
                 }
             ],
             "time": "2021-02-25T21:54:58+00:00"
-        },
-        {
-            "name": "laravel-admin-ext/backup",
-            "version": "v1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel-admin-extensions/backup.git",
-                "reference": "8a3eee6cfc4f636557d9b88a636630b44da260f6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel-admin-extensions/backup/zipball/8a3eee6cfc4f636557d9b88a636630b44da260f6",
-                "reference": "8a3eee6cfc4f636557d9b88a636630b44da260f6",
-                "shasum": ""
-            },
-            "require": {
-                "encore/laravel-admin": ">=1.5",
-                "php": ">=7.0.0",
-                "spatie/laravel-backup": ">=5.0"
-            },
-            "require-dev": {
-                "laravel/laravel": "~5.5",
-                "phpunit/phpunit": "~6.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Encore\\Admin\\Backup\\BackupServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Encore\\Admin\\Backup\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "z-song",
-                    "email": "zosong@126.com"
-                }
-            ],
-            "description": "Backup extension for laravel-admin",
-            "homepage": "https://github.com/laravel-admin-extensions/backup",
-            "keywords": [
-                "backup",
-                "laravel-admin"
-            ],
-            "support": {
-                "issues": "https://github.com/laravel-admin-extensions/backup/issues",
-                "source": "https://github.com/laravel-admin-extensions/backup/tree/v1.1.1"
-            },
-            "time": "2020-09-11T04:42:29+00:00"
         },
         {
             "name": "laravel-admin-ext/log-viewer",
