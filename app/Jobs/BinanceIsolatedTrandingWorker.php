@@ -288,9 +288,7 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
             if(array_key_exists('orders', $result) and $result['orders']) {
                 foreach ($result['orders'] as $order) {
 
-                    if($order['price'] == 0
-                    and OrderType::fromKey($order['type'])->is(OrderType::MARKET)
-                    and  SideType::fromKey($order['side'])->is(SideType::SELL)) {
+                    if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
                         $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
                     }
 
