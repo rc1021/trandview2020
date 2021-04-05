@@ -14,4 +14,7 @@ final class DirectType extends Enum implements LocalizedEnum
 {
     const SHORT = 1;
     const LONG = 2;
+
+    // 合約新增
+    const BOTH = 3;
 }
