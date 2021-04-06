@@ -1942,12 +1942,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/rc1021/php-binance-api.git",
-                "reference": "5a0efc097bee236aaf5f4df6151e6b57de3a95fb"
+                "reference": "f177773dd70e87c661394d3ba6165d58a9f8c441"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rc1021/php-binance-api/zipball/5a0efc097bee236aaf5f4df6151e6b57de3a95fb",
-                "reference": "5a0efc097bee236aaf5f4df6151e6b57de3a95fb",
+                "url": "https://api.github.com/repos/rc1021/php-binance-api/zipball/f177773dd70e87c661394d3ba6165d58a9f8c441",
+                "reference": "f177773dd70e87c661394d3ba6165d58a9f8c441",
                 "shasum": ""
             },
             "require": {
@@ -1982,7 +1982,7 @@
             "support": {
                 "source": "https://github.com/rc1021/php-binance-api/tree/master"
             },
-            "time": "2021-04-01T15:43:40+00:00"
+            "time": "2021-04-06T05:22:23+00:00"
         },
         {
             "name": "khanamiryan/qrcode-detector-decoder",

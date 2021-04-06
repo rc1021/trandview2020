@@ -278,7 +278,7 @@ class BinanceApiManager
         {
             $req = $this->getLastRequest();
             // if The system does not have enough asset now.
-            if(data_get($req, 'output.code', 0) == -3045) {
+            if(data_get($req, 'json.code', 0) == -3045) {
                 if($this->redo_times++ < 3) {
                     return $this->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
                 }
