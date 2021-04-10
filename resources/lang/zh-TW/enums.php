@@ -17,6 +17,8 @@ return [
     DirectType::class => [
         DirectType::SHORT => '做空',
         DirectType::LONG => '做多',
+        DirectType::FORCE => '強制',
+        DirectType::BOTH => 'Both',
     ],
 
     TxnExchangeType::class => [

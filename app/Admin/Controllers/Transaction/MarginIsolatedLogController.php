@@ -21,6 +21,7 @@ use Encore\Admin\Widgets\Box;
 use Encore\Admin\Widgets\Table;
 use App\Admin\Models\TransactionLog\ShowTxnOrder;
 use App\Admin\Models\TransactionLog\ShowCalcLog;
+use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 
 class MarginIsolatedLogController extends AdminController
 {
@@ -43,6 +44,10 @@ class MarginIsolatedLogController extends AdminController
         $instance = new SignalHistory();
         $grid = new Grid($instance);
 
+        $grid->tools(function ($tools) {
+            $tools->append(new MarginForceLiquidationTool());
+        });
+
         $grid->column('created_at', __('admin.rec.signal.created_at'))->display(function($created_at) {
             $html = <<<HTML
                 <i class="fa fa-fw fa-check text-success"></i>
@@ -55,7 +60,7 @@ class MarginIsolatedLogController extends AdminController
             return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
         });
 
-        $dynamic_columns = [ 'txn_type', 'symbol_type', 'entry_price', 'risk_start_price', 'position_price', 'auto_liquidation_at'];
+        $dynamic_columns = [ 'txn_type', 'symbol_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price'];
         foreach ($dynamic_columns as $column) {
             $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
                 if($column->getName() == 'txn_type')

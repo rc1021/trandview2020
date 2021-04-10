@@ -81,23 +81,31 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
             $this->user->txnStatus->trading_program_status = 1;
             $this->user->txnStatus->save();
             $exchange = $this->signal->txn_exchange_type;
+            $this->initBinanceApi();
 
-            // 買入
-            if($exchange->is(TxnExchangeType::Entry))
+            if($this->signal->txn_direct_type->is(DirectType::FORCE))
             {
-                $this->timer['init'] = self::DuringTimer(function () {
-                    $this->initBinanceApi();
-                    $this->initWorksheet();
-                });
-                $this->entryHandle();
+                $symbol_key = $this->signal->symbolType->key;
+                $index = $this->api->marginPriceIndex($symbol_key);
+                $this->signal->current_price = $this->api->floor_dec(data_get($index, 'price', 0), 2);
+                $this->signal->save();
+                // 強制出場
+                $this->forceLiquidation();
             }
-            // 賣出
-            elseif($exchange->is(TxnExchangeType::Exit))
+            else
             {
-                $this->timer['init'] = self::DuringTimer(function () {
-                    $this->initBinanceApi();
-                });
-                $this->exitHandle();
+                // 買入
+                if($exchange->is(TxnExchangeType::Entry))
+                {
+                    $this->forceLiquidation();
+                    $this->initWorksheet();
+                    $this->entryHandle();
+                }
+                // 賣出
+                elseif($exchange->is(TxnExchangeType::Exit))
+                {
+                    $this->exitHandle();
+                }
             }
         }
         catch(Exception $e) {
@@ -113,6 +121,77 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
 
         $this->user->txnStatus->trading_program_status = 0;
         $this->user->txnStatus->save();
+    }
+
+    // 強制平倉
+    public function forceLiquidation()
+    {
+        try {
+            $symbol_key = $this->signal->symbolType->key;
+            // 做多進場狀態, 所以做多出場
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $quote_asset_borrowed = data_get($account, "assets.$symbol_key.quoteAsset.borrowed", 0);
+            if($quote_asset_borrowed > 0) {
+                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $this->timer['force_liquidation_quoteAsset_borrowed'] = self::DuringTimer(function () use (&$result)
+                {
+                    if(array_key_exists('orders', $result) and $result['orders']) {
+                        foreach ($result['orders'] as $order) {
+                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
+                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
+                            }
+                            TxnMarginOrder::create(array_merge([
+                                'user_id' => $this->user->id,
+                                'signal_id' => $this->signal->id
+                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
+                        }
+                    }
+                });
+            }
+            // 做空進場狀態, 所以做空出場
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $base_asset_borrowed = data_get($account, "assets.$symbol_key.baseAsset.borrowed", 0);
+            if($base_asset_borrowed > 0) {
+                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::SHORT));
+                $this->timer['force_liquidation_baseAsset_borrowed'] = self::DuringTimer(function () use (&$result)
+                {
+                    if(array_key_exists('orders', $result) and $result['orders']) {
+                        foreach ($result['orders'] as $order) {
+                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
+                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
+                            }
+                            TxnMarginOrder::create(array_merge([
+                                'user_id' => $this->user->id,
+                                'signal_id' => $this->signal->id
+                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
+                        }
+                    }
+                });
+            }
+            // 出掉所有的標的幣
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $base_asset_free = data_get($account, "assets.$symbol_key.baseAsset.free", 0);
+            if($base_asset_free > 0) {
+                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $this->timer['force_liquidation_baseAsset_free'] = self::DuringTimer(function () use (&$result)
+                {
+                    if(array_key_exists('orders', $result) and $result['orders']) {
+                        foreach ($result['orders'] as $order) {
+                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
+                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
+                            }
+                            TxnMarginOrder::create(array_merge([
+                                'user_id' => $this->user->id,
+                                'signal_id' => $this->signal->id
+                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
+                        }
+                    }
+                });
+            }
+        }
+        catch(Exception $e) {
+            // 平倉失敗記錄起來
+        }
     }
 
     private function initBinanceApi()
@@ -257,9 +336,6 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
             }
         });
 
-        if(array_key_exists('error', $result) and $result['error'])
-            throw new Exception($result['error']);
-
         // 變更用戶狀態
         $this->user->txnStatus->current_state = 1;
         $this->user->txnStatus->total_transaction_times++;
@@ -268,6 +344,9 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         else
             $this->user->txnStatus->total_number_of_short_times++;
         $this->user->txnStatus->save();
+
+        if(array_key_exists('error', $result) and $result['error'])
+            throw new Exception($result['error']);
     }
 
     /**
@@ -300,9 +379,6 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
             }
         });
 
-        if(array_key_exists('error', $result) and $result['error'])
-            throw new Exception($result['error']);
-
         // 變更用戶狀態
         $this->user->txnStatus->current_state = 0;
         $this->user->txnStatus->total_transaction_times++;
@@ -311,5 +387,8 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         else
             $this->user->txnStatus->total_number_of_short_times++;
         $this->user->txnStatus->save();
+
+        if(array_key_exists('error', $result) and $result['error'])
+            throw new Exception($result['error']);
     }
 }

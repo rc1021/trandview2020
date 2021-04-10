@@ -20,6 +20,7 @@
 
 Encore\Admin\Form::forget(['map', 'editor']);
 
-Encore\Admin\Admin::favicon('/favicon.ico');
+Encore\Admin\Facades\Admin::favicon('/favicon.ico');
+Encore\Admin\Facades\Admin::js('/js/admin.js');
 
 Encore\Admin\Form::extend('linenotify', App\Admin\Extensions\Form\LINENotifyBinder::class);

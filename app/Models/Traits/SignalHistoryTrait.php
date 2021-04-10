@@ -28,6 +28,9 @@ trait SignalHistoryTrait
     {
         switch($this->getSignal('交易執行類別'))
         {
+            case "Force Exit":
+                return DirectType::fromValue(DirectType::FORCE);
+                break;
             case "Short Exit":
             case "Short Entry":
                 return DirectType::fromValue(DirectType::SHORT);
@@ -44,6 +47,7 @@ trait SignalHistoryTrait
     {
         switch($this->getSignal('交易執行類別'))
         {
+            case "Force Exit":
             case "Long Exit":
             case "Short Exit":
                 return TxnExchangeType::fromValue(TxnExchangeType::Exit);
@@ -77,6 +81,11 @@ trait SignalHistoryTrait
     public function getCurrentPriceAttribute()
     {
         return floatval($this->getSignal('現價'));
+    }
+
+    public function setCurrentPriceAttribute($val = null)
+    {
+        return $this->setSignal('現價', floatval($val));
     }
 
     // 5	=>	交易執行價格

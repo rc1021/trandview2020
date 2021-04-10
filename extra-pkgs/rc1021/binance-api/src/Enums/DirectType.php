@@ -17,4 +17,7 @@ final class DirectType extends Enum implements LocalizedEnum
 
     // 合約新增
     const BOTH = 3;
+
+    // 強制平倉
+    const FORCE = 4;
 }

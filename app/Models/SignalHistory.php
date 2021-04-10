@@ -40,6 +40,24 @@ class SignalHistory extends Model
         return $this->_signal;
     }
 
+    public function setSignal($key, $val = null)
+    {
+        if(count($this->_signal) == 0) {
+            $arr = [];
+            $count = preg_match_all('/([^?=,]+)=([^,]*)?/', $this->message, $arr);
+            $this->is_valid = ($count == 10 && count($arr) == 3);
+            if($this->is_valid) {
+                $this->_signal = array_combine($arr[1], $arr[2]);
+                $this->is_valid = !is_null($this->symbol_type);
+            }
+        }
+        $this->_signal[$key] = $val;
+        $tmp = [];
+        foreach ($this->_signal as $key => $value)
+            array_push($tmp, sprintf('%s=%s', $key, $value));
+        $this->message = implode(',', $tmp);
+    }
+
     public function getCalcLogPathAttribute()
     {
         if (!Admin::user())
