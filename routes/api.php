@@ -19,3 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('signal', [App\Http\Controllers\API\SignalController::class, 'fire'])->name('signal');
+Route::post('margin/signal', [App\Http\Controllers\API\SignalController::class, 'fire'])->name('margin.signal');
+Route::post('feature/signal', [App\Http\Controllers\API\FeatureSignalController::class, 'fire'])->name('feature.signal');
