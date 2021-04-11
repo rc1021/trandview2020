@@ -97,7 +97,10 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
                 // 買入
                 if($exchange->is(TxnExchangeType::Entry))
                 {
-                    $this->forceLiquidation();
+                    // 如果狀態已經是進場就略過此次訊號並發佈訊息
+                    if($this->user->txnStatus->current_state)
+                        throw new Exception('持倉中收到進場訊號(略過本次訊息)');
+
                     $this->initWorksheet();
                     $this->entryHandle();
                 }
@@ -192,6 +195,11 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         catch(Exception $e) {
             // 平倉失敗記錄起來
         }
+
+        // 變更用戶狀態
+        $this->user->txnStatus->current_state = 0;
+        $this->user->txnStatus->total_transaction_times++;
+        $this->user->txnStatus->save();
     }
 
     private function initBinanceApi()
