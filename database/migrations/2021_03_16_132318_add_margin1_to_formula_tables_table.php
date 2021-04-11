@@ -21,7 +21,7 @@ class AddMargin1ToFormulaTablesTable extends Migration
             $table->string('setcol28')->nullable();
             $table->string('setcol29')->nullable();
             $table->string('setcol30')->nullable();
-            $table->string('commit')->nullable();
+            $table->text('commit')->nullable();
         });
     }
 
