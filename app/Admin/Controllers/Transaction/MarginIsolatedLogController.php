@@ -62,7 +62,7 @@ class MarginIsolatedLogController extends AdminController
         });
 
         // "orderId"
-        $dynamic_columns = ["symbol", "txn_type", "type", "side", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount"];
+        $dynamic_columns = ["symbol", "txn_type", "type", "side", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", 'loan_ratio'];
         foreach ($dynamic_columns as $column) {
             $grid->column($column, __('admin.txn.order.'.$column))->display(function($name, $column) {
                 $data = $this[$column->getName()];
@@ -79,6 +79,9 @@ class MarginIsolatedLogController extends AdminController
                         break;
                     case 'status':
                         $data = OrderStatusType::fromKey($data);
+                        break;
+                    case 'loan_ratio':
+                        $data = ($data > 0) ? $data * 100 . '%' : '';
                         break;
                 }
                 if($data instanceof Enum)
