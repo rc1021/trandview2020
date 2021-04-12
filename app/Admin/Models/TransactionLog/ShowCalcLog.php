@@ -4,6 +4,7 @@ namespace App\Admin\Models\TransactionLog;
 
 use Illuminate\Contracts\Support\Renderable;
 use App\Models\SignalHistory;
+use App\Models\TxnMarginOrder;
 use BinanceApi\Enums\OrderType;
 use Encore\Admin\Widgets\Table;
 use Encore\Admin\Layout\Content;
@@ -13,8 +14,8 @@ class ShowCalcLog implements Renderable
 {
     public function render($key = null)
     {
-        $signal = SignalHistory::find($key);
-        $html = $signal->calc_log_html;
+        $txn = TxnMarginOrder::find($key);
+        $html = $$txn->signal->calc_log_html;
         if($html) {
             // $box = new Box(null, $html);
             // $box = str_replace('box-body', 'box-body table-responsive no-padding', $box);

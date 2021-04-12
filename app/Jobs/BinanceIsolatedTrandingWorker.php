@@ -348,11 +348,17 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         {
             if(array_key_exists('orders', $result) and $result['orders']) {
                 foreach ($result['orders'] as $order) {
-                    TxnMarginOrder::create(array_merge([
+                    $arr = [
                         'user_id' => $this->user->id,
                         'signal_id' => $this->signal->id,
                         'fills' => json_encode($order['fills'])
-                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
+                    ];
+                    if(OrderType::fromKey($order['type'])->is(OrderType::LIMIT))
+                    {
+                        list($loan_ratio) = $this->getCalculatedValues([$this->formulaTable->setcol31]);
+                        $arr['loan_ratio'] = $loan_ratio;
+                    }
+                    TxnMarginOrder::create(array_merge($arr, Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
                 }
             }
         });

@@ -132,6 +132,7 @@ return [
             'marginBuyBorrowAmount' => '借款金額',
             'side' => '方向',
             'status' => '狀態',
+            'txn_type' => '交易執行類別',
         ],
         'feature' => [
             "clientOrderId" => "用戶自定義的訂單號",
