@@ -14,7 +14,7 @@ class TxnMarginOrder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ["user_id", "signal_id", "symbol", "clientOrderId", "origClientOrderId", "orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset", "fills"];
+    protected $fillable = ["user_id", "signal_id", "symbol", "clientOrderId", "origClientOrderId", "orderId", "type", "side", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "marginBuyBorrowAsset", "fills", "loan_ratio"];
 
     protected $hidden = ['user_id', 'signal_id', 'updated_at', 'fills', 'isIsolated', 'error', 'deleted_at'];
 
