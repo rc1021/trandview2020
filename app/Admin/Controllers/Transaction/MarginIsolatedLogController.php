@@ -40,7 +40,7 @@ class MarginIsolatedLogController extends AdminController
      */
     protected function grid()
     {
-        // \Encore\Admin\Admin::style('td[class^=column] { min-width: 132px; }');
+        \Encore\Admin\Admin::style('.modal-dialog td[class^=column] { min-width: 132px; }');
 
         $instance = new TxnMarginOrder();
         $grid = new Grid($instance);
