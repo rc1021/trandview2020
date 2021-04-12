@@ -142,7 +142,7 @@ class MarginIsolatedLogController extends AdminController
             $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
-        $grid->model()->load(['signal']);
+        $grid->model()->load(['signal'])->where('user_id', Admin::user()->id);
         $grid->model()->orderBy('id', 'desc');
         $grid->disableCreateButton();
         $grid->disableRowSelector();
