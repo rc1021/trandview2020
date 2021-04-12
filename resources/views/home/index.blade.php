@@ -1,5 +1,12 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/12</h2>
+        <ul>
+            <li>持倉中收到進場訊號(略過本次訊息)</li>
+            <li>沒有足夠的餘額可借就降10%<br>
+                <img class="img-responsive" src="/logs/沒有足夠的餘額可借就降10趴.jpg" />
+            </li>
+        </ul>
         <h2>2021/04/11</h2>
         <ul>
             <li>槓桿交易加入&nbsp;<a href="{{ route('admin.txn.forceLiquidation') }}" rel="nofollow" class="btn btn-danger btn-xs" style="color: #fff;" data-confirm="是否確定要強制平倉?" data-disable-with="執行中..." data-method="post" data-remote="true" data-refresh="500" data-alter="">
