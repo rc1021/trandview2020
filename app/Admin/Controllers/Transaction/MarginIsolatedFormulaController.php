@@ -126,6 +126,8 @@ class MarginIsolatedFormulaController extends AdminController implements Rendera
         $show->field('setcol29', __('admin.txn.margin.isolated.formula.setcol29'));
         $show->divider(__('admin.txn.margin.isolated.formula.divider_8'));
         $show->field('setcol30', __('admin.txn.margin.isolated.formula.setcol30'));
+        $show->divider(__('admin.txn.margin.isolated.formula.divider_9'));
+        $show->field('setcol31', __('admin.txn.margin.isolated.formula.setcol31'));
         $show->divider();
         $show->field('created_at', __('admin.txn.margin.isolated.formula.created_at'));
         $show->field('updated_at', __('admin.txn.margin.isolated.formula.updated_at'));
@@ -199,6 +201,8 @@ class MarginIsolatedFormulaController extends AdminController implements Rendera
             $form->text('setcol29', __('admin.txn.margin.isolated.formula.setcol29'));
             $form->divider(__('admin.txn.margin.isolated.formula.divider_8'));
             $form->text('setcol30', __('admin.txn.margin.isolated.formula.setcol30'));
+            $form->divider(__('admin.txn.margin.isolated.formula.divider_9'));
+            $form->text('setcol31', __('admin.txn.margin.isolated.formula.setcol31'));
         });
 
         $form->disableEditingCheck();

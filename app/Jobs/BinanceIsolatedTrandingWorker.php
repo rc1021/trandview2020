@@ -102,7 +102,22 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
                         throw new Exception('持倉中收到進場訊號(略過本次訊息)');
 
                     $this->initWorksheet();
-                    $this->entryHandle();
+
+                    for($i = 1.0; $i >= 0.0; $i = $i - 0.1) {
+                        try {
+                            $this->sheet->setCellValue($this->formulaTable->setcol31, $i);
+                            $this->entryHandle();
+                        }
+                        catch(Exception $e)
+                        {
+                            $req = $this->api->getLastRequest();
+                            // 沒有足夠的餘額可借就降10%
+                            if(data_get($req, 'json.code', 0) == -3045)
+                                continue;
+                            throw $e;
+                        }
+                        break;
+                    }
                 }
                 // 賣出
                 elseif($exchange->is(TxnExchangeType::Exit))
@@ -251,10 +266,6 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
         $sheet->setCellValue($formulaTable->setcol15, $this->signal->hightPositionPrice);
         // 開倉價格容差(最低價位)
         $sheet->setCellValue($formulaTable->setcol16, $this->signal->lowPositionPrice);
-
-        // excel 快照
-        $html = new Html($this->spreadsheet);
-        Storage::disk('local')->put("excel-logs/{$this->user->id}/{$this->signal->id}/index.html", $html->generateSheetData());
     }
 
     /**
@@ -343,6 +354,10 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
                 }
             }
         });
+
+        // excel 快照
+        $html = new Html($this->spreadsheet);
+        Storage::disk('local')->put("excel-logs/{$this->user->id}/{$this->signal->id}/index.html", $html->generateSheetData());
 
         // 變更用戶狀態
         $this->user->txnStatus->current_state = 1;

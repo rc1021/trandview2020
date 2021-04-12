@@ -279,16 +279,7 @@ class BinanceApiManager
             $req = $this->getLastRequest();
             // if The system does not have enough asset now.
             if(data_get($req, 'json.code', 0) == -3045) {
-                if($this->redo_times++ < 3) {
-                    return $this->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
-                }
-                else {
-                    // 超過 10 次，就用帳戶資產購買，不用槓桿
-                    $symbol_key = $symbol->key;
-                    $account = $this->marginIsolatedAccountByKey($symbol_key);
-                    $netAssetOfBtc = $this->floor_dec(data_get($account, "assets.$symbol_key.quoteAsset.netAssetOfBtc", 0), 5);
-                    return $this->doIsolateEntry($symbol, $direct, $netAssetOfBtc, $price, $stop_price, $sell_price);
-                }
+                throw new Exception(data_get($req, 'json.msg'));
             }
             $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
         }
