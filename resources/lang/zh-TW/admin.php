@@ -255,6 +255,7 @@ return [
             'txn_order' => [
                 'count' => '有 :count 筆資料'
             ],
+            'loan_ratio' => '借款%',
             'txn_orders' => '下單資料',
             'log' => '開倉紀錄',
             'detail' => '詳情',
