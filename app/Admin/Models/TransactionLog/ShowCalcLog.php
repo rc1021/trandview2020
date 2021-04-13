@@ -14,8 +14,8 @@ class ShowCalcLog implements Renderable
 {
     public function render($key = null)
     {
-        $txn = TxnMarginOrder::find($key);
-        $html = $txn->signal->calc_log_html;
+        $signal = SignalHistory::find($key);
+        $html = $signal->calc_log_html;
         if($html) {
             // $box = new Box(null, $html);
             // $box = str_replace('box-body', 'box-body table-responsive no-padding', $box);
