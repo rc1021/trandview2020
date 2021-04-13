@@ -133,7 +133,7 @@ return [
             'side' => '方向',
             'status' => '狀態',
             'txn_type' => '交易執行類別',
-            'loan_ratio' => '實際借款%',
+            'loan_ratio' => '借款%',
         ],
         'feature' => [
             "clientOrderId" => "用戶自定義的訂單號",

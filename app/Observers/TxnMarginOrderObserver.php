@@ -79,6 +79,7 @@ class TxnMarginOrderObserver
 
     public static function GetMessage(array $order)
     {
+        $order['loan_ratio'] = sprintf('%s%%', $order['loan_ratio'] * 100);
         $order['side'] = SideType::fromKey($order['side'])->description;
         $order['type'] = OrderType::fromKey($order['type'])->description;
         $order['status'] = OrderStatusType::fromKey($order['status'])->description;

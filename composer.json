@@ -51,7 +51,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "helpers/string_helper.php"
+            "helpers/string_helper.php",
+            "helpers/float_helper.php"
         ]
     },
     "autoload-dev": {

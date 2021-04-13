@@ -83,6 +83,11 @@ class MarginIsolatedLogController extends AdminController
                     case 'loan_ratio':
                         $data = ($data > 0) ? $data * 100 . '%' : '';
                         break;
+                    case 'price':
+                    case 'cummulativeQuoteQty':
+                    case 'marginBuyBorrowAmount':
+                        $data = ceil_dec($data, 2);
+                        break;
                 }
                 if($data instanceof Enum)
                     return $data->description;
