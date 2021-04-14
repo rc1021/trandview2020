@@ -130,6 +130,8 @@ class BinanceApiManager
             $stop_orders->each(function ($stop, $key) use ($symbol_key, $rm_stop_orders) {
                 $rm_stop_orders->push($this->api->marginDeleteIsolatedOrder($symbol_key, $stop['orderId'], $stop['clientOrderId']));
             });
+            $result['orders'] = array_merge($rm_stop_orders->all(), $result['orders']);
+
             // 市價出場成交單
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $borrowed = floatval(data_get($account, "assets.$symbol_key.baseAsset.borrowed"));
@@ -147,6 +149,9 @@ class BinanceApiManager
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
                     array_push($result['orders'], $order);
                 }
+                else {
+                    throw new Exception("做多出場，但市價賣出數量為0，以下為帳戶詳情：\n" . print_r($account, true) );
+                }
             }
             else {
                 // 計算數量 + 手續費
@@ -163,12 +168,14 @@ class BinanceApiManager
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
                     array_push($result['orders'], $order);
                 }
+                else {
+                    throw new Exception("做空出場，但市價買入數量為0，以下為帳戶詳情：\n" . print_r($account, true) );
+                }
             }
             // $freeQuantity = data_get($stopOrder, 'origQty', 0);
             // $status = data_get($this->marginDeleteIsolatedOrder($symbol->key, $stopOrderId), 'status', '');
             // if(strtoupper($status) !== "CANCELED")
             //     throw new Exception("Delete StopLossLimit failure. origQty: $freeQuantity");
-            $result['orders'] = array_merge($rm_stop_orders->all(), $result['orders']);
         }
         catch(Exception $e) {
             $req = $this->getLastRequest();
