@@ -113,6 +113,8 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
                             $req = $this->api->getLastRequest();
                             // 沒有足夠的餘額可借就降10%
                             if(data_get($req, 'json.code', 0) == -3045) {
+                                $this->spreadsheet->clearCalculationCache();
+                                $this->sheet = $this->spreadsheet->getActiveSheet();
                                 sleep(1);
                                 continue;
                             }
