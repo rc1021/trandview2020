@@ -103,9 +103,9 @@ class BinanceIsolatedTrandingWorker implements ShouldQueue
 
                     $this->initWorksheet();
 
-                    for($i = 1.0; $i >= 0.0; $i = $i - 0.1) {
+                    for($i = 2.0; $i >= 0.0; $i = $i - 0.1) {
                         try {
-                            $this->sheet->setCellValue($this->formulaTable->setcol31, $i);
+                            $this->sheet->setCellValue($this->formulaTable->setcol31, ($i > 1.0) ? 1.0 : $i);
                             $this->entryHandle();
                         }
                         catch(Exception $e)
