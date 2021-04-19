@@ -1,5 +1,10 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/04/19</h2>
+        <ul>
+            <li>進場借款由每次降 10% 改為先用 100% 借款多嚐試 10 次，如果都失敗的話才每次降 10% 的作法借款</li>
+            <li>做空出場的買入數量計算由&nbsp;<code>$quantity = $this->ceil_dec(($borrowed + $free) * (1 + $taker), 5);</code><br>改為&nbsp;<code>$quantity = $this->ceil_dec($this->ceil_dec($borrowed + $free, 5) * (1 + $taker), 5);</code></li>
+        </ul>
         <h2>2021/04/12</h2>
         <ul>
             <li>持倉中收到進場訊號(略過本次訊息)</li>
