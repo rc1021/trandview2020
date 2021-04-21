@@ -9,7 +9,7 @@ class SignalRepository
 
     public function doFire($request)
     {
-        SignalHistory::parseAndPlay($request->getContent());
+        SignalHistory::parseAndPlay($request->getContent(), 'margin');
     }
 
     public function getHistoryModel($request)
@@ -22,6 +22,7 @@ class SignalRepository
     public function doFeatureFire($request)
     {
         Log::debug($request->getContent());
+        // SignalHistory::parseAndPlay($request->getContent(), 'feature');
     }
 
 }

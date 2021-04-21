@@ -250,7 +250,7 @@ class MarginIsolatedLogController extends AdminController
             $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
-        $grid->model()->with('txnOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
+        $grid->model()->where('type', 'margin')->with('txnOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
             $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
                 ->where('admin_user_id', Admin::user()->id);
         });

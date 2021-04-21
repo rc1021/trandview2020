@@ -11,12 +11,20 @@ use App\Jobs\ProcessSignal;
 
 trait SignalHistoryTrait
 {
-    // 建立一筆訊號，並執行訊息內容
-    public static function parseAndPlay($message)
+    /**
+     * 建立一筆訊號，並執行訊息內容
+     *
+     * @param $message string content
+     * @param $type string 訊號型別：feature(合約)、margin(槓桿)
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public static function parseAndPlay($message, $type)
     {
         // 記錄訊息
         $rec = new \App\Models\SignalHistory;
         $rec->clock = '1';
+        $rec->type = $type;
         $rec->message = $message;
         $rec->save();
 
