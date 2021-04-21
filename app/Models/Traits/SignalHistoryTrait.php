@@ -8,6 +8,9 @@ use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
 use App\Enums\TxnExchangeType;
 use App\Jobs\ProcessSignal;
+use App\Models\AdminUser;
+use Illuminate\Database\Eloquent\Builder;
+use Exception;
 
 trait SignalHistoryTrait
 {
@@ -29,6 +32,19 @@ trait SignalHistoryTrait
         $rec->save();
 
         ProcessSignal::dispatchSync($rec);
+
+        try {
+            $trading_platform_type = $rec->trading_platform_type;
+            AdminUser::whereHas('keysecrets', function (Builder $query) use ($trading_platform_type) {
+                $query->where('type', $trading_platform_type);
+            })->chunk(200, function ($users) use ($message, $type) {
+                foreach ($users as $user)
+                {
+                    $user->notify(sprintf("%s訊號\n%s", $type, $message));
+                }
+            });
+        }
+        catch(Exception $e) {}
     }
 
     // 0	=>	交易執行類別: 交易方向
