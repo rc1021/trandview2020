@@ -31,8 +31,6 @@ trait SignalHistoryTrait
         $rec->message = $message;
         $rec->save();
 
-        ProcessSignal::dispatchSync($rec);
-
         try {
             $trading_platform_type = $rec->trading_platform_type;
             AdminUser::whereHas('keysecrets', function (Builder $query) use ($trading_platform_type) {
@@ -40,11 +38,13 @@ trait SignalHistoryTrait
             })->chunk(200, function ($users) use ($message, $type) {
                 foreach ($users as $user)
                 {
-                    $user->notify(sprintf("%s訊號\n%s", $type, $message));
+                    $user->notify(sprintf("%s訊號\n%s", ucwords($type), str_replace(': ', '=', str_replace("\n", ',', $message))));
                 }
             });
         }
         catch(Exception $e) {}
+
+        ProcessSignal::dispatchSync($rec);
     }
 
     // 0	=>	交易執行類別: 交易方向
