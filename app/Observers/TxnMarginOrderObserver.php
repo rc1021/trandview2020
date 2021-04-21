@@ -10,6 +10,7 @@ use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\SideType;
 use BinanceApi\Enums\OrderStatusType;
 use App\Enums\TxnExchangeType;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class TxnMarginOrderObserver
@@ -27,6 +28,23 @@ class TxnMarginOrderObserver
             $data = self::GetMessage($txnMarginOrder->toArray());
             $data = sprintf('%s%s', DirectType::fromValue($txnMarginOrder->signal->txn_direct_type)->description, TxnExchangeType::fromValue($txnMarginOrder->signal->txn_exchange_type)->description) . $data;
             $txnMarginOrder->user->notify($data);
+
+            // 如果是市價單出場就結算這次的輸贏
+            if(OrderType::fromKey($txnMarginOrder->type)->is(OrderType::MARKET)) {
+                $limit = TxnMarginOrder::where('user_id', $txnMarginOrder->user_id)
+                ->where('type', OrderType::fromValue(OrderType::LIMIT))
+                ->where('id', '<', $txnMarginOrder->id)
+                ->orderBy('id', 'desc')
+                ->first();
+
+                // 做空出場
+                if(SideType::fromKey($txnMarginOrder->side)->is(SideType::BUY)) {
+                    $txnMarginOrder->user->notify(sprintf('(測試功能)本次盈虧：%s', $limit->cummulativeQuoteQty - $txnMarginOrder->cummulativeQuoteQty));
+                }
+                else {
+                    $txnMarginOrder->user->notify(sprintf('(測試功能)本次盈虧：%s', $txnMarginOrder->cummulativeQuoteQty - $limit->cummulativeQuoteQty));
+                }
+            }
         }
         catch(Exception $e) {
             Log::warning($e->getMessage());
