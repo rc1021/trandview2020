@@ -48,7 +48,7 @@ class BinanceIsolatedStopLossLimitCheck implements ShouldQueue
         });
     }
 
-    private function fire($orderID)
+    public function fire($orderID)
     {
         $order = TxnMarginOrder::with(['user', 'user.keysecrets'])->find($orderID);
         $user = $order->user;
@@ -56,7 +56,7 @@ class BinanceIsolatedStopLossLimitCheck implements ShouldQueue
         $api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));
 
         try {
-            $current = $api->marginGetIsolatedOrder($order->symbol, $order->id);
+            $current = $api->marginGetIsolatedOrder($order->symbol, $order->orderId);
 
             // 如果狀態有改
             if($current['status'] != $order->status) {
