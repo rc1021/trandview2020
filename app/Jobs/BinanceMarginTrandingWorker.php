@@ -154,7 +154,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $quote_asset_borrowed = data_get($account, "assets.$symbol_key.quoteAsset.borrowed", 0);
             if($quote_asset_borrowed > 0) {
-                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_quoteAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -174,7 +174,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_borrowed = data_get($account, "assets.$symbol_key.baseAsset.borrowed", 0);
             if($base_asset_borrowed > 0) {
-                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::SHORT));
+                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::SHORT));
                 $this->timer['force_liquidation_baseAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -194,7 +194,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_free = data_get($account, "assets.$symbol_key.baseAsset.free", 0);
             if($base_asset_free > 0) {
-                $result = $this->api->doIsolateExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_baseAsset_free'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -314,13 +314,13 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                 ]);
                 $symbol = SymbolType::fromKey($symbol);
                 if($sell_quantity != '-') {
-                    $result = $this->api->doIsolateEntryButSell($symbol, floatval($sell_quantity));
+                    $result = $this->api->doMarginEntryButSell($symbol, floatval($sell_quantity));
                 }
                 else {
                     $quantity = $capital / $current;
                     if($quantity <= 0)
                         throw new Exception(sprintf('數量小於 0(%.5f)', $quantity));
-                    $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
+                    $result = $this->api->doMarginEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
                 }
             }
             else {
@@ -336,7 +336,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                 ]);
 
                 $symbol = SymbolType::fromKey($symbol);
-                $result = $this->api->doIsolateEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
+                $result = $this->api->doMarginEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
             }
             // 設定自動賣出時間
             if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
@@ -392,7 +392,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $result = [];
 
         $this->timer['isolate_exit'] = self::DuringTimer(function () use (&$result) {
-            $result = $this->api->doIsolateExit($this->signal->symbolType, $this->signal->txnDirectType);
+            $result = $this->api->doMarginExit($this->signal->symbolType, $this->signal->txnDirectType);
         });
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)

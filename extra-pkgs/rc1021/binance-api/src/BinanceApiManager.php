@@ -109,7 +109,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doIsolateExit(SymbolType $symbol, DirectType $direct)
+    public function doMarginExit(SymbolType $symbol, DirectType $direct)
     {
         $result = [
             'error' => null,
@@ -194,7 +194,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doIsolateEntryButSell(SymbolType $symbol, float $sell_quantity)
+    public function doMarginEntryButSell(SymbolType $symbol, float $sell_quantity)
     {
         $result = [
             'error' => null,
@@ -232,7 +232,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doIsolateEntry(SymbolType $symbol, DirectType $direct, $quantity, $price, $stop_price, $sell_price) : array
+    public function doMarginEntry(SymbolType $symbol, DirectType $direct, $quantity, $price, $stop_price, $sell_price) : array
     {
         // 記錄做單方向
         $this->direct = $direct;
@@ -244,7 +244,7 @@ class BinanceApiManager
 
         try {
             // 槓桿逐倉下單(自動借貸)
-            $order = call_user_func_array([$this, sprintf('doIsolate%sEntry', decamelize($direct->key))], [$symbol, $quantity, $price]);
+            $order = call_user_func_array([$this, sprintf('doMargin%sEntry', decamelize($direct->key))], [$symbol, $quantity, $price]);
             array_push($result['orders'], $order);
             if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
@@ -279,7 +279,7 @@ class BinanceApiManager
             }
             $stop_price = $this->floor_dec($stop_price, 2);
             $sell_price = $this->floor_dec($sell_price, 2);
-            $stop_order = call_user_func_array([$this, sprintf('doIsolate%sEntryStop', decamelize($direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
+            $stop_order = call_user_func_array([$this, sprintf('doMargin%sEntryStop', decamelize($direct->key))], [$symbol, $stop_quantity, $stop_price, $sell_price]);
             array_push($result['orders'], $stop_order);
         }
         catch(Exception $e)
@@ -304,7 +304,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doIsolateLongEntry(SymbolType $symbol, $quantity, $price)
+    private function doMarginLongEntry(SymbolType $symbol, $quantity, $price)
     {
         $type = OrderType::fromValue(OrderType::LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
@@ -322,7 +322,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doIsolateShortEntry(SymbolType $symbol, $quantity, $price)
+    private function doMarginShortEntry(SymbolType $symbol, $quantity, $price)
     {
         $side = SideType::fromValue(SideType::SELL);
         $type = OrderType::fromValue(OrderType::LIMIT);
@@ -342,7 +342,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doIsolateLongEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
+    private function doMarginLongEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
     {
         $type = OrderType::fromValue(OrderType::STOP_LOSS_LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
@@ -362,7 +362,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function doIsolateShortEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
+    private function doMarginShortEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
     {
         $type = OrderType::fromValue(OrderType::STOP_LOSS_LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
