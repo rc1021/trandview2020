@@ -134,6 +134,7 @@ return [
             'status' => '狀態',
             'txn_type' => '交易執行類別',
             'loan_ratio' => '借款%',
+            'stopPrice' => '止損價',
         ],
         'feature' => [
             "clientOrderId" => "用戶自定義的訂單號",

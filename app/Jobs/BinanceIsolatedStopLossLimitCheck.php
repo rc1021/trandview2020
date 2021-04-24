@@ -67,14 +67,12 @@ class BinanceIsolatedStopLossLimitCheck implements ShouldQueue
                     $api->IsolatedBaseAssetRepay($order->symbol);
                 }
 
-                TxnMarginOrder::where('id', $orderID)
-                        ->update(Arr::only($current, ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"]));
-
+                $current = Arr::only($current, ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"]);
+                TxnMarginOrder::where('id', $orderID)->update($current);
                 unset($order['isIsolated']);
-                unset($order['error']);
-                unset($order['deleted_at']);
-                $notify_message  = "止損單狀態改變 from " . $order->status . " to " . $current['status'] . "\n";
-                $notify_message .= "詳情: \n";
+
+                $notify_message  = "止損單狀態改變，從" . $order->status . "到" . $current['status'] . "\n";
+                $notify_message .= "詳情:";
                 $notify_message .= TxnMarginOrderObserver::GetMessage($current);
                 $user->notify(print_r($notify_message, true));
             }
