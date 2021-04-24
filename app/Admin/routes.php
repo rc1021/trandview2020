@@ -26,13 +26,13 @@ Route::group([
     });
 
     Route::group([
-        'prefix'        => 'txn/margin/isolated',
+        'prefix'        => 'txn/margin',
         'namespace'     => 'Transaction',
-        'as'            => 'txn.margin.isolated.',
+        'as'            => 'txn.margin.',
     ], function (Router $router) {
-        $router->get('logs/calc/{signal_history}', MarginIsolatedLogController::class.'@calc')->name('logs.calc');
-        $router->resource('logs', MarginIsolatedLogController::class);
-        $router->get('formula/{key}/preview', MarginIsolatedFormulaController::class.'@preview')->name('formula.preview');
-        $router->resource('formula', MarginIsolatedFormulaController::class);
+        $router->get('logs/calc/{signal_history}', MarginLogController::class.'@calc')->name('logs.calc');
+        $router->resource('logs', MarginLogController::class);
+        $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
+        $router->resource('formula', MarginFormulaController::class);
     });
 });

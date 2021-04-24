@@ -33,7 +33,7 @@ use App\Enums\TradingPlatformType;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
 use Exception;
 
-class BinanceIsolatedTrandingWorker implements ShouldQueue
+class BinanceMarginTrandingWorker implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

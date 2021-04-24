@@ -48,7 +48,7 @@ class DailySummary implements ShouldQueue
             {
                 try {
                 // 取得槓桿交易記錄
-                $report_daily_summary = $this->isolatedDailySummary($user);
+                $report_daily_summary = $this->marginDailySummary($user);
                 // 發通知訊息
                 $user->notify($report_daily_summary);
                 }
@@ -64,7 +64,7 @@ class DailySummary implements ShouldQueue
 
     }
 
-    private function isoLatedDailySummary(AdminUser $user)
+    private function marginDailySummary(AdminUser $user)
     {
         $ks = $user->keysecret()->toArray();
         $api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));

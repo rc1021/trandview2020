@@ -24,7 +24,7 @@ use App\Admin\Models\TransactionLog\ShowCalcLog;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 use App\Models\TxnMarginOrder;
 
-class MarginIsolatedLogController extends AdminController
+class MarginLogController extends AdminController
 {
     /**
      * Title for current resource.

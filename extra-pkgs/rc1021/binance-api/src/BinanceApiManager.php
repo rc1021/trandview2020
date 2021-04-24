@@ -48,7 +48,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function IsolatedBaseAssetRepay($symbol_key, $account = null)
+    public function MarginBaseAssetRepay($symbol_key, $account = null)
     {
         $result = [
             'error' => null,

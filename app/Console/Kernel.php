@@ -4,7 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Jobs\BinanceIsolatedStopLossLimitCheck;
+use App\Jobs\BinanceMarginStopLossLimitCheck;
 use App\Models\TxnMarginOrder;
 use App\Models\AdminUser;
 use App\Jobs\DailySummary;
@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('backup:clean')->daily()->at('01:00');
         // $schedule->command('backup:run')->daily()->at('01:30');
         // $schedule->job(new DailySummary)->cron('0 16 * * *');
-        $schedule->job(new BinanceIsolatedStopLossLimitCheck)->cron('59 * * * *');
+        $schedule->job(new BinanceMarginStopLossLimitCheck)->cron('59 * * * *');
 
         $schedule->call(function () {
             // 取得所有尚未結束的止損單

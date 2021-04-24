@@ -8,7 +8,7 @@ use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Exception;
-use App\Jobs\BinanceIsolatedTrandingWorker;
+use App\Jobs\BinanceMarginTrandingWorker;
 use Encore\Admin\Facades\Admin;
 use App\Models\SignalHistory;
 
@@ -31,7 +31,7 @@ class HomeController extends Controller
             $rec->message = sprintf('交易執行類別=Force Exit,交易所=BINANCE,交易配對=BTCUSDT,執行日期時間=%s,現價=null,交易執行價格=null,做多起始風險價位=null,做空起始風險價位=null,開倉價格容差(最高價位)=null,開倉價格容差(最低價位)=null', now());
             $rec->save();
 
-            $worker = new BinanceIsolatedTrandingWorker(Admin::user(), $rec);
+            $worker = new BinanceMarginTrandingWorker(Admin::user(), $rec);
             $worker->handle();
 
             return response()->json([

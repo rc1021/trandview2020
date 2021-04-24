@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\SignalHistory;
 use App\Models\AdminUser;
 use App\Enums\TradingPlatformType;
-use App\Jobs\BinanceIsolatedTrandingWorker;
+use App\Jobs\BinanceMarginTrandingWorker;
 use Binance;
 
 class ProcessSignal implements ShouldQueue
@@ -47,7 +47,7 @@ class ProcessSignal implements ShouldQueue
                 foreach ($users as $user)
                 {
                     if($type->is(TradingPlatformType::BINANCE)) {
-                        BinanceIsolatedTrandingWorker::dispatch($user, $this->signal);
+                        BinanceMarginTrandingWorker::dispatch($user, $this->signal);
                     }
                     else {
                         // else if
