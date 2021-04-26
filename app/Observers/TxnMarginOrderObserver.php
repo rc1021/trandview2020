@@ -32,17 +32,17 @@ class TxnMarginOrderObserver
             // 如果是市價單出場就結算這次的輸贏
             if(OrderType::fromKey($txnMarginOrder->type)->is(OrderType::MARKET)) {
                 $limit = TxnMarginOrder::where('user_id', $txnMarginOrder->user_id)
-                ->where('type', OrderType::fromValue(OrderType::LIMIT))
+                ->where('type', OrderType::fromValue(OrderType::LIMIT)->key)
                 ->where('id', '<', $txnMarginOrder->id)
                 ->orderBy('id', 'desc')
                 ->first();
 
                 // 做空出場
                 if(SideType::fromKey($txnMarginOrder->side)->is(SideType::BUY)) {
-                    $txnMarginOrder->user->notify(sprintf('(測試功能)本次盈虧：%s', $limit->cummulativeQuoteQty - $txnMarginOrder->cummulativeQuoteQty));
+                    $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $limit->cummulativeQuoteQty - $txnMarginOrder->cummulativeQuoteQty));
                 }
                 else {
-                    $txnMarginOrder->user->notify(sprintf('(測試功能)本次盈虧：%s', $txnMarginOrder->cummulativeQuoteQty - $limit->cummulativeQuoteQty));
+                    $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $txnMarginOrder->cummulativeQuoteQty - $limit->cummulativeQuoteQty));
                 }
             }
         }
