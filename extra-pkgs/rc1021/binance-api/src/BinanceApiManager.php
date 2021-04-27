@@ -29,15 +29,61 @@ class BinanceApiManager
         $this->api = new Binance\API($key, $secret);
     }
 
-    //無條件進位
+    /**
+     * 無條件進位
+     *
+     * @param $v float
+     * @param $precision int 小數點位數
+     * @return float
+     * @throws \Exception
+     */
     public function ceil_dec($v, $precision) : float{
         $c = pow(10, $precision);
         return ceil($v*$c)/$c;
     }
-    //無條件捨去
+
+    /**
+     * 無條件捨去
+     *
+     * @param $v float
+     * @param $precision int 小數點位數
+     * @return float
+     * @throws \Exception
+     */
     public function floor_dec($v, $precision) : float{
         $c = pow(10, $precision);
         return floor($v*$c)/$c;
+    }
+
+    /**
+     * 合約賬戶: U本位合约出場
+     *
+     * @param $symbol ENUM
+     * @param $quantity DECIMAL 下單數量
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public function doFeaturesExit(SymbolType $symbol, DirectType $direct)
+    {
+    }
+
+    /**
+     * 合約賬戶: U本位合约進場
+     *
+     * @param $symbol ENUM
+     * @param $direct ENUM 執行方向
+     * @param $leverage int 槓桿倍數
+     * @param $price int 限價單價格
+     * @param $quantity int 限價單數量
+     * @param $time_in_force string 下單種類
+     * @param $stop_price int 止損單觸發價格
+     * @param $sell_price int 止損單價格
+     * @param $stop_time_in_force string 止損單下單種類
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public function doFeaturesEntry(SymbolType $symbol, DirectType $direct, $leverage, $price, $quantity, $time_in_force, $stop_price, $sell_price, $stop_time_in_force)
+    {
     }
 
     /**

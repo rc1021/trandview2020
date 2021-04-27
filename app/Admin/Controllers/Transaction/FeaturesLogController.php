@@ -24,7 +24,7 @@ use App\Admin\Models\TransactionLog\ShowCalcLog;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 use App\Models\TxnMarginOrder;
 
-class MarginLogController extends AdminController
+class FeaturesLogController extends AdminController
 {
     /**
      * Title for current resource.
@@ -176,7 +176,7 @@ class MarginLogController extends AdminController
                                 , TxnExchangeType::fromValue($this->txn_exchange_type)->description);
                     case 'loan_ratio':
                         if(TxnExchangeType::fromValue($this->txn_exchange_type)->is(TxnExchangeType::Entry)) {
-                            foreach ($this->txnMargOrders as $order) {
+                            foreach ($this->txnFeatOrders as $order) {
                                 if(OrderType::fromKey($order->type)->is(OrderType::LIMIT) and $order->loan_ratio > 0)
                                     $data = $order->loan_ratio * 100 . '%';
                             }
@@ -195,13 +195,13 @@ class MarginLogController extends AdminController
             });
         }
 
-        $grid->column('txnMargOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnMargOrders) {
-            $count = count($txnMargOrders);
+        $grid->column('txnFeatOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnFeatOrders) {
+            $count = count($txnFeatOrders);
             return __('admin.rec.signal.txn_order.count', compact('count'));
         })->expand(function ($model) {
             // "symbol", "clientOrderId", "origClientOrderId"
             $only = ["orderId", "type", "side", "created_at", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "loan_ratio"];
-            $txnMargOrders = $model->txnMargOrders->map(function ($origin) use ($only) {
+            $txnFeatOrders = $model->txnFeatOrders->map(function ($origin) use ($only) {
                 $order = $origin->only($only);
                 $order['side'] = SideType::fromKey($order['side'])->description;
                 $order['type'] = OrderType::fromKey($order['type'])->description;
@@ -216,7 +216,7 @@ class MarginLogController extends AdminController
             $columns = collect($only)->map(function ($column) {
                 return __('admin.txn.order.'.$column);
             })->toArray();
-            return new Table($columns, $txnMargOrders);
+            return new Table($columns, $txnFeatOrders);
         });
 
         $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
@@ -250,7 +250,7 @@ class MarginLogController extends AdminController
             $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
-        $grid->model()->where('type', 'margin')->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
+        $grid->model()->where('type', 'features')->with('txnFeatOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
             $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
                 ->where('admin_user_id', Admin::user()->id);
         });

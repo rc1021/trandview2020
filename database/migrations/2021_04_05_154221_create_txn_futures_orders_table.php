@@ -15,6 +15,8 @@ class CreateTxnFuturesOrdersTable extends Migration
     {
         Schema::create('txn_futures_orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id');
+            $table->foreignId('signal_id');
 
             $table->string("clientOrderId"); //"testOrder", // 用户自定义的订单号
             $table->string("cumQty"); //"0",
@@ -39,6 +41,7 @@ class CreateTxnFuturesOrdersTable extends Migration
             $table->string("updateTime"); //1566818724722, // 更新时间
             $table->string("workingType"); //"CONTRACT_PRICE", // 条件价格触发类型
             $table->boolean("priceProtect"); //false            // 是否开启条件单触发保护
+            $table->float('loan_ratio', 3, 1)->default(0); //回填實際借款%
 
             $table->timestamps();
         });

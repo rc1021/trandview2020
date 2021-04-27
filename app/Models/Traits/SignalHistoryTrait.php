@@ -92,7 +92,8 @@ trait SignalHistoryTrait
     // 2	=>	交易配對
     public function getSymbolTypeAttribute()
     {
-        return SymbolType::coerce($this->getSignal('交易配對'));
+        $val = $this->getSignal('交易配對');
+        return SymbolType::coerce(str_replace('BTCUSDTPERP', '', $val));
     }
 
     // 3	=>	執行日期時間

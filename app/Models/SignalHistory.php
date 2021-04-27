@@ -84,10 +84,17 @@ class SignalHistory extends Model
         return $this->belongsToMany(AdminUser::class, 'signal_history_user');
     }
 
-    public function txnOrders()
+    public function txnMargOrders()
     {
         if(!Admin::user())
             return $this->hasMany(TxnMarginOrder::class, 'signal_id')->where('user_id', 0);
         return $this->hasMany(TxnMarginOrder::class, 'signal_id')->where('user_id', Admin::user()->id);
+    }
+
+    public function txnFeatOrders()
+    {
+        if(!Admin::user())
+            return $this->hasMany(TxnFuturesOrder::class, 'signal_id')->where('user_id', 0);
+        return $this->hasMany(TxnFuturesOrder::class, 'signal_id')->where('user_id', Admin::user()->id);
     }
 }

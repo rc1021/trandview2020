@@ -34,6 +34,11 @@ class AdminUser extends Administrator
         return $this->hasOne(AdminTxnSetting::class, 'user_id');
     }
 
+    public function txnFeatSetting()
+    {
+        return $this->hasOne(AdminTxnFeatSetting::class, 'user_id');
+    }
+
     public function txnStatus()
     {
         return $this->hasOne(AdminTxnStatus::class, 'user_id');

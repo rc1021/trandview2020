@@ -35,4 +35,15 @@ Route::group([
         $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
         $router->resource('formula', MarginFormulaController::class);
     });
+
+    Route::group([
+        'prefix'        => 'txn/features',
+        'namespace'     => 'Transaction',
+        'as'            => 'txn.features.',
+    ], function (Router $router) {
+        $router->get('logs/calc/{signal_history}', FeaturesLogController::class.'@calc')->name('logs.calc');
+        $router->resource('logs', FeaturesLogController::class);
+        $router->get('formula/{key}/preview', FeaturesFormulaController::class.'@preview')->name('formula.preview');
+        $router->resource('formula', FeaturesFormulaController::class);
+    });
 });

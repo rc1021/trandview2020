@@ -21,7 +21,7 @@ class MarginFormulaController extends AdminController implements Renderable
      *
      * @var string
      */
-    protected $title = '公式表更新紀錄';
+    protected $title = '槓桿公式表更新紀錄';
 
     /**
      * Make a grid builder.
