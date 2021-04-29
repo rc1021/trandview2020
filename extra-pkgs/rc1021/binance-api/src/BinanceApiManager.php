@@ -65,6 +65,39 @@ class BinanceApiManager
      */
     public function doFeaturesExit(SymbolType $symbol, DirectType $direct)
     {
+        $result = [
+            'error' => null,
+            'orders' => [],
+        ];
+
+        try {
+            $symbol_key = $symbol->key;
+            // 撤销全部订单 (TRADE)
+            $rm_all_orders = collect($this->api->futuresDeleteAllOpenOrders($symbol_key));
+            $result['orders'] = array_merge($rm_all_orders->all(), $result['orders']);
+
+            if($direct->is(DirectType::LONG))
+            {
+                // 市價賣出
+                $side = SideType::fromValue(SideType::SELL);
+                $type = OrderType::fromValue(OrderType::MARKET);
+                $order = $this->api->featuresClosePositionOrder($symbol_key, $side->key, $type->key);
+                array_push($result['orders'], $order);
+            }
+            else {
+                // 市價賣出
+                $side = SideType::fromValue(SideType::BUY);
+                $type = OrderType::fromValue(OrderType::MARKET);
+                $order = $this->api->featuresClosePositionOrder($symbol_key, $side->key, $type->key);
+                array_push($result['orders'], $order);
+            }
+        }
+        catch(Exception $e) {
+            $req = $this->getLastRequest();
+            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
+        }
+
+        return $result;
     }
 
     /**
