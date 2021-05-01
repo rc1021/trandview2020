@@ -85,7 +85,9 @@ class BinanceMarginStopLossLimitCheck implements ShouldQueue
                 $order->save();
                 return ;
             }
-            Log::warning(sprintf('執行 <code>StopLossLimitCheck(%s)</code> 時，發生錯誤：%s', $orderID, $e->getMessage()));
+
+            $msg = sprintf('執行 StopLossLimitCheck(orderID: %s) 時，發生錯誤：%s', $orderID, $e->getMessage());
+            Log::warning($msg, $e->getTrace());
         }
     }
 }

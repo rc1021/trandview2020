@@ -47,7 +47,7 @@ class TxnMarginOrderObserver
             }
         }
         catch(Exception $e) {
-            Log::warning($e->getMessage());
+            Log::warning($e->getMessage(), $e->getTrace());
         }
     }
 
