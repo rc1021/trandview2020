@@ -43,7 +43,7 @@ class ProcessSignal implements ShouldQueue
             $type = $this->signal->trading_platform_type;
             AdminUser::whereHas('keysecrets', function (Builder $query) use ($type) {
                 $query->where('type', $type);
-            })->chunk(200, function ($users) use ($type) {
+            })->orderBy('id', 'desc')->chunk(200, function ($users) use ($type) {
                 foreach ($users as $user)
                 {
                     if($type->is(TradingPlatformType::BINANCE)) {

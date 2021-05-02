@@ -10,6 +10,7 @@ use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\OrderTypeRespType;
 use BinanceApi\Enums\SideEffectType;
 use BinanceApi\Enums\TimeInForce;
+use BinanceApi\Enums\WorkingType;
 use Binance;
 use Exception;
 
@@ -72,9 +73,13 @@ class BinanceApiManager
 
         try {
             $symbol_key = $symbol->key;
-            // 撤销全部订单 (TRADE)
-            $rm_all_orders = collect($this->api->futuresDeleteAllOpenOrders($symbol_key));
-            $result['orders'] = array_merge($rm_all_orders->all(), $result['orders']);
+            try {
+                // 撤销全部订单 (TRADE)
+                // 因為合約撤消全訂單會出現 Exception with message 'signedRequest error: {"code": 200,"msg": "The operation of cancel all open order is done."}'
+                // 所以用 try catch 處理
+                collect($this->api->futuresDeleteAllOpenOrders($symbol_key));
+            }
+            catch(Exception $e) {}
 
             if($direct->is(DirectType::LONG))
             {
@@ -117,6 +122,49 @@ class BinanceApiManager
      */
     public function doFeaturesEntry(SymbolType $symbol, DirectType $direct, $leverage, $price, $quantity, $time_in_force, $stop_price, $sell_price, $stop_time_in_force)
     {
+        // 記錄做單方向
+        $this->direct = $direct;
+
+        $result = [
+            'error' => null,
+            'orders' => [],
+        ];
+
+        try {
+            // 先設定倍數
+            $this->api->futuresLeverage($symbol->key, $leverage);
+
+            // 下單進場
+            $side = SideType::fromValue(SideType::BUY);
+            if($direct->is(DirectType::SHORT))
+                $side = SideType::fromValue(SideType::SELL);
+            $type = OrderType::fromValue(OrderType::LIMIT);
+            $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
+            $working = WorkingType::fromValue(WorkingType::MARK_PRICE);
+            $force = TimeInForce::fromValue(TimeInForce::GTC);
+            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, $this->floor_dec($quantity, 5), $this->floor_dec($price, 2), null, $stop_price, null, null, null, $force->key, $working->key, null, $resp->key);
+            array_push($result['orders'], $order);
+            if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
+                $this->futuresDeleteOrder($order['symbol'], $order['orderId']);
+                $ord = print_r($order, true);
+                throw new Exception(<<<EOF
+                    未立即完成訂單(撤單)
+                    訂單細節:
+                    $ord
+                EOF);
+            }
+        }
+        catch(Exception $e)
+        {
+            $req = $this->getLastRequest();
+            // if The system does not have enough asset now.
+            if(data_get($req, 'json.code', 0) == -3045) {
+                throw new Exception(data_get($req, 'json.msg'));
+            }
+            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
+        }
+        // 回傳結果
+        return $result;
     }
 
     /**
