@@ -285,7 +285,7 @@ class BinanceApiManager
                 $trade_fee = $this->api->tradeFee($symbol_key);
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
                 // 先$borrowed + $free進位一次，再加手續費進位一次
-                $quantity = $this->ceil_dec($this->ceil_dec($borrowed + $free, 5) * (1 + $taker), 5);
+                $quantity = $this->ceil_dec(($borrowed + $free) * (1 + $taker), 5) * 1.1;
                 if($quantity > 0) {
                     // 市價賣出
                     $side = SideType::fromValue(SideType::BUY);
