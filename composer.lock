@@ -850,16 +850,16 @@
         },
         {
             "name": "encore/laravel-admin",
-            "version": "v1.8.11",
+            "version": "v1.8.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/z-song/laravel-admin.git",
-                "reference": "6ddd381a9f4928b6c2175dea297e6a8b385d8d28"
+                "reference": "2c4834cf2d3160b31714292eece6df58e78c177f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/z-song/laravel-admin/zipball/6ddd381a9f4928b6c2175dea297e6a8b385d8d28",
-                "reference": "6ddd381a9f4928b6c2175dea297e6a8b385d8d28",
+                "url": "https://api.github.com/repos/z-song/laravel-admin/zipball/2c4834cf2d3160b31714292eece6df58e78c177f",
+                "reference": "2c4834cf2d3160b31714292eece6df58e78c177f",
                 "shasum": ""
             },
             "require": {
@@ -918,9 +918,9 @@
             ],
             "support": {
                 "issues": "https://github.com/z-song/laravel-admin/issues",
-                "source": "https://github.com/z-song/laravel-admin/tree/v1.8.11"
+                "source": "https://github.com/z-song/laravel-admin/tree/v1.8.12"
             },
-            "time": "2020-11-15T02:55:51+00:00"
+            "time": "2021-05-03T13:52:04+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -1464,16 +1464,16 @@
         },
         {
             "name": "google/protobuf",
-            "version": "v3.15.8",
+            "version": "v3.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/protocolbuffers/protobuf-php.git",
-                "reference": "cae7735e67acf738881c02ca12604cc4a7ad2e5a"
+                "reference": "29d9722e5c3b4d21b49acd820ac486e2b92096df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/cae7735e67acf738881c02ca12604cc4a7ad2e5a",
-                "reference": "cae7735e67acf738881c02ca12604cc4a7ad2e5a",
+                "url": "https://api.github.com/repos/protocolbuffers/protobuf-php/zipball/29d9722e5c3b4d21b49acd820ac486e2b92096df",
+                "reference": "29d9722e5c3b4d21b49acd820ac486e2b92096df",
                 "shasum": ""
             },
             "require": {
@@ -1503,9 +1503,9 @@
             ],
             "support": {
                 "issues": "https://github.com/protocolbuffers/protobuf-php/issues",
-                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.15.8"
+                "source": "https://github.com/protocolbuffers/protobuf-php/tree/v3.16.0"
             },
-            "time": "2021-04-08T17:17:35+00:00"
+            "time": "2021-05-07T01:06:10+00:00"
         },
         {
             "name": "graham-campbell/result-type",
@@ -2551,16 +2551,16 @@
         },
         {
             "name": "league/commonmark",
-            "version": "1.6.0",
+            "version": "1.6.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/thephpleague/commonmark.git",
-                "reference": "19a9673b833cc37770439097b381d86cd125bfe8"
+                "reference": "2651c497f005de305c7ba3f232cbd87b8c00ee8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/19a9673b833cc37770439097b381d86cd125bfe8",
-                "reference": "19a9673b833cc37770439097b381d86cd125bfe8",
+                "url": "https://api.github.com/repos/thephpleague/commonmark/zipball/2651c497f005de305c7ba3f232cbd87b8c00ee8c",
+                "reference": "2651c497f005de305c7ba3f232cbd87b8c00ee8c",
                 "shasum": ""
             },
             "require": {
@@ -2648,7 +2648,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-05-01T19:00:49+00:00"
+            "time": "2021-05-08T16:08:00+00:00"
         },
         {
             "name": "league/flysystem",

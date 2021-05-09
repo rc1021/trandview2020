@@ -142,17 +142,36 @@ class BinanceApiManager
             $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
             $working = WorkingType::fromValue(WorkingType::MARK_PRICE);
             $force = TimeInForce::fromValue(TimeInForce::GTC);
-            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, $this->floor_dec($quantity, 5), $this->floor_dec($price, 2), null, $stop_price, null, null, null, $force->key, $working->key, null, $resp->key);
-            array_push($result['orders'], $order);
-            if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
+            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, $this->floor_dec($quantity, 5), $this->floor_dec($price, 2), null, null, null, null, null, $force->key, null, null, $resp->key);
+            $order_id = data_get($order, 'orderId', false);
+            if(!$order_id)
+                throw new Exception('No OrderID');
+            // 每隔 1 秒確認訂單狀態, 10秒後依然沒成交就取消
+            $i = 1;
+            do {
+                sleep(1);
+                $order = $this->api->futuresGetOrder($symbol->key, $order_id);
+                if(OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED))
+                    break;
+            } while(++$i <= 10);
+
+            if(OrderStatusType::fromKey($order['status'])->is(OrderStatusType::NEW)) {
                 $this->futuresDeleteOrder($order['symbol'], $order['orderId']);
                 $ord = print_r($order, true);
                 throw new Exception(<<<EOF
-                    未立即完成訂單(撤單)
+                    10秒內未立即完成訂單(撤單)
                     訂單細節:
                     $ord
                 EOF);
             }
+            array_push($result['orders'], $order);
+
+            // 設定止損單
+            $side = SideType::fromValue(SideType::SELL);
+            if($direct->is(DirectType::SHORT))
+                $side = SideType::fromValue(SideType::BUY);
+            $type = OrderType::fromValue(OrderType::STOP_MARKET);
+            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, null, null, null, $stop_price, null, null, null, $force->key, null, null, $resp->key);
         }
         catch(Exception $e)
         {
@@ -285,7 +304,7 @@ class BinanceApiManager
                 $trade_fee = $this->api->tradeFee($symbol_key);
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
                 // 先$borrowed + $free進位一次，再加手續費進位一次
-                $quantity = $this->ceil_dec(($borrowed + $free) * (1 + $taker), 5) * 1.1;
+                $quantity = $this->ceil_dec(($borrowed + $free) * (1 - $taker), 5);
                 if($quantity > 0) {
                     // 市價賣出
                     $side = SideType::fromValue(SideType::BUY);
