@@ -38,7 +38,7 @@ trait SignalHistoryTrait
             })->chunk(200, function ($users) use ($message, $type) {
                 foreach ($users as $user)
                 {
-                    $user->notify(sprintf("%s訊號\n%s", ucwords($type), str_replace(': ', '=', str_replace(',', "\n", $message))));
+                    $user->notify(sprintf("%s訊號\n%s", ucwords($type), str_replace('=', ': ', str_replace(',', "\n", $message))));
                 }
             });
         }
