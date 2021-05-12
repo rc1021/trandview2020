@@ -107,7 +107,8 @@ class TxnMarginOrderObserver
             unset($order['marginBuyBorrowAsset']);
         }
         // $order['transactTime'] = Carbon::parse($order['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
-        $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
+        if(array_key_exists('created_at', $order))
+            $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
         unset($order['transactTime']);
         unset($order['clientOrderId']);
         unset($order['id']);
