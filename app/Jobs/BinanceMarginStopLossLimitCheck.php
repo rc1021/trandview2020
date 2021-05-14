@@ -61,10 +61,13 @@ class BinanceMarginStopLossLimitCheck implements ShouldQueue
             // 如果狀態有改
             if($current['status'] != $order->status) {
 
-                // 如果"做空"止損單被觸發, 就把買入不足還利息的標的幣，再還掉利息
-                $side = SideType::fromValue(SideType::BUY)->key;
-                if($order->side == $side && $current['status'] == 'FILLED') {
-                    $api->MarginBaseAssetRepay($order->symbol);
+                $open = $api->marginIsolatedOpenOrders($order->symbol);
+                if(count($open) == 0) {
+                    // 如果"做空"止損單被觸發, 就把買入不足還利息的標的幣，再還掉利息
+                    $side = SideType::fromValue(SideType::BUY)->key;
+                    if($order->side == $side && $current['status'] == 'FILLED') {
+                        $api->MarginBaseAssetRepay($order->symbol);
+                    }
                 }
 
                 $current = Arr::only($current, ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"]);
