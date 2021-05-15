@@ -22,5 +22,6 @@ Encore\Admin\Form::forget(['map', 'editor']);
 
 Encore\Admin\Facades\Admin::favicon('/favicon.ico');
 Encore\Admin\Facades\Admin::js('/js/admin.js');
+Encore\Admin\Facades\Admin::style('.modal-body {max-height: calc(100vh - 143px);overflow-y: auto;}');
 
 Encore\Admin\Form::extend('linenotify', App\Admin\Extensions\Form\LINENotifyBinder::class);
