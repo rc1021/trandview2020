@@ -9,10 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Repositories\Admin\TransactionRepository;
 use App\Models\AdminTxnEntryRec;
 
-class TransactionController extends BaseAuthController
+class TransactionMarginSettingController extends BaseAuthController
 {
-    public function setting(Content $content, TransactionRepository $rep)
-    {
-        return $rep->getSetting($content);
-    }
+
 }
