@@ -21,6 +21,7 @@
         "laravel/framework": "^8.12",
         "laravel/tinker": "^2.5",
         "phpoffice/phpspreadsheet": "^1.17",
+        "predis/predis": "^1.1",
         "rc1021/binance-api": "dev-master",
         "spatie/laravel-backup": "^6.15"
     },
