@@ -14,6 +14,21 @@ services:
         depends_on:
             - mysql
             - redis
+    autotxn:
+        build: .
+        restart: always
+        ports:
+            - '81:80'
+        environment:
+            PORT: 80
+        volumes:
+            - '.:/app'
+            - './autotxn/.env:/app/.env'
+        networks:
+            - sail
+        depends_on:
+            - mysql
+            - redis
     phpmyadmin:
         image: 'phpmyadmin'
         restart: always

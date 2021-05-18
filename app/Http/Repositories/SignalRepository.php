@@ -9,6 +9,7 @@ class SignalRepository
 
     public function doFire($request)
     {
+        Log::debug($request->getContent());
         SignalHistory::parseAndPlay($request->getContent(), 'margin');
     }
 
