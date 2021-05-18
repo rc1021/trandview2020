@@ -21,7 +21,7 @@ class ShowCalcLog implements Renderable
             // $box = str_replace('box-body', 'box-body table-responsive no-padding', $box);
             // return $box;
             return <<<HTML
-                <div class="table-responsive no-padding">$html</div>
+                <div class="no-padding">$html</div>
             HTML;
         }
         return 'No Data';
