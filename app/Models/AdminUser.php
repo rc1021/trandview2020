@@ -21,7 +21,7 @@ class AdminUser extends Administrator
 
     public function signals()
     {
-        return $this->belongsToMany(SignalHistory::class, 'signal_history_user');
+        return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->withPivot('error', 'asset');;
     }
 
     public function orders()

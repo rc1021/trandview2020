@@ -77,6 +77,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $error = null;
         try {
             $this->user->load('txnSetting')->refresh();
+            $this->user->signals()->attach($this->signal);
 
             $this->user->txnStatus->trading_program_status = 1;
             $this->user->txnStatus->save();
@@ -138,7 +139,8 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $this->time_duration = $this->timer;
         $this->signal->save();
 
-        $this->user->signals()->attach($this->signal, !is_null($error) ? compact('error') : []);
+        if(!is_null($error))
+            $this->user->signals()->updateExistingPivot($this->signal, compact('error'));
         $this->user->save();
 
         $this->user->txnStatus->trading_program_status = 0;
@@ -242,6 +244,8 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $sheet = $this->sheet = $this->spreadsheet->getActiveSheet();
 
         $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+        $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
+
         // 當前總資金(計價幣)
         $sheet->setCellValue($formulaTable->setcol1, data_get($account, "assets.$symbol_key.quoteAsset.free"));
         // 當前總資金(標的幣)
