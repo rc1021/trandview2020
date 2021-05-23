@@ -36,7 +36,7 @@ class MarginFormulaController extends AdminController implements Renderable
 
         $grid->column('pair', __('admin.txn.margin.formula.pair'));
         // $grid->column('id', __('admin.txn.margin.formula.id'))->sortable();
-        $grid->column('file_path', __('admin.txn.margin.formula.file_path'))->sortable()
+        $grid->column('file_path', __('admin.txn.margin.formula.file_path'))
              ->display(function ($file_path) {
                 return substr($file_path, strrpos($file_path, '/') + 1);
              })
@@ -51,7 +51,7 @@ class MarginFormulaController extends AdminController implements Renderable
         $grid->column('updated_at', __('admin.txn.margin.formula.updated_at'));
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
-            $filter->equal('column', __('admin.txn.margin.formula.id'));
+            $filter->equal('pair', __('admin.txn.margin.formula.pair'));
             $filter->between('updated_at', __('admin.txn.margin.formula.updated_at'))->datetime();
         });
         $grid->model()->lastPair();
