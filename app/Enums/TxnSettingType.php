@@ -1,6 +1,6 @@
 <?php
 
-namespace BinanceApi\Enums;
+namespace App\Enums;
 
 use BenSampo\Enum\Enum;
 use BenSampo\Enum\Contracts\LocalizedEnum;
@@ -10,7 +10,9 @@ use BenSampo\Enum\Contracts\LocalizedEnum;
  * @method static static OptionTwo()
  * @method static static OptionThree()
  */
-final class SymbolType extends Enum implements LocalizedEnum
+final class TxnSettingType extends Enum implements LocalizedEnum
 {
-    const BTCUSDT =   1;
+    const Spot = 1;
+    const Margin = 2;
+    const Feature = 3;
 }

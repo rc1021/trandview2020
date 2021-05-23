@@ -33,7 +33,7 @@ Route::group([
         $router->resource('logs', MarginLogController::class);
         $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
         $router->resource('formula', MarginFormulaController::class);
-        $router->resource('setting', TransactionController::class);
+        $router->resource('setting', MarginSettingController::class);
     });
 
     // Route::group([

@@ -23,6 +23,9 @@ services:
             PMA_HOST: 'mysql'
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
+            AUTH_TYPE: '${DB_AUTH_TYPE:-http}'
+        volumes:
+            - './docker/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php'
         networks:
             - sail
         depends_on:

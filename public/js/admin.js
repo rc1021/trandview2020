@@ -688,7 +688,7 @@ $(function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(/*! /Users/rc1021/Projects/trandview2020/resources/js/admin.js */"./resources/js/admin.js");
+module.exports = __webpack_require__(/*! /Users/rc1021/projects/trandview2020/resources/js/admin.js */"./resources/js/admin.js");
 
 
 /***/ })

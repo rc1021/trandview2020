@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 use App\Models\SignalHistory;
+use App\Enums\TxnSettingType;
 use Illuminate\Support\Facades\Log;
 
 class SignalRepository
@@ -9,7 +10,7 @@ class SignalRepository
 
     public function doFire($request)
     {
-        SignalHistory::parseAndPlay($request->getContent(), 'margin');
+        SignalHistory::parseAndPlay($request->getContent(), TxnSettingType::fromValue(TxnSettingType::Margin));
     }
 
     public function getHistoryModel($request)

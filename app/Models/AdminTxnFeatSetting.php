@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use BinanceApi\Enums\SymbolType;
-use BinanceApi\BinanceApiManager;
 
 class AdminTxnFeatSetting extends Model
 {

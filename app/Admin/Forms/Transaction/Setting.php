@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Http\Repositories\Admin\AuthKeySecretRepository;
 use App\Models\AdminUser;
 use App\Models\AdminTxnSetting;
-use BinanceApi\Enums\SymbolType;
 use Illuminate\Support\Arr;
 
 class Setting extends Form
@@ -52,8 +51,8 @@ class Setting extends Form
         $this->text('initial_tradable_total_funds', __('admin.txn.initial_tradable_total_funds'))->rules('required|numeric');
         $this->switch('lever_switch', __('admin.txn.lever_switch'))->rules('required')->states($states);
         $this->text('initial_capital_risk', __('admin.txn.initial_capital_risk'))->rules('required|numeric');
-        $this->text('btc_daily_interest', __('admin.txn.btc_daily_interest'))->rules('required|numeric');
-        $this->text('usdt_daily_interest', __('admin.txn.usdt_daily_interest'))->rules('required|numeric');
+        $this->text('base_asset_daily_interest', __('admin.txn.base_asset_daily_interest'))->rules('required|numeric');
+        $this->text('quote_asset_daily_interest', __('admin.txn.quote_asset_daily_interest'))->rules('required|numeric');
     }
 
     /**

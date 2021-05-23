@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use DB;
 
 class FormulaTable extends Model
 {
@@ -25,6 +26,27 @@ class FormulaTable extends Model
         if($version > 0)
             return $query->where('id', $version);
         return $query->orderBy('id', 'desc');
+    }
+
+    /**
+     * 取得指定交易對公式表最新的資料
+     *
+     * @return FormulaTable
+     */
+    public function scopePair($query, $pair)
+    {
+        return $query->where('pair', $pair);
+    }
+
+    /**
+     * 取得所有交易對公式表最新的資料
+     *
+     *
+     * @return FormulaTable
+     */
+    public function scopeLastPair($query)
+    {
+        return $query->whereIn('id', FormulaTable::groupBy('pair')->select([DB::raw("MAX(id)")]))->orderBy('id', 'asc');
     }
 
     /**

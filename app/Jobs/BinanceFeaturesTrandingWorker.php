@@ -14,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\SideType;
@@ -85,8 +84,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
 
             if($this->signal->txn_direct_type->is(DirectType::FORCE))
             {
-                $symbol_key = $this->signal->symbolType->key;
-                $index = $this->api->futuresTickerPrice($symbol_key);
+                $index = $this->api->futuresTickerPrice($this->signal->symbol_type);
                 $this->signal->current_price = $this->api->floor_dec(data_get($index, 'price', 0), 2);
                 $this->signal->save();
                 // 強制出場
@@ -149,12 +147,12 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
     public function forceLiquidation()
     {
         try {
-            $symbol_key = $this->signal->symbolType->key;
+            $symbol_key = $this->signal->symbol_type;
             // 做多進場狀態, 所以做多出場
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $quote_asset_borrowed = data_get($account, "assets.$symbol_key.quoteAsset.borrowed", 0);
             if($quote_asset_borrowed > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_quoteAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -174,7 +172,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_borrowed = data_get($account, "assets.$symbol_key.baseAsset.borrowed", 0);
             if($base_asset_borrowed > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::SHORT));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::SHORT));
                 $this->timer['force_liquidation_baseAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -194,7 +192,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_free = data_get($account, "assets.$symbol_key.baseAsset.free", 0);
             if($base_asset_free > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_baseAsset_free'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -236,8 +234,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         if(is_null($this->spreadsheet))
             throw new Exception(sprintf('公式表載入錯誤, 版本號: %d', $formulaTable->id));
 
-        $symbol_key = $this->signal->symbolType->key;
-
         // 當前表試算表
         $sheet = $this->sheet = $this->spreadsheet->getActiveSheet();
 
@@ -245,7 +241,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         // 初始帳戶餘額
         $sheet->setCellValue($formulaTable->setcol1, data_get($account, "availableBalance"));
         // 交易配對
-        $sheet->setCellValue($formulaTable->setcol2, $symbol_key);
+        $sheet->setCellValue($formulaTable->setcol2, $this->signal->symbol_type);
         // 每次初始可交易總資金(%)
         $sheet->setCellValue($formulaTable->setcol3, $this->user->txnFeatSetting->initial_tradable_total_funds);
         // 每次交易資金風險(%)
@@ -306,7 +302,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
             ]);
             if($quantity == '-' or $quantity <= 0)
                 throw new Exception(sprintf('數量小於 0(%.5f)', $quantity));
-            $symbol = SymbolType::fromKey($symbol);
             $result = $this->api->doFeaturesEntry($symbol, $direct, $leverage, $price, $quantity, $time_in_force, $stop_price, $sell_price, $stop_time_in_force);
         });
 
@@ -355,7 +350,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         $result = [];
 
         $this->timer['exit'] = self::DuringTimer(function () use (&$result) {
-            $result = $this->api->doFeaturesExit($this->signal->symbolType, $this->signal->txnDirectType);
+            $result = $this->api->doFeaturesExit($this->signal->symbol_type, $this->signal->txnDirectType);
         });
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)

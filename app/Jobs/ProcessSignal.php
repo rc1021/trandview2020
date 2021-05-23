@@ -40,13 +40,10 @@ class ProcessSignal implements ShouldQueue
     {
         if($this->signal->is_valid)
         {
-            $type = $this->signal->trading_platform_type;
-            AdminUser::whereHas('keysecrets', function (Builder $query) use ($type) {
-                $query->where('type', $type);
-            })->orderBy('id', 'desc')->chunk(200, function ($users) use ($type) {
+            AdminUser::matchTypePair($this->signal->trading_platform_type, $this->signal->symbol_type)->orderBy('id', 'desc')->chunk(200, function ($users) {
                 foreach ($users as $user)
                 {
-                    if($type->is(TradingPlatformType::BINANCE)) {
+                    if($this->signal->trading_platform_type->is(TradingPlatformType::BINANCE)) {
                         BinanceMarginTrandingWorker::dispatch($user, $this->signal);
                     }
                     else {
