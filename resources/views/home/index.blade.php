@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/05/23</h2>
+        <ul>
+            <li>新增多交易對設置</li>
+        </ul>
         <h2>2021/05/10</h2>
         <ul>
             <li>做空出場數量計算公式改為 <code>$quantity = $this->ceil_dec(($borrowed + $free) / (1 - $taker), 5);</code></li>
