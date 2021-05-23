@@ -4,29 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use BinanceApi\Enums\SymbolType;
+use App\Enums\TxnSettingType;
 use BinanceApi\BinanceApiManager;
 
 class AdminTxnSetting extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'initial_tradable_total_funds',
-        'initial_capital_risk',
-        'lever_switch',
-        'btn_daily_interest',
-        'usdt_daily_interest',
+    protected $casts = [
+        'options' => 'array',
     ];
 
-    function getTxnSymbolTypeAttribute() : SymbolType
+    function getInitialTradableTotalFundsAttribute() : float
     {
-        return SymbolType::coerce((int)$this->attributes['transaction_matching']);
+        return data_get((object)$this->options, 'initial_tradable_total_funds', 1.0);
     }
 
-    // 初始資金風險
-    function getInitialCapitalRisk () {
-        return $this->initial_tradable_total_funds * $this->capital_risk_per_transaction / 100;
+    function getInitialCapitalRiskAttribute() : float
+    {
+        return data_get((object)$this->options, 'initial_capital_risk', 0.07);
+    }
+
+    function getLeverSwitchAttribute() : bool
+    {
+        return data_get((object)$this->options, 'lever_switch', true);
+    }
+
+    function getBaseAssetDailyInterestAttribute() : float
+    {
+        return data_get((object)$this->options, 'base_asset_daily_interest', 0.0003);
+    }
+
+    function getQuoteAssetDailyInterestAttribute() : float
+    {
+        return data_get((object)$this->options, 'quote_asset_daily_interest', 0.0015);
     }
 
     public function user()

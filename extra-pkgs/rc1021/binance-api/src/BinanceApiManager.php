@@ -2,7 +2,6 @@
 
 namespace BinanceApi;
 
-use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\SideType;
 use BinanceApi\Enums\OrderStatusType;
@@ -59,12 +58,12 @@ class BinanceApiManager
     /**
      * 合約賬戶: U本位合约出場
      *
-     * @param $symbol ENUM
+     * @param $symbol_key string
      * @param $quantity DECIMAL 下單數量
      * @return array containing the response
      * @throws \Exception
      */
-    public function doFeaturesExit(SymbolType $symbol, DirectType $direct)
+    public function doFeaturesExit(string $symbol_key, DirectType $direct)
     {
         $result = [
             'error' => null,
@@ -72,7 +71,6 @@ class BinanceApiManager
         ];
 
         try {
-            $symbol_key = $symbol->key;
             try {
                 // 撤销全部订单 (TRADE)
                 // 因為合約撤消全訂單會出現 Exception with message 'signedRequest error: {"code": 200,"msg": "The operation of cancel all open order is done."}'
@@ -108,7 +106,7 @@ class BinanceApiManager
     /**
      * 合約賬戶: U本位合约進場
      *
-     * @param $symbol ENUM
+     * @param $symbol_key string
      * @param $direct ENUM 執行方向
      * @param $leverage int 槓桿倍數
      * @param $price int 限價單價格
@@ -120,7 +118,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doFeaturesEntry(SymbolType $symbol, DirectType $direct, $leverage, $price, $quantity, $time_in_force, $stop_price, $sell_price, $stop_time_in_force)
+    public function doFeaturesEntry(string $symbol_key, DirectType $direct, $leverage, $price, $quantity, $time_in_force, $stop_price, $sell_price, $stop_time_in_force)
     {
         // 記錄做單方向
         $this->direct = $direct;
@@ -132,7 +130,7 @@ class BinanceApiManager
 
         try {
             // 先設定倍數
-            $this->api->futuresLeverage($symbol->key, $leverage);
+            $this->api->futuresLeverage($symbol_key, $leverage);
 
             // 下單進場
             $side = SideType::fromValue(SideType::BUY);
@@ -142,7 +140,7 @@ class BinanceApiManager
             $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
             $working = WorkingType::fromValue(WorkingType::MARK_PRICE);
             $force = TimeInForce::fromValue(TimeInForce::GTC);
-            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, $this->floor_dec($quantity, 5), $this->floor_dec($price, 2), null, null, null, null, null, $force->key, null, null, $resp->key);
+            $order = $this->api->futuresOrder($symbol_key, $side->key, $type->key, null, null, $this->floor_dec($quantity, 5), $this->floor_dec($price, 2), null, null, null, null, null, $force->key, null, null, $resp->key);
             $order_id = data_get($order, 'orderId', false);
             if(!$order_id)
                 throw new Exception('No OrderID');
@@ -150,7 +148,7 @@ class BinanceApiManager
             $i = 1;
             do {
                 sleep(1);
-                $order = $this->api->futuresGetOrder($symbol->key, $order_id);
+                $order = $this->api->futuresGetOrder($symbol_key, $order_id);
                 if(OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED))
                     break;
             } while(++$i <= 10);
@@ -171,7 +169,7 @@ class BinanceApiManager
             if($direct->is(DirectType::SHORT))
                 $side = SideType::fromValue(SideType::BUY);
             $type = OrderType::fromValue(OrderType::STOP_MARKET);
-            $order = $this->api->futuresOrder($symbol->key, $side->key, $type->key, null, null, null, null, null, $stop_price, null, null, null, $force->key, null, null, $resp->key);
+            $order = $this->api->futuresOrder($symbol_key, $side->key, $type->key, null, null, null, null, null, $stop_price, null, null, null, $force->key, null, null, $resp->key);
         }
         catch(Exception $e)
         {
@@ -250,12 +248,12 @@ class BinanceApiManager
     /**
      * BTC/USDT 槓桿逐倉市價賣出(自动还款交易订单)
      *
-     * @param $symbol ENUM
+     * @param $symbol_key string 交易對
      * @param $quantity DECIMAL 下單數量
      * @return array containing the response
      * @throws \Exception
      */
-    public function doMarginExit(SymbolType $symbol, DirectType $direct)
+    public function doMarginExit(string $symbol_key, DirectType $direct)
     {
         $result = [
             'error' => null,
@@ -263,7 +261,6 @@ class BinanceApiManager
         ];
 
         try {
-            $symbol_key = $symbol->key;
             // 取得所有掛單
             $open_orders = collect($this->api->marginIsolatedOpenOrders($symbol_key));
             // 取得止損單
@@ -340,7 +337,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doMarginEntryButSell(SymbolType $symbol, float $sell_quantity)
+    public function doMarginEntryButSell(string $symbol_key, float $sell_quantity)
     {
         $result = [
             'error' => null,
@@ -348,7 +345,6 @@ class BinanceApiManager
         ];
 
         try {
-            $symbol_key = $symbol->key;
             // 市價賣出
             $side = SideType::fromValue(SideType::SELL);
             $type = OrderType::fromValue(OrderType::MARKET);
@@ -369,7 +365,7 @@ class BinanceApiManager
     /**
      * BTC/USDT 槓桿逐倉下單(自動借貸) + 市價止損單
      *
-     * @param $symbol ENUM
+     * @param $symbol string
      * @param $direct ENUM 做單方向
      * @param $quantity DECIMAL 下單數量
      * @param $price DECIMAL 限價
@@ -378,7 +374,7 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    public function doMarginEntry(SymbolType $symbol, DirectType $direct, $quantity, $price, $stop_price, $sell_price) : array
+    public function doMarginEntry(string $symbol, DirectType $direct, $quantity, $price, $stop_price, $sell_price) : array
     {
         // 記錄做單方向
         $this->direct = $direct;
@@ -444,71 +440,71 @@ class BinanceApiManager
     /**
      * 槓桿逐倉下單(自動借貸) 做多
      *
-     * @param $symbol ENUM
+     * @param $symbol string
      * @param $quantity DECIMAL 下單數量
      * @param $price DECIMAL 限價
      * @return array containing the response
      * @throws \Exception
      */
-    private function doMarginLongEntry(SymbolType $symbol, $quantity, $price)
+    private function doMarginLongEntry(string $symbol, $quantity, $price)
     {
         $type = OrderType::fromValue(OrderType::LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
+        return $this->api->marginIsolatedOrder($symbol, SideType::fromValue(SideType::BUY)->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
      * 槓桿逐倉下單(自動借貸) 做空
      *
-     * @param $symbol ENUM
+     * @param $symbol string
      * @param $quantity DECIMAL 下單數量
      * @param $price DECIMAL 限價
      * @return array containing the response
      * @throws \Exception
      */
-    private function doMarginShortEntry(SymbolType $symbol, $quantity, $price)
+    private function doMarginShortEntry(string $symbol, $quantity, $price)
     {
         $side = SideType::fromValue(SideType::SELL);
         $type = OrderType::fromValue(OrderType::LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::MARGIN_BUY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
-        return $this->api->marginIsolatedOrder($symbol->key, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
+        return $this->api->marginIsolatedOrder($symbol, $side->key, $type->key, $this->floor_dec($quantity, 5), null, $this->floor_dec($price, 2), null, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
      * 止損單 做多
      *
-     * @param $symbol ENUM
+     * @param $symbol string
      * @param $quantity DECIMAL 下單數量
      * @param $stop_price DECIMAL 止盈止損單-觸發價
      * @param $sell_price DECIMAL 止盈止損單-限價
      * @return array containing the response
      * @throws \Exception
      */
-    private function doMarginLongEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
+    private function doMarginLongEntryStop(string $symbol, $quantity, $stop_price, $sell_price)
     {
         $type = OrderType::fromValue(OrderType::STOP_LOSS_LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
         $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
         $force = TimeInForce::fromValue(TimeInForce::GTC);
 
-        return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::SELL)->key, $type->key, $quantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
+        return $this->api->marginIsolatedOrder($symbol, SideType::fromValue(SideType::SELL)->key, $type->key, $quantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
      * 止損單 做空
      *
-     * @param $symbol ENUM
+     * @param $symbol string
      * @param $quantity DECIMAL 下單數量
      * @param $stop_price DECIMAL 止盈止損單-觸發價
      * @param $sell_price DECIMAL 止盈止損單-限價
      * @return array containing the response
      * @throws \Exception
      */
-    private function doMarginShortEntryStop(SymbolType $symbol, $quantity, $stop_price, $sell_price)
+    private function doMarginShortEntryStop(string $symbol, $quantity, $stop_price, $sell_price)
     {
         $type = OrderType::fromValue(OrderType::STOP_LOSS_LIMIT);
         $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
@@ -516,7 +512,7 @@ class BinanceApiManager
         $force = TimeInForce::fromValue(TimeInForce::GTC);
 
         // 取得目前帳戶 $symbol 數量
-        return $this->api->marginIsolatedOrder($symbol->key, SideType::fromValue(SideType::BUY)->key, $type->key, $quantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
+        return $this->api->marginIsolatedOrder($symbol, SideType::fromValue(SideType::BUY)->key, $type->key, $quantity, null, $sell_price, $stop_price, null, null, $resp->key, $effect->key, $force->key);
     }
 
     /**
@@ -526,10 +522,10 @@ class BinanceApiManager
      * @return array containing the response
      * @throws \Exception
      */
-    private function getFreeQuantity(SymbolType $symbol) : float
+    private function getFreeQuantity(string $symbol) : float
     {
         $account = $this->api->marginIsolatedAccount();
         $assets = collect(data_get($account, 'assets', []))->keyBy('symbol')->toArray();
-        return $this->floor_dec(floatval(data_get($assets, "$symbol->key.baseAsset.free", 0)), 5);
+        return $this->floor_dec(floatval(data_get($assets, "$symbol.baseAsset.free", 0)), 5);
     }
 }

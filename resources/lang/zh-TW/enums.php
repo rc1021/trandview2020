@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\TradingPlatformType;
-use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\SideType;
@@ -29,10 +28,6 @@ return [
     SideType::class => [
         SideType::BUY => '買入',
         SideType::SELL => '賣出',
-    ],
-
-    SymbolType::class => [
-        SymbolType::BTCUSDT => 'BTCUSDT',
     ],
 
     OrderType::class => [

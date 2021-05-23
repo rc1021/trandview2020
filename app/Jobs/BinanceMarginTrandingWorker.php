@@ -14,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use BinanceApi\Enums\SymbolType;
 use BinanceApi\Enums\DirectType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\SideType;
@@ -86,8 +85,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
             if($this->signal->txn_direct_type->is(DirectType::FORCE))
             {
-                $symbol_key = $this->signal->symbolType->key;
-                $index = $this->api->marginPriceIndex($symbol_key);
+                $index = $this->api->marginPriceIndex($this->signal->symbol_type);
                 $this->signal->current_price = $this->api->floor_dec(data_get($index, 'price', 0), 2);
                 $this->signal->save();
                 // 強制出場
@@ -151,12 +149,12 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     public function forceLiquidation()
     {
         try {
-            $symbol_key = $this->signal->symbolType->key;
+            $symbol_key = $this->signal->symbol_type;
             // 做多進場狀態, 所以做多出場
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $quote_asset_borrowed = data_get($account, "assets.$symbol_key.quoteAsset.borrowed", 0);
             if($quote_asset_borrowed > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_quoteAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -176,7 +174,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_borrowed = data_get($account, "assets.$symbol_key.baseAsset.borrowed", 0);
             if($base_asset_borrowed > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::SHORT));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::SHORT));
                 $this->timer['force_liquidation_baseAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -196,7 +194,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $base_asset_free = data_get($account, "assets.$symbol_key.baseAsset.free", 0);
             if($base_asset_free > 0) {
-                $result = $this->api->doMarginExit($this->signal->symbolType, DirectType::fromValue(DirectType::LONG));
+                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_baseAsset_free'] = self::DuringTimer(function () use (&$result)
                 {
                     if(array_key_exists('orders', $result) and $result['orders']) {
@@ -231,14 +229,13 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
     private function initWorksheet()
     {
-        $formulaTable = $this->formulaTable = FormulaTable::version()->first();
+        $symbol_key = $this->signal->symbol_type;
+        $formulaTable = $this->formulaTable = FormulaTable::pair($symbol_key)->version()->first();
         if(is_null($formulaTable))
-            throw new Exception('未上傳公式表');
+            throw new Exception(sprintf('未上傳%s公式表', $symbol_key));
         $this->spreadsheet = $formulaTable->spreadsheet;
         if(is_null($this->spreadsheet))
-            throw new Exception(sprintf('公式表載入錯誤, 版本號: %d', $formulaTable->id));
-
-        $symbol_key = $this->signal->symbolType->key;
+            throw new Exception(sprintf('%s公式表載入錯誤, 版本號: %d', $symbol_key, $formulaTable->id));
 
         // 當前表試算表
         $sheet = $this->sheet = $this->spreadsheet->getActiveSheet();
@@ -251,9 +248,9 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         // 當前總資金(標的幣)
         $sheet->setCellValue($formulaTable->setcol2, data_get($account, "assets.$symbol_key.baseAsset.free"));
         // 標的幣借款利息(24h)
-        $sheet->setCellValue($formulaTable->setcol5, $this->user->txnSetting->btc_daily_interest);
+        $sheet->setCellValue($formulaTable->setcol5, $this->user->txnSetting->base_asset_daily_interest);
         // 計價幣借款利息(24h)
-        $sheet->setCellValue($formulaTable->setcol6, $this->user->txnSetting->usdt_daily_interest);
+        $sheet->setCellValue($formulaTable->setcol6, $this->user->txnSetting->quote_asset_daily_interest);
         // 交易配對
         $sheet->setCellValue($formulaTable->setcol7, $symbol_key);
         // 每次初始可交易總資金(%)
@@ -316,7 +313,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                     $this->formulaTable->setcol23,
                     $this->formulaTable->setcol30,
                 ]);
-                $symbol = SymbolType::fromKey($symbol);
                 if($sell_quantity != '-') {
                     $result = $this->api->doMarginEntryButSell($symbol, floatval($sell_quantity));
                 }
@@ -339,7 +335,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                     $this->formulaTable->setcol30,
                 ]);
 
-                $symbol = SymbolType::fromKey($symbol);
                 $result = $this->api->doMarginEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
             }
             // 設定自動賣出時間
@@ -396,7 +391,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $result = [];
 
         $this->timer['isolate_exit'] = self::DuringTimer(function () use (&$result) {
-            $result = $this->api->doMarginExit($this->signal->symbolType, $this->signal->txnDirectType);
+            $result = $this->api->doMarginExit($this->signal->symbol_type, $this->signal->txnDirectType);
         });
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)

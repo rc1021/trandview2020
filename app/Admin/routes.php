@@ -21,7 +21,6 @@ Route::group([
     ], function (Router $router) {
         $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret');
         $router->put('key-secrets', AuthController::class.'@putKeySecret')->name('keysecret');
-        $router->get('setting', TransactionController::class.'@setting')->name('setting');
         $router->post('force-liquidation', HomeController::class.'@forceLiquidation')->name('forceLiquidation');
     });
 
@@ -34,16 +33,17 @@ Route::group([
         $router->resource('logs', MarginLogController::class);
         $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
         $router->resource('formula', MarginFormulaController::class);
+        $router->resource('setting', MarginSettingController::class);
     });
 
-    Route::group([
-        'prefix'        => 'txn/features',
-        'namespace'     => 'Transaction',
-        'as'            => 'txn.features.',
-    ], function (Router $router) {
-        $router->get('logs/calc/{signal_history}', FeaturesLogController::class.'@calc')->name('logs.calc');
-        $router->resource('logs', FeaturesLogController::class);
-        $router->get('formula/{key}/preview', FeaturesFormulaController::class.'@preview')->name('formula.preview');
-        $router->resource('formula', FeaturesFormulaController::class);
-    });
+    // Route::group([
+    //     'prefix'        => 'txn/features',
+    //     'namespace'     => 'Transaction',
+    //     'as'            => 'txn.features.',
+    // ], function (Router $router) {
+    //     $router->get('logs/calc/{signal_history}', FeaturesLogController::class.'@calc')->name('logs.calc');
+    //     $router->resource('logs', FeaturesLogController::class);
+    //     $router->get('formula/{key}/preview', FeaturesFormulaController::class.'@preview')->name('formula.preview');
+    //     $router->resource('formula', FeaturesFormulaController::class);
+    // });
 });

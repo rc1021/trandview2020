@@ -32,7 +32,7 @@ class SignalHistory extends Model
             $this->is_valid = ($count == 10 && count($arr) == 3);
             if($this->is_valid) {
                 $this->_signal = array_combine($arr[1], $arr[2]);
-                $this->is_valid = !is_null($this->symbol_type);
+                $this->is_valid = !empty($this->symbol_type);
             }
         }
         if(!is_null($key))
@@ -48,7 +48,7 @@ class SignalHistory extends Model
             $this->is_valid = ($count == 10 && count($arr) == 3);
             if($this->is_valid) {
                 $this->_signal = array_combine($arr[1], $arr[2]);
-                $this->is_valid = !is_null($this->symbol_type);
+                $this->is_valid = !empty($this->symbol_type);
             }
         }
         $this->_signal[$key] = $val;

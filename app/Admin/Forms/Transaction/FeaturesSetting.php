@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use App\Http\Repositories\Admin\AuthKeySecretRepository;
 use App\Models\AdminUser;
 use App\Models\AdminTxnSetting;
-use BinanceApi\Enums\SymbolType;
 use Illuminate\Support\Arr;
 
 class FeaturesSetting extends Form

@@ -4,12 +4,11 @@ namespace App\Models\Traits;
 
 use Illuminate\Support\Arr;
 use App\Enums\TradingPlatformType;
-use BinanceApi\Enums\SymbolType;
+use App\Enums\TxnSettingType;
 use BinanceApi\Enums\DirectType;
 use App\Enums\TxnExchangeType;
 use App\Jobs\ProcessSignal;
 use App\Models\AdminUser;
-use Illuminate\Database\Eloquent\Builder;
 use Exception;
 
 trait SignalHistoryTrait
@@ -22,23 +21,20 @@ trait SignalHistoryTrait
      * @return array containing the response
      * @throws \Exception
      */
-    public static function parseAndPlay($message, $type)
+    public static function parseAndPlay($message, TxnSettingType $type)
     {
         // 記錄訊息
         $rec = new \App\Models\SignalHistory;
         $rec->clock = '1';
-        $rec->type = $type;
+        $rec->type = $type->key;
         $rec->message = $message;
         $rec->save();
 
         try {
-            $trading_platform_type = $rec->trading_platform_type;
-            AdminUser::whereHas('keysecrets', function (Builder $query) use ($trading_platform_type) {
-                $query->where('type', $trading_platform_type);
-            })->chunk(200, function ($users) use ($message, $type) {
+            AdminUser::matchTypePair($rec->trading_platform_type, $rec->symbol_type)->chunk(200, function ($users) use ($message, $type) {
                 foreach ($users as $user)
                 {
-                    $user->notify(sprintf("%s訊號\n%s", ucwords($type), str_replace('=', ': ', str_replace(',', "\n", $message))));
+                    $user->notify(sprintf("%s訊號\n%s", $type->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
                 }
             });
         }
@@ -92,8 +88,7 @@ trait SignalHistoryTrait
     // 2	=>	交易配對
     public function getSymbolTypeAttribute()
     {
-        $val = $this->getSignal('交易配對');
-        return SymbolType::coerce(str_replace('BTCUSDTPERP', '', $val));
+        return $this->getSignal('交易配對');
     }
 
     // 3	=>	執行日期時間

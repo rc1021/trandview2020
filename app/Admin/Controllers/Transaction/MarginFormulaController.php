@@ -13,6 +13,7 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Show;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
+use \DB;
 
 class MarginFormulaController extends AdminController implements Renderable
 {
@@ -21,7 +22,7 @@ class MarginFormulaController extends AdminController implements Renderable
      *
      * @var string
      */
-    protected $title = '槓桿公式表更新紀錄';
+    protected $title = '槓桿公式表';
 
     /**
      * Make a grid builder.
@@ -33,26 +34,27 @@ class MarginFormulaController extends AdminController implements Renderable
         \Encore\Admin\Admin::style('td[class^=column] { min-width: 125px; }');
         $grid = new Grid(new FormulaTable);
 
-        $grid->column('id', __('admin.txn.margin.formula.id'))->sortable();
-        // $grid->column('file_path', __('admin.txn.margin.formula.file_path'))->sortable()
-        //      ->display(function ($file_path) {
-        //         return substr($file_path, strrpos($file_path, '/') + 1);
-        //      })
-        //      ->modal(__('admin.txn.margin.formula.file_preview'), MarginFormulaController::class);
-        $grid->column('commit', __('admin.txn.margin.formula.commit'))->sortable()
+        $grid->column('pair', __('admin.txn.margin.formula.pair'));
+        // $grid->column('id', __('admin.txn.margin.formula.id'))->sortable();
+        $grid->column('file_path', __('admin.txn.margin.formula.file_path'))->sortable()
+             ->display(function ($file_path) {
+                return substr($file_path, strrpos($file_path, '/') + 1);
+             })
+             ->modal(__('admin.txn.margin.formula.file_preview'), MarginFormulaController::class);
+        $grid->column('commit', __('admin.txn.margin.formula.commit'))
                 ->display(function ($commit) {
                     return nl2br($commit);
                 });
         $grid->column('user_id', __('admin.txn.margin.formula.user_id'))->display(function($userId) {
             return AdminUser::find($userId)->name;
-        })->sortable();
-        $grid->column('updated_at', __('admin.txn.margin.formula.updated_at'))->date('Y-m-d H:i:s')->sortable();
+        });
+        $grid->column('updated_at', __('admin.txn.margin.formula.updated_at'));
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
             $filter->equal('column', __('admin.txn.margin.formula.id'));
             $filter->between('updated_at', __('admin.txn.margin.formula.updated_at'))->datetime();
         });
-        $grid->model()->orderBy('id', 'desc');
+        $grid->model()->lastPair();
         $grid->disableExport();
         $grid->disableRowSelector();
         $grid->actions(function ($actions) {
@@ -79,6 +81,7 @@ class MarginFormulaController extends AdminController implements Renderable
             return AdminUser::find($userId)->name;
         });
 
+        $show->field('pair', __('admin.txn.margin.formula.pair'));
         $show->field('file_path', __('admin.txn.margin.formula.file_path'))->file()->as(function ($render) {
             $preview = __('admin.txn.margin.formula.file_preview');
             $link = route('admin.txn.margin.formula.preview', $this);
@@ -151,6 +154,7 @@ class MarginFormulaController extends AdminController implements Renderable
 
         $form->hidden('user_id', __('admin.txn.margin.formula.user_id'))->value(Admin::user()->id);
         $form->column(1/2, function ($form) {
+            $form->text('pair', __('admin.txn.margin.formula.pair'));
             $form->file('file_path', __('admin.txn.margin.formula.file_path'))
                 ->retainable()
                 ->rules('mimes:xlsx')

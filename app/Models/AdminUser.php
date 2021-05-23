@@ -9,6 +9,8 @@ use Encore\Admin\Auth\Database\Administrator;
 use App\Models\SignalHistory;
 use App\Models\TxnMarginOrder;
 use App\Jobs\LineNotify;
+use App\Enums\TradingPlatformType;
+use Illuminate\Database\Eloquent\Builder;
 
 class AdminUser extends Administrator
 {
@@ -17,6 +19,24 @@ class AdminUser extends Administrator
         if(!empty($this->line_notify_token)) {
             LineNotify::dispatch($this->line_notify_token, $message);
         }
+    }
+
+    /**
+     * 取得有設定指定交易設置的用戶
+     *
+     * @param $query Builder content
+     * @param $type TradingPlatformType 訊號型別：feature(合約)、margin(槓桿)
+     * @param $pair string 交易對
+     * @return Builder containing the response
+     * @throws \Exception
+     */
+    public function scopeMatchTypePair($query, TradingPlatformType $type, $pair)
+    {
+        return $query->whereHas('keysecrets', function (Builder $query) use ($type) {
+            $query->where('type', $type);
+        })->whereHas('txnSetting', function (Builder $query) use ($pair) {
+            $query->where('pair', $pair);
+        });
     }
 
     public function signals()
