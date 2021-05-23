@@ -77,8 +77,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         try {
             $this->user->load('txnFeatSetting')->refresh();
 
-            $this->user->txnStatus->trading_program_status = 1;
-            $this->user->txnStatus->save();
             $exchange = $this->signal->txn_exchange_type;
             $this->initBinanceApi();
 
@@ -95,10 +93,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
                 // 買入
                 if($exchange->is(TxnExchangeType::Entry))
                 {
-                    // 如果狀態已經是進場就略過此次訊號並發佈訊息
-                    if($this->user->txnStatus->current_feat_state)
-                        throw new Exception('持倉中收到進場訊號(略過本次訊息)');
-
                     $this->initWorksheet();
 
                     for($i = 2.0; $i >= 0.0; $i = $i - 0.1) {
@@ -138,9 +132,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
 
         $this->user->signals()->attach($this->signal, !is_null($error) ? compact('error') : []);
         $this->user->save();
-
-        $this->user->txnStatus->trading_program_status = 0;
-        $this->user->txnStatus->save();
     }
 
     // 強制平倉
@@ -212,11 +203,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         catch(Exception $e) {
             // 平倉失敗記錄起來
         }
-
-        // 變更用戶狀態
-        $this->user->txnStatus->current_feat_state = 0;
-        $this->user->txnStatus->total_transaction_times++;
-        $this->user->txnStatus->save();
     }
 
     private function initBinanceApi()
@@ -327,15 +313,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         $html = new Html($this->spreadsheet);
         Storage::disk('local')->put("excel-logs/{$this->user->id}/{$this->signal->id}/index.html", $html->generateSheetData());
 
-        // 變更用戶狀態
-        $this->user->txnStatus->current_feat_state = 1;
-        $this->user->txnStatus->total_transaction_times++;
-        if($this->signal->txn_direct_type->is(DirectType::LONG))
-            $this->user->txnStatus->total_number_of_long_times++;
-        else
-            $this->user->txnStatus->total_number_of_short_times++;
-        $this->user->txnStatus->save();
-
         if(array_key_exists('error', $result) and $result['error'])
             throw new Exception($result['error']);
     }
@@ -369,15 +346,6 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
                 }
             }
         });
-
-        // 變更用戶狀態
-        $this->user->txnStatus->current_feat_state = 0;
-        $this->user->txnStatus->total_transaction_times++;
-        if($this->signal->txn_direct_type->is(DirectType::LONG))
-            $this->user->txnStatus->total_number_of_long_times++;
-        else
-            $this->user->txnStatus->total_number_of_short_times++;
-        $this->user->txnStatus->save();
 
         if(array_key_exists('error', $result) and $result['error'])
             throw new Exception($result['error']);
