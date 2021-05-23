@@ -22,6 +22,7 @@ use Encore\Admin\Widgets\Table;
 use App\Admin\Models\TransactionLog\ShowTxnOrder;
 use App\Admin\Models\TransactionLog\ShowCalcLog;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
+use App\Enums\TxnSettingType;
 use App\Models\TxnMarginOrder;
 
 class MarginLogController extends AdminController
@@ -250,7 +251,7 @@ class MarginLogController extends AdminController
             $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
-        $grid->model()->where('type', 'margin')->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
+        $grid->model()->where('type', TxnSettingType::Margin)->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
             $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
                 ->where('admin_user_id', Admin::user()->id);
         });
