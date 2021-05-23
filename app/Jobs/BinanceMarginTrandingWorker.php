@@ -36,7 +36,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $signal, $user, $spreadsheet, $sheet, $api, $formulaTable, $notifyMessage, $timer = [];
+    protected $signal, $user, $txn_setting, $spreadsheet, $sheet, $api, $formulaTable, $notifyMessage, $timer = [];
 
     /**
      * Create a new job instance.
@@ -75,7 +75,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     {
         $error = null;
         try {
-            $this->user->load('txnSetting')->refresh();
+            $this->txn_setting = $this->user->txnSettings()->where('pair', $this->signal->symbol_type)->first();
             $this->user->signals()->attach($this->signal);
 
             $this->user->txnStatus->trading_program_status = 1;
@@ -248,17 +248,17 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         // 當前總資金(標的幣)
         $sheet->setCellValue($formulaTable->setcol2, data_get($account, "assets.$symbol_key.baseAsset.free"));
         // 標的幣借款利息(24h)
-        $sheet->setCellValue($formulaTable->setcol5, $this->user->txnSetting->base_asset_daily_interest);
+        $sheet->setCellValue($formulaTable->setcol5, $this->txn_setting->base_asset_daily_interest);
         // 計價幣借款利息(24h)
-        $sheet->setCellValue($formulaTable->setcol6, $this->user->txnSetting->quote_asset_daily_interest);
+        $sheet->setCellValue($formulaTable->setcol6, $this->txn_setting->quote_asset_daily_interest);
         // 交易配對
         $sheet->setCellValue($formulaTable->setcol7, $symbol_key);
         // 每次初始可交易總資金(%)
-        $sheet->setCellValue($formulaTable->setcol8, $this->user->txnSetting->initial_tradable_total_funds);
+        $sheet->setCellValue($formulaTable->setcol8, $this->txn_setting->initial_tradable_total_funds);
         // 每次交易資金風險(%)
-        $sheet->setCellValue($formulaTable->setcol9, $this->user->txnSetting->initial_capital_risk);
+        $sheet->setCellValue($formulaTable->setcol9, $this->txn_setting->initial_capital_risk);
         // 槓桿使用
-        $sheet->setCellValue($formulaTable->setcol10, ($this->user->txnSetting->lever_switch) ? "Yes" : "No");
+        $sheet->setCellValue($formulaTable->setcol10, ($this->txn_setting->lever_switch) ? "Yes" : "No");
         // 應開倉日期時間
         $sheet->setCellValue($formulaTable->setcol11, date('Y-m-d H:i:s', $this->signal->positionAt));
         // 交易方向(多/空)

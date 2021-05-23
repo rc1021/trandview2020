@@ -10,7 +10,7 @@ class SignalRepository
 
     public function doFire($request)
     {
-        SignalHistory::parseAndPlay($request->getContent(), TxnSettingType::fromValue(TxnSettingType::Margin));
+        SignalHistory::parseAndPlay($request->getContent(), TxnSettingType::Margin);
     }
 
     public function getHistoryModel($request)

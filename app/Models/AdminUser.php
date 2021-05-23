@@ -34,7 +34,7 @@ class AdminUser extends Administrator
     {
         return $query->whereHas('keysecrets', function (Builder $query) use ($type) {
             $query->where('type', $type);
-        })->whereHas('txnSetting', function (Builder $query) use ($pair) {
+        })->whereHas('txnSettings', function (Builder $query) use ($pair) {
             $query->where('pair', $pair);
         });
     }
@@ -49,14 +49,14 @@ class AdminUser extends Administrator
         return $this->hasOne(TxnMarginOrder::class, 'user_id');
     }
 
-    public function txnSetting()
+    public function txnSettings()
     {
-        return $this->hasOne(AdminTxnSetting::class, 'user_id');
+        return $this->hasMany(AdminTxnSetting::class, 'user_id');
     }
 
-    public function txnFeatSetting()
+    public function txnFeatSettings()
     {
-        return $this->hasOne(AdminTxnFeatSetting::class, 'user_id');
+        return $this->hasMany(AdminTxnFeatSetting::class, 'user_id');
     }
 
     public function txnStatus()

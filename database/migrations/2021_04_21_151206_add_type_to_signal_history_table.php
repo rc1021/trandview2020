@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\TxnSettingType;
 
 class AddTypeToSignalHistoryTable extends Migration
 {
@@ -14,7 +15,7 @@ class AddTypeToSignalHistoryTable extends Migration
     public function up()
     {
         Schema::table('signal_histories', function (Blueprint $table) {
-            $table->string("type");
+            $table->integer('type')->default(TxnSettingType::Margin);
         });
     }
 

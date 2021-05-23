@@ -21,12 +21,12 @@ trait SignalHistoryTrait
      * @return array containing the response
      * @throws \Exception
      */
-    public static function parseAndPlay($message, TxnSettingType $type)
+    public static function parseAndPlay($message, $type)
     {
         // 記錄訊息
         $rec = new \App\Models\SignalHistory;
         $rec->clock = '1';
-        $rec->type = $type->key;
+        $rec->type = $type;
         $rec->message = $message;
         $rec->save();
 
@@ -34,7 +34,7 @@ trait SignalHistoryTrait
             AdminUser::matchTypePair($rec->trading_platform_type, $rec->symbol_type)->chunk(200, function ($users) use ($message, $type) {
                 foreach ($users as $user)
                 {
-                    $user->notify(sprintf("%s訊號\n%s", $type->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
+                    $user->notify(sprintf("%s訊號\n%s", TxnSettingType::fromValue($type)->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
                 }
             });
         }
