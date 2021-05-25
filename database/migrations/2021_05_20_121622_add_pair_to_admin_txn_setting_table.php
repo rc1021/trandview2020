@@ -19,7 +19,7 @@ class AddPairToAdminTxnSettingTable extends Migration
             $table->integer('type')->default(TxnSettingType::Margin);
             $table->string('pair');
             $table->json('options')->default(new Expression('(JSON_ARRAY())'));
-            $table->unique('user_id', 'pair');
+            $table->unique(['user_id', 'pair'], 'pair');
 
             $table->dropColumn([
                 'initial_tradable_total_funds',
@@ -45,6 +45,7 @@ class AddPairToAdminTxnSettingTable extends Migration
             $table->tinyInteger('lever_switch')->default(1);
             $table->float('btc_daily_interest', 24, 8)->default(0.0003);
             $table->float('usdt_daily_interest', 24, 8)->default(0.0015);
+            $table->dropUnique('pair');
 
             $table->dropColumn([
                 'type',
