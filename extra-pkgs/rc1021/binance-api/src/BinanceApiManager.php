@@ -296,13 +296,10 @@ class BinanceApiManager
                 }
             }
             else {
-                $borrowed = floatval(data_get($account, "assets.$symbol_key.baseAsset.borrowed"));
-                $interest = floatval(data_get($account, "assets.$symbol_key.baseAsset.interest"));
-                $repay = $borrowed + $interest;
-                // 計算數量 + 手續費
                 $trade_fee = $this->api->tradeFee($symbol_key);
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
-                $quantity = $this->ceil_dec($repay * (1 + $taker), 5);
+                $netAsset = floatval(data_get($account, "assets.$symbol_key.baseAsset.netAsset"));
+                $quantity = $this->ceil_dec(abs($netAsset) / (1 - $taker), 5);
                 if($quantity > 0) {
                     // 市價賣出，但不自動還款
                     $side = SideType::fromValue(SideType::BUY);
@@ -314,6 +311,9 @@ class BinanceApiManager
                     array_push($result['orders'], $order);
                     // 執行還款
                     $asset = data_get($account, "assets.$symbol_key.baseAsset.asset");
+                    $borrowed = floatval(data_get($account, "assets.$symbol_key.baseAsset.borrowed"));
+                    $interest = floatval(data_get($account, "assets.$symbol_key.baseAsset.interest"));
+                    $repay = $borrowed + $interest;
                     $this->api->marginIsolatedRepay($asset, $repay, $symbol_key);
                 }
                 else {
