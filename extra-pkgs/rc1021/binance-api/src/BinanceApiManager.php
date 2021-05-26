@@ -277,11 +277,10 @@ class BinanceApiManager
 
             // 市價出場成交單
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-            $borrowed = floatval(data_get($account, "assets.$symbol_key.baseAsset.borrowed"));
-            $free = floatval(data_get($account, "assets.$symbol_key.baseAsset.free"));
             if($direct->is(DirectType::LONG))
             {
-                $quantity = $this->floor_dec($borrowed + $free, 5);
+                $free = floatval(data_get($account, "assets.$symbol_key.baseAsset.free"));
+                $quantity = $this->floor_dec($free, 5);
                 if($quantity > 0) {
                     // 市價賣出
                     $side = SideType::fromValue(SideType::SELL);
@@ -297,20 +296,25 @@ class BinanceApiManager
                 }
             }
             else {
+                $borrowed = floatval(data_get($account, "assets.$symbol_key.baseAsset.borrowed"));
+                $interest = floatval(data_get($account, "assets.$symbol_key.baseAsset.interest"));
+                $repay = $borrowed + $interest;
                 // 計算數量 + 手續費
                 $trade_fee = $this->api->tradeFee($symbol_key);
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
-                // 先$borrowed + $free進位一次，再加手續費進位一次
-                $quantity = $this->ceil_dec(($borrowed + $free) / (1 - $taker), 5);
+                $quantity = $this->ceil_dec($repay * (1 + $taker), 5);
                 if($quantity > 0) {
-                    // 市價賣出
+                    // 市價賣出，但不自動還款
                     $side = SideType::fromValue(SideType::BUY);
                     $type = OrderType::fromValue(OrderType::MARKET);
                     $resp = OrderTypeRespType::fromValue(OrderTypeRespType::FULL);
-                    $effect = SideEffectType::fromValue(SideEffectType::AUTO_REPAY);
+                    $effect = SideEffectType::fromValue(SideEffectType::NO_SIDE_EFFECT);
                     $force = TimeInForce::fromValue(TimeInForce::GTC);
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
                     array_push($result['orders'], $order);
+                    // 執行還款
+                    $asset = data_get($account, "assets.$symbol_key.baseAsset.asset");
+                    $this->api->marginIsolatedRepay($asset, $repay, $symbol_key);
                 }
                 else {
                     throw new Exception("做空出場，但市價買入數量為0，以下為帳戶詳情：\n" . print_r($account, true) );

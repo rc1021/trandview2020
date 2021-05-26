@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/05/27</h2>
+        <ul>
+            <li>改良做空出場程序讓借款還得乾乾淨淨</li>
+        </ul>
         <h2>2021/05/23</h2>
         <ul>
             <li>新增多交易對設置</li>
