@@ -24,6 +24,16 @@ class SignalHistory extends Model
         $this->getSignal();
     }
 
+    public function scopeFilterSymbol($query, $symbol_key)
+    {
+        return $query->where('message', 'like', '%交易配對='.$symbol_key.'%');
+    }
+
+    public function scopeFilterEntry($query)
+    {
+        return $query->where('message', 'like', '%交易執行類別=%Entry,%');
+    }
+
     public function getSignal($key = null)
     {
         if(count($this->_signal) == 0) {

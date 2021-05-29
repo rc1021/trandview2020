@@ -209,8 +209,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
     private function initBinanceApi()
     {
-        $ks = $this->user->keysecret()->toArray();
-        $this->api = new BinanceApiManager(data_get($ks, 'key', ''), data_get($ks, 'secret', ''));
+        $this->api = $this->user->binance_api;
     }
 
     private function initWorksheet()

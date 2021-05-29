@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\TxnMarginOrder;
+use App\Models\AdminUser;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use BinanceApi\Enums\OrderType;
@@ -29,21 +30,20 @@ class TxnMarginOrderObserver
             $data = sprintf('%s%s', DirectType::fromValue($txnMarginOrder->signal->txn_direct_type)->description, TxnExchangeType::fromValue($txnMarginOrder->signal->txn_exchange_type)->description) . $data;
             $txnMarginOrder->user->notify($data);
 
-            // 如果是市價單出場就結算這次的輸贏
+            // 如果是市價單出場就結算這次的盈虧
             if(OrderType::fromKey($txnMarginOrder->type)->is(OrderType::MARKET)) {
-                $limit = TxnMarginOrder::where('user_id', $txnMarginOrder->user_id)
-                ->where('type', OrderType::fromValue(OrderType::LIMIT)->key)
-                ->where('id', '<', $txnMarginOrder->id)
-                ->orderBy('id', 'desc')
-                ->first();
-
-                // 做空出場
-                if(SideType::fromKey($txnMarginOrder->side)->is(SideType::BUY)) {
-                    $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $limit->cummulativeQuoteQty - $txnMarginOrder->cummulativeQuoteQty));
-                }
-                else {
-                    $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $txnMarginOrder->cummulativeQuoteQty - $limit->cummulativeQuoteQty));
-                }
+                $symbol_key = $txnMarginOrder->symbol;
+                // 取得進場時原始資產
+                $lastSignal = $txnMarginOrder->user->latestTxnEntrySignal($symbol_key);
+                if(is_null($lastSignal))
+                    throw new Exception("No Latest EntrySignal: ". $symbol_key);
+                $originAsset = $lastSignal->pivot->asset;
+                $originQuoteAssetFree = data_get($originAsset, 'quoteAsset.free', 0);
+                // 取得帳戶現有資產
+                $currentAsset = $txnMarginOrder->user->binance_api->marginIsolatedAccountByKey($symbol_key);
+                $currentQuoteAssetFree = data_get($currentAsset, 'assets.'.$symbol_key.'.quoteAsset.free', 0);
+                // 通知盈虧
+                $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
             }
         }
         catch(Exception $e) {

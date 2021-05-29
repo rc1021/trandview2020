@@ -24,6 +24,9 @@ use App\Admin\Models\TransactionLog\ShowCalcLog;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 use App\Enums\TxnSettingType;
 use App\Models\TxnMarginOrder;
+use App\Models\AdminTxnSetting;
+use App\Models\AdminUser;
+use Exception;
 
 class MarginLogController extends AdminController
 {
@@ -39,120 +42,12 @@ class MarginLogController extends AdminController
      *
      * @return Grid
      */
-    // protected function grid()
-    // {
-    //     \Encore\Admin\Admin::style('.modal-dialog td[class^=column] { min-width: 132px; }');
-
-    //     $instance = new TxnMarginOrder();
-    //     $grid = new Grid($instance);
-
-    //     $grid->tools(function ($tools) {
-    //         $tools->append(new MarginForceLiquidationTool());
-    //     });
-
-    //     $grid->column('created_at', __('admin.txn.order.created_at'))->display(function($created_at) {
-    //         $html = <<<HTML
-    //             <i class="fa fa-fw fa-check text-success"></i>
-    //         HTML;
-    //         if(!empty($this->signal->error)) {
-    //             $html = <<<HTML
-    //                 <i class="fa fa-fw fa-exclamation-circle text-danger"></i>
-    //             HTML;
-    //         }
-    //         return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
-    //     });
-
-    //     // "orderId"
-    //     $dynamic_columns = ["symbol", "txn_type", "type", "side", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", 'loan_ratio'];
-    //     foreach ($dynamic_columns as $column) {
-    //         $grid->column($column, __('admin.txn.order.'.$column))->display(function($name, $column) {
-    //             $data = $this[$column->getName()];
-    //             switch($column->getName()) {
-    //                 case 'txn_type':
-    //                     return sprintf('%s%s'
-    //                             , DirectType::fromValue($this->signal->txn_direct_type)->description
-    //                             , TxnExchangeType::fromValue($this->signal->txn_exchange_type)->description);
-    //                 case 'side':
-    //                     $data = SideType::fromKey($data);
-    //                     break;
-    //                 case 'type':
-    //                     $data = OrderType::fromKey($data);
-    //                     break;
-    //                 case 'status':
-    //                     $data = OrderStatusType::fromKey($data);
-    //                     break;
-    //                 case 'loan_ratio':
-    //                     $data = ($data > 0) ? $data * 100 . '%' : '';
-    //                     break;
-    //                 case 'price':
-    //                 case 'cummulativeQuoteQty':
-    //                 case 'marginBuyBorrowAmount':
-    //                     $data = ceil_dec($data, 2);
-    //                     break;
-    //             }
-    //             if($data instanceof Enum)
-    //                 return $data->description;
-    //             return $data;
-    //         });
-    //     }
-
-    //     $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
-    //         if($this->signal->calc_log_path)
-    //             return __('admin.rec.signal.detail');
-    //         return 'No Data';
-    //     })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
-
-    //     $grid->column('error', __('admin.rec.signal.error'))->display(function($log) {
-    //         if($this->signal->error)
-    //             return __('admin.rec.signal.detail');
-    //         return 'No Data';
-    //     })->expand(function ($model) {
-    //         $title = __('admin.rec.signal.error');
-    //         return <<<HTML
-    //         <div class="box">
-    //             <div class="box-header">
-    //                 <i class="fa fa-warning text-red"></i> $title
-    //             </div>
-    //             <div class="box-body">
-    //                 <div style="white-space: pre-wrap;background: #333;color: #fff; padding: 10px;">$model->signal->error</div>
-    //             </div>
-    //         </div>
-    //         HTML;
-    //     });
-
-    //     $grid->disableActions();
-
-    //     $grid->filter(function($filter) {
-    //         $filter->disableIdFilter();
-    //         $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
-    //     });
-
-    //     $grid->model()->load(['signal'])->where('user_id', Admin::user()->id);
-    //     $grid->model()->orderBy('id', 'desc');
-    //     $grid->disableCreateButton();
-    //     $grid->disableRowSelector();
-    //     $grid->disableExport();
-    //     $grid->disableColumnSelector();
-    //     $grid->paginate(100);
-
-    //     return $grid;
-    // }
-
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid()
     {
         \Encore\Admin\Admin::style('.modal-dialog td[class^=column] { min-width: 125px; }');
 
         $instance = new SignalHistory();
         $grid = new Grid($instance);
-
-        $grid->tools(function ($tools) {
-            $tools->append(new MarginForceLiquidationTool());
-        });
 
         $grid->column('created_at', __('admin.rec.signal.created_at'))->display(function($created_at) {
             $html = <<<HTML
@@ -262,7 +157,63 @@ class MarginLogController extends AdminController
         $grid->disableColumnSelector();
         $grid->paginate(50);
 
-        return $grid;
+        return $this->txnEntryRows() . $grid->render();
+    }
+
+    private function txnEntryRows()
+    {
+        $user = AdminUser::find(Admin::user()->id);
+        $api = $user->binance_api;
+        $settings = $user->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($user, $api) {
+            $is_entry = $user->IsTxnEntryStatus($item->pair);
+            $icon = $is_entry ? '<i class="fa fa-check text-green"></i>' : '<i class="fa fa-close text-red"></i>';
+            if($is_entry) {
+                try {
+                    $signal = $user->latestTxnEntrySignal($item->pair);
+                    $free = data_get($signal, 'pivot.asset.quoteAsset.free', 0);
+                    $txn = $signal->txnMargOrders()
+                        ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
+                        ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
+                    $current_price = $api->floor_dec($api->price($item->pair), 2);
+                    $account = $api->marginIsolatedAccountByKey($item->pair);
+                    $quoteQty = $txn->executedQty * $current_price;
+                    $quoteInterest = data_get($account, 'assets.'.$item->pair.'.baseAsset.interest', 0) * $current_price; // 利息
+                    $gap = $quoteQty - $txn->cummulativeQuoteQty - $quoteInterest;
+                    if($signal->txn_direct_type->is(DirectType::SHORT))
+                        $gap = $txn->cummulativeQuoteQty - $quoteQty - $quoteInterest;
+                    $btn = MarginForceLiquidationTool::NewInstance($item->pair);
+                    return [
+                        $item->pair,
+                        $icon,
+                        $free,
+                        $current_price,
+                        $txn->price,
+                        $api->floor_dec($gap, 2),
+                        $btn->render(),
+                    ];
+                }
+                catch(Exception $e) {
+                    return [
+                        $item->pair,
+                        '計算發生錯誤: ' . $e->getMessage()
+                    ];
+                }
+            }
+            return [$item->pair, $icon, '', '', '', '', ''];
+        });
+        $box = new Box('進場中的交易列表', new Table([
+            '交易對',
+            '進場中',
+            '原始資金',
+            '目前價位',
+            '當時價位',
+            '目前未出場獲利',
+            '操作',
+        ], $settings->all()));
+        $box->collapsable();
+        $box->style('info');
+        $box->scrollable();
+        return str_replace('"box-body"', '"box-body no-padding"' ,$box->render());
     }
 
     public function calc(SignalHistory $signal_history, Content $content)

@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Encore\Admin\Auth\Database\Administrator;
 use App\Models\SignalHistory;
+use App\Models\SignalHistoryUser;
 use App\Models\TxnMarginOrder;
 use App\Jobs\LineNotify;
 use App\Enums\TradingPlatformType;
+use App\Enums\TxnExchangeType;
+use BinanceApi\BinanceApiManager;
 use Illuminate\Database\Eloquent\Builder;
 
 class AdminUser extends Administrator
@@ -41,7 +44,8 @@ class AdminUser extends Administrator
 
     public function signals()
     {
-        return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->withPivot('error', 'asset');;
+        // return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->withPivot('error', 'asset');
+        return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->using(SignalHistoryUser::class)->withPivot('error', 'asset');
     }
 
     public function orders()
@@ -72,5 +76,50 @@ class AdminUser extends Administrator
     public function keysecret()
     {
         return $this->keysecrets()->first();
+    }
+
+    /**
+     * 取得指定交易對是否正在場內?
+     *
+     * @param $symbol_key string 交易对
+     * @return bool containing the response
+     * @throws \Exception
+     */
+    public function IsTxnEntryStatus(string $symbol_key) : bool
+    {
+        $signal = $this->signals()->filterSymbol($symbol_key)->latest()->first();
+        if(is_null($signal))
+            return false;
+        return $signal->txn_exchange_type->is(TxnExchangeType::Entry);
+    }
+
+    /**
+     * 取得指定交易對最後一筆進場訊號
+     *
+     * @param $symbol_key string 交易对
+     * @return SignalHistory containing the response
+     * @throws \Exception
+     */
+    public function latestTxnEntrySignal(string $symbol_key = null) : SignalHistory
+    {
+        if(is_null($symbol_key))
+            return $this->signals()->filterEntry()->latest()->first();
+        return $this->signals()->filterEntry()->filterSymbol($symbol_key)->latest()->first();
+    }
+
+    /**
+     * 取得 Binacne Api Manager
+     *
+     * @return BinanceApiManager containing the response
+     * @throws \Exception
+     */
+    public function getBinanceApiAttribute() : BinanceApiManager
+    {
+        $ks = $this->keysecrets()->first();
+        $key = data_get($ks, 'key', null);
+        $secret = data_get($ks, 'secret', null);
+        if(is_null($key) || is_null($secret))
+            return null;
+        return new BinanceApiManager($key, $secret);
     }
 }

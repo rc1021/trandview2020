@@ -15,6 +15,11 @@ class AdminTxnSetting extends Model
         'options' => 'array',
     ];
 
+    function scopeFilterType($query, $type)
+    {
+        return $query->where('type', $type);
+    }
+
     function getInitialTradableTotalFundsAttribute() : float
     {
         return data_get((object)$this->options, 'initial_tradable_total_funds', 1.0);

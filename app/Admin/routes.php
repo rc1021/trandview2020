@@ -21,7 +21,7 @@ Route::group([
     ], function (Router $router) {
         $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret');
         $router->put('key-secrets', AuthController::class.'@putKeySecret')->name('keysecret');
-        $router->post('force-liquidation', HomeController::class.'@forceLiquidation')->name('forceLiquidation');
+        $router->post('force-liquidation/{pair}', HomeController::class.'@forceLiquidation')->name('forceLiquidation');
     });
 
     Route::group([

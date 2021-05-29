@@ -1,7 +1,8 @@
 <div class="btn-group" data-toggle="buttons">
-    <a href="{{ route('admin.txn.forceLiquidation') }}"
+    <a href="{{ route('admin.txn.forceLiquidation', ['pair' => $pair]) }}"
         rel="nofollow"
-        class="btn btn-danger btn-sm"
+        class="btn btn-danger btn-xs"
+        style="color: #fff;"
         data-confirm="是否確定要強制平倉?"
         data-disable-with="執行中..."
         data-method="post"

@@ -22,9 +22,19 @@ class TxnMarginOrder extends Model
         'transactTime',
     ];
 
+    public function scopeFilterStatus($query, string $status)
+    {
+        return $query->where('status', $status);
+    }
+
     public function scopeStatusNew($query)
     {
         return $query->where('status', OrderStatusType::fromValue(OrderStatusType::NEW)->key);
+    }
+
+    public function scopeFilterType($query, string $type)
+    {
+        return $query->where('type', $type);
     }
 
     public function scopeStopLossLimit($query)

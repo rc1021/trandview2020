@@ -63,7 +63,7 @@ trait SignalHistoryTrait
     }
 
     // 0	=>	交易執行類別: 買入/賣出
-    public function getTxnExchangeTypeAttribute()
+    public function getTxnExchangeTypeAttribute() : TxnExchangeType
     {
         switch($this->getSignal('交易執行類別'))
         {
