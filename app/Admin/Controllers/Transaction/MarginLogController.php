@@ -214,7 +214,7 @@ class MarginLogController extends AdminController
         $box->collapsable();
         $box->style('info');
         $box->scrollable();
-        return str_replace('"box-body"', '"box-body no-padding"' ,$box->render());
+        return str_replace('"box-body"', '"box-body table-responsive no-padding"' ,$box->render());
     }
 
     public function calc(SignalHistory $signal_history, Content $content)
