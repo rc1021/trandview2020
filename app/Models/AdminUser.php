@@ -12,8 +12,14 @@ use App\Models\TxnMarginOrder;
 use App\Jobs\LineNotify;
 use App\Enums\TradingPlatformType;
 use App\Enums\TxnExchangeType;
+use App\Enums\TxnSettingType;
 use BinanceApi\BinanceApiManager;
+use BinanceApi\Enums\OrderStatusType;
+use BinanceApi\Enums\OrderType;
+use BinanceApi\Enums\DirectType;
 use Illuminate\Database\Eloquent\Builder;
+use Exception;
+use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 
 class AdminUser extends Administrator
 {
@@ -121,5 +127,49 @@ class AdminUser extends Administrator
         if(is_null($key) || is_null($secret))
             return null;
         return new BinanceApiManager($key, $secret);
+    }
+
+    public function getCurrentMarginTxns()
+    {
+        $api = $this->binance_api;
+        return $this->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($api) {
+            $is_entry = $this->IsTxnEntryStatus($item->pair);
+            $icon = $is_entry ? '<i class="fa fa-check text-green"></i>' : '<i class="fa fa-close text-red"></i>';
+            if($is_entry) {
+                try {
+                    $signal = $this->latestTxnEntrySignal($item->pair);
+                    $free = data_get($signal, 'pivot.asset.quoteAsset.free', 0);
+                    $txn = $signal->txnMargOrders()
+                        ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
+                        ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
+                    $current_price = $api->floor_dec($api->price($item->pair), 2);
+                    $account = $api->marginIsolatedAccountByKey($item->pair);
+                    $quoteQty = $txn->executedQty * $current_price;
+                    $quoteInterest = data_get($account, 'assets.'.$item->pair.'.baseAsset.interest', 0) * $current_price; // 利息
+                    $gap = $quoteQty - $txn->cummulativeQuoteQty - $quoteInterest;
+                    if($signal->txn_direct_type->is(DirectType::SHORT))
+                        $gap = $txn->cummulativeQuoteQty - $quoteQty - $quoteInterest;
+                    $gap_rate = $api->floor_dec($gap / $free * 100, 2);
+                    $btn = MarginForceLiquidationTool::NewInstance($item->pair);
+                    return [
+                        $item->pair,
+                        $icon,
+                        $api->floor_dec($free, 2),
+                        $current_price,
+                        $txn->price,
+                        $api->floor_dec($gap, 2) . ' | '. $gap_rate . '%',
+                        $btn->render(),
+                    ];
+                }
+                catch(Exception $e) {
+                    return [
+                        $item->pair,
+                        $icon,
+                        '計算發生錯誤: ' . $e->getMessage()
+                    ];
+                }
+            }
+            return [$item->pair, $icon];
+        })->all();
     }
 }

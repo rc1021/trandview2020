@@ -163,54 +163,9 @@ class MarginLogController extends AdminController
     private function txnEntryRows()
     {
         $user = AdminUser::find(Admin::user()->id);
-        $api = $user->binance_api;
-        $settings = $user->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($user, $api) {
-            $is_entry = $user->IsTxnEntryStatus($item->pair);
-            $icon = $is_entry ? '<i class="fa fa-check text-green"></i>' : '<i class="fa fa-close text-red"></i>';
-            if($is_entry) {
-                try {
-                    $signal = $user->latestTxnEntrySignal($item->pair);
-                    $free = data_get($signal, 'pivot.asset.quoteAsset.free', 0);
-                    $txn = $signal->txnMargOrders()
-                        ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
-                        ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
-                    $current_price = $api->floor_dec($api->price($item->pair), 2);
-                    $account = $api->marginIsolatedAccountByKey($item->pair);
-                    $quoteQty = $txn->executedQty * $current_price;
-                    $quoteInterest = data_get($account, 'assets.'.$item->pair.'.baseAsset.interest', 0) * $current_price; // 利息
-                    $gap = $quoteQty - $txn->cummulativeQuoteQty - $quoteInterest;
-                    if($signal->txn_direct_type->is(DirectType::SHORT))
-                        $gap = $txn->cummulativeQuoteQty - $quoteQty - $quoteInterest;
-                    $gap_rate = floor($gap / $free * 100);
-                    $btn = MarginForceLiquidationTool::NewInstance($item->pair);
-                    return [
-                        $item->pair,
-                        $icon,
-                        $api->floor_dec($free, 2),
-                        $current_price,
-                        $txn->price,
-                        $api->floor_dec($gap, 2) . ' | '. $gap_rate . '%',
-                        $btn->render(),
-                    ];
-                }
-                catch(Exception $e) {
-                    return [
-                        $item->pair,
-                        '計算發生錯誤: ' . $e->getMessage()
-                    ];
-                }
-            }
-            return [$item->pair, $icon, '', '', '', '', ''];
-        });
-        $box = new Box('進場中的交易列表', new Table([
-            '交易對',
-            '進場中',
-            '原始資金',
-            '目前價位',
-            '當時價位',
-            '目前未出場獲利',
-            '操作',
-        ], $settings->all()));
+        $txns = $user->getCurrentMarginTxns();
+        $header = ['交易對', '進場中', '原始資金', '目前價位', '當時價位', '目前未出場獲利', '操作'];
+        $box = new Box('進場中的交易列表', new Table($header, $txns));
         $box->collapsable();
         $box->style('info');
         $box->scrollable();

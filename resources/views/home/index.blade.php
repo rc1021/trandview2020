@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/05/29</h2>
+        <ul>
+            <li>新功能：在交易紀錄頁面，顯示進場中的交易列表</li>
+        </ul>
         <h2>2021/05/27</h2>
         <ul>
             <li>改良做空出場程序讓借款還得乾乾淨淨</li>
