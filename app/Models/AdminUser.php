@@ -148,7 +148,7 @@ class AdminUser extends Administrator
                     $txn = $signal->txnMargOrders()
                         ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
                         ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
-                    $current_price = $api->floor_dec($api->price($item->pair), 2);
+                    $current_price = $api->floor_dec($api->marginPrice($item->pair), 2);
                     $account = $api->marginIsolatedAccountByKey($item->pair);
                     $quoteQty = $txn->executedQty * $current_price;
                     $quoteInterest = data_get($account, 'assets.'.$item->pair.'.baseAsset.interest', 0) * $current_price; // 利息

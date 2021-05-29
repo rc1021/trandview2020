@@ -83,8 +83,8 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
             if($this->signal->txn_direct_type->is(DirectType::FORCE))
             {
-                $index = $this->api->marginPriceIndex($this->signal->symbol_type);
-                $this->signal->current_price = $this->api->floor_dec(data_get($index, 'price', 0), 2);
+                $price = $this->api->marginPrice($this->signal->symbol_type);
+                $this->signal->current_price = $this->api->floor_dec($price, 2);
                 $this->signal->save();
                 // 強制出場
                 $this->forceLiquidation();

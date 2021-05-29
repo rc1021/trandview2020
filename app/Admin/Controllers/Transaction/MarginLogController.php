@@ -168,7 +168,6 @@ class MarginLogController extends AdminController
         $box = new Box('進場中的交易列表', new Table($header, $txns));
         $box->collapsable();
         $box->style('info');
-        $box->scrollable();
         return str_replace('"box-body"', '"box-body table-responsive no-padding"' ,$box->render());
     }
 
