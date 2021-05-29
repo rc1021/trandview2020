@@ -181,14 +181,15 @@ class MarginLogController extends AdminController
                     $gap = $quoteQty - $txn->cummulativeQuoteQty - $quoteInterest;
                     if($signal->txn_direct_type->is(DirectType::SHORT))
                         $gap = $txn->cummulativeQuoteQty - $quoteQty - $quoteInterest;
+                    $gap_rate = floor($gap / $free * 100);
                     $btn = MarginForceLiquidationTool::NewInstance($item->pair);
                     return [
                         $item->pair,
                         $icon,
-                        $free,
+                        $api->floor_dec($free, 2),
                         $current_price,
                         $txn->price,
-                        $api->floor_dec($gap, 2),
+                        $api->floor_dec($gap, 2) . ' | '. $gap_rate . '%',
                         $btn->render(),
                     ];
                 }

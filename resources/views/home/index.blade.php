@@ -40,7 +40,7 @@
         </ul>
         <h2>2021/04/11</h2>
         <ul>
-            <li>槓桿交易加入&nbsp;<a href="{{ route('admin.txn.forceLiquidation') }}" rel="nofollow" class="btn btn-danger btn-xs" style="color: #fff;" data-confirm="是否確定要強制平倉?" data-disable-with="執行中..." data-method="post" data-remote="true" data-refresh="500" data-alter="">
+            <li>槓桿交易加入&nbsp;<a href="#" rel="nofollow" class="btn btn-danger btn-xs" style="color: #fff;" data-confirm="是否確定要強制平倉?" data-disable-with="執行中..." data-method="post" data-remote="true" data-refresh="500" data-alter="">
                 <i class="fa fa-exclamation-triangle"></i>&nbsp;強制平倉
             </a>&nbsp;功能</li>
         </ul>
