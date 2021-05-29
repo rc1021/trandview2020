@@ -129,7 +129,13 @@ class AdminUser extends Administrator
         return new BinanceApiManager($key, $secret);
     }
 
-    public function getCurrentMarginTxns()
+    /**
+     * 取得 進場中的交易列表
+     *
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public function getCurrentMarginTxns() : array
     {
         $api = $this->binance_api;
         return $this->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($api) {
