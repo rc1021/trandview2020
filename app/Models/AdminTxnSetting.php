@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Enums\TxnSettingType;
+use Exception;
 use BinanceApi\BinanceApiManager;
 
 class AdminTxnSetting extends Model
@@ -37,12 +37,30 @@ class AdminTxnSetting extends Model
 
     function getBaseAssetDailyInterestAttribute() : float
     {
-        return data_get((object)$this->options, 'base_asset_daily_interest', 0.0003);
+        try {
+            $exchange = BinanceApiManager::ExchangeInfo();
+            $base = data_get($exchange, "symbols.$this->pair.baseAsset");
+            $viplist  = BinanceApiManager::MarginVipSpecList();
+            $viplevel = $this->user->vip_level;
+            return data_get($viplist, "data.$base.specs.$viplevel.dailyInterestRate", 0.0005);
+        }
+        catch(Exception $e) {
+            return 0.0005;
+        }
     }
 
     function getQuoteAssetDailyInterestAttribute() : float
     {
-        return data_get((object)$this->options, 'quote_asset_daily_interest', 0.0015);
+        try {
+            $exchange = BinanceApiManager::ExchangeInfo();
+            $quote = data_get($exchange, "symbols.$this->pair.quoteAsset");
+            $viplist  = BinanceApiManager::MarginVipSpecList();
+            $viplevel = $this->user->vip_level;
+            return data_get($viplist, "data.$quote.specs.$viplevel.dailyInterestRate", 0.0009);
+        }
+        catch(Exception $e) {
+            return 0.0009;
+        }
     }
 
     public function user()

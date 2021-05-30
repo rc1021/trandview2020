@@ -117,8 +117,6 @@ class MarginSettingController extends AdminController
             $form->text('initial_tradable_total_funds', __('admin.txn.margin.setting.form.initial_tradable_total_funds'))->rules('required')->default(1.0);
             $form->text('initial_capital_risk', __('admin.txn.margin.setting.form.initial_capital_risk'))->rules('required')->default(0.07);
             $form->switch('lever_switch', __('admin.txn.margin.setting.lever_switch'))->rules('required')->default(true)->states($states);
-            $form->text('base_asset_daily_interest', __('admin.txn.margin.setting.base_asset_daily_interest'))->rules('required')->default(0.0003);
-            $form->text('quote_asset_daily_interest', __('admin.txn.margin.setting.quote_asset_daily_interest'))->rules('required')->default(0.0015);
         });
 
         $form->disableEditingCheck();

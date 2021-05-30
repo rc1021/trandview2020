@@ -26,6 +26,12 @@ class AuthController extends BaseAuthController
     protected function settingForm()
     {
         $form = parent::settingForm();
+        $form->slider('vip_level', 'VIP Level')->options([
+            'max'       => 9,
+            'min'       => 0,
+            'step'      => 1,
+            'prefix'    => 'Vip ',
+        ]);
         $form->linenotify('line_notify_token', 'LINE 通知')->attribute([
             'readonly'=>true,
             'data-callbackurl' => route('admin.admin-line-notify.callback', ['username' => Admin::user()->username]),

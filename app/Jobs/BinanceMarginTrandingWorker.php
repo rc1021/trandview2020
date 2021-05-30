@@ -75,7 +75,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     {
         $error = null;
         try {
-            $this->txn_setting = $this->user->txnSettings()->where('pair', $this->signal->symbol_type)->first();
+            $this->txn_setting = $this->user->txnSettings()->where('pair', $this->signal->symbol_type)->with('user')->first();
             $this->user->signals()->attach($this->signal);
 
             $exchange = $this->signal->txn_exchange_type;

@@ -12,6 +12,7 @@ use BinanceApi\Enums\TimeInForce;
 use BinanceApi\Enums\WorkingType;
 use Binance;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 class BinanceApiManager
 {
@@ -27,6 +28,75 @@ class BinanceApiManager
         $this->key = $key;
         $this->secret = $secret;
         $this->api = new Binance\API($key, $secret);
+    }
+
+    public static function HttpRequestClient($url)
+    {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+            CURLOPT_HTTPHEADER => ['Cookie: cid=kIck7YK5'],
+        ]);
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    /**
+     * 交易规范信息
+     *
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public static function ExchangeInfo($no_cache = false, $seconds = 300)
+    {
+        if($no_cache)
+            Cache::forget(__FUNCTION__);
+
+        return Cache::remember(__FUNCTION__, $seconds, function () {
+            $response = self::HttpRequestClient('https://www.binance.com/api/v3/exchangeInfo');
+            $resp = json_decode($response, true);
+            if(array_key_exists('symbols', $resp)) {;
+                $tmp = [];
+                foreach($resp['symbols'] as $key => $value){
+                    $tmp[$value['symbol']] = $value;
+                }
+                $resp['symbols'] = $tmp;
+            }
+            return $resp;
+        });
+    }
+
+    /**
+     * 取得 杠杆借贷利率
+     *
+     * @return array containing the response
+     * @throws \Exception
+     */
+    public static function MarginVipSpecList($no_cache = false, $seconds = 300)
+    {
+        if($no_cache)
+            Cache::forget(__FUNCTION__);
+
+        return Cache::remember(__FUNCTION__, $seconds, function () {
+            $response = self::HttpRequestClient('https://www.binance.com/gateway-api/v1/friendly/margin/vip/spec/list-all');
+            $resp = json_decode($response, true);
+            if(array_key_exists('data', $resp)) {;
+                $tmp = [];
+                foreach($resp['data'] as $key => $value){
+                    $tmp[$value['assetName']] = $value;
+                }
+                $resp['data'] = $tmp;
+            }
+            return $resp;
+        });
     }
 
     /**
