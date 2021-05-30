@@ -2,7 +2,7 @@
     <div class="box-body">
         <h2>2021/05/30</h2>
         <ul>
-            <li>新功能：加入指定 <a href="{{ route('admin.setting') }}" class="btn btn-xs btn-link">Vip Level 設定</a> 讓未來槓桿交易能自動取得手續費率</li>
+            <li>新功能：加入指定 <a href="{{ route('admin.setting') }}" class="btn btn-xs btn-link">Vip Level 設定</a> 讓未來槓桿交易能自動取得借款利率</li>
         </ul>
         <h2>2021/05/29</h2>
         <ul>
