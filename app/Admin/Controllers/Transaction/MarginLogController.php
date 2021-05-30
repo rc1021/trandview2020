@@ -164,7 +164,7 @@ class MarginLogController extends AdminController
     {
         $user = AdminUser::find(Admin::user()->id);
         $txns = $user->getCurrentMarginTxns();
-        $header = ['交易對', '進場中', '原始資金', '目前價位', '當時價位', '目前未出場獲利', '操作'];
+        $header = ['交易對', '進場中', '進場前原始資金', '進場當時價位', '目前價位', '目前未出場獲利', '操作'];
         $box = new Box('進場中的交易列表', new Table($header, $txns));
         $box->collapsable();
         $box->style('info');

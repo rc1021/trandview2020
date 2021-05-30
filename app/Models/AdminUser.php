@@ -155,14 +155,14 @@ class AdminUser extends Administrator
                     $gap = $quoteQty - $txn->cummulativeQuoteQty - $quoteInterest;
                     if($signal->txn_direct_type->is(DirectType::SHORT))
                         $gap = $txn->cummulativeQuoteQty - $quoteQty - $quoteInterest;
-                    $gap_rate = $api->floor_dec($gap / $free * 100, 2);
+                    $gap_rate = $api->floor_dec($gap / $free * 100, 3);
                     $btn = MarginForceLiquidationTool::NewInstance($item->pair);
                     return [
                         $item->pair,
                         $icon,
                         $api->floor_dec($free, 2),
-                        $current_price,
                         $txn->price,
+                        $current_price,
                         $api->floor_dec($gap, 2) . ' | '. $gap_rate . '%',
                         $btn->render(),
                     ];
