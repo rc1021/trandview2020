@@ -171,11 +171,17 @@ class AdminUser extends Administrator
                     return [
                         $item->pair,
                         $icon,
-                        '計算發生錯誤: ' . $e->getMessage()
+                        [
+                            'col' => 5,
+                            'content' => '計算發生錯誤: ' . $e->getMessage()
+                        ]
                     ];
                 }
             }
-            return [$item->pair, $icon];
+            return [$item->pair, $icon, [
+                'col' => 5,
+                'content' => '目前未交易'
+            ]];
         })->all();
     }
 }
