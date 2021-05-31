@@ -32,18 +32,22 @@ class TxnMarginOrderObserver
 
             // 如果是市價單出場就結算這次的盈虧
             if(OrderType::fromKey($txnMarginOrder->type)->is(OrderType::MARKET)) {
+                $msg = ['出場結算'];
                 $symbol_key = $txnMarginOrder->symbol;
                 // 取得進場時原始資產
                 $lastSignal = $txnMarginOrder->user->latestTxnEntrySignal($symbol_key);
                 if(is_null($lastSignal))
                     throw new Exception("No Latest EntrySignal: ". $symbol_key);
-                $originAsset = $lastSignal->pivot->asset;
-                $originQuoteAssetFree = data_get($originAsset, 'quoteAsset.free', 0);
+                array_push($msg, sprintf("交易對：%s", $lastSignal->symbol_type));
+                $originQuoteAssetFree = data_get($lastSignal->pivot->asset, 'quoteAsset.free', 0);
+                array_push($msg, sprintf("進場前原資金：%s", $originQuoteAssetFree));
                 // 取得帳戶現有資產
                 $currentAsset = $txnMarginOrder->user->binance_api->marginIsolatedAccountByKey($symbol_key);
                 $currentQuoteAssetFree = data_get($currentAsset, 'assets.'.$symbol_key.'.quoteAsset.free', 0);
+                array_push($msg, sprintf("目前帳戶資金：%s", $originQuoteAssetFree));
+                array_push($msg, sprintf("本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
                 // 通知盈虧
-                $txnMarginOrder->user->notify(sprintf("(測試功能)\n本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
+                $txnMarginOrder->user->notify(print_r($msg, true));
             }
         }
         catch(Exception $e) {

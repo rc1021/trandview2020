@@ -1,5 +1,10 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/05/31</h2>
+        <ul>
+            <li>更新出場結算 Line Notify 內容</li>
+            <li>進場前記錄原始資金 / 出場後記錄目前資金</li>
+        </ul>
         <h2>2021/05/30</h2>
         <ul>
             <li>新功能：加入指定 <a href="{{ route('admin.setting') }}" class="btn btn-xs btn-link">Vip Level 設定</a> 讓未來槓桿交易能自動取得借款利率</li>

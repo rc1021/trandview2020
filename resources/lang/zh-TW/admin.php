@@ -319,6 +319,7 @@ return [
             'txn_order' => [
                 'count' => '有 :count 筆資料'
             ],
+            'message' => '訊息原始內容',
             'loan_ratio' => '借款%',
             'txn_orders' => '下單資料',
             'log' => '開倉紀錄',
@@ -334,7 +335,8 @@ return [
             'trading_platform_type' => '交易所',
             'symbol_type' => '交易配對',
             'position_at' => '執行日期時間',
-            'current_price' => '現價',
+            'current_price' => '訊息現價',
+            'asset_free' => '進場前/出場後資金',
             'entry_price' => '交易執行價格',
             'risk_start_price' => '起始風險價位',
             'hight_position_price' => '開倉價格容差(最高價位)',

@@ -62,7 +62,8 @@ class MarginLogController extends AdminController
             return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
         });
 
-        $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
+        // $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
+        $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'asset_free', 'loan_ratio'];
         foreach ($dynamic_columns as $column) {
             $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
                 $data = $this[$column->getName()];
@@ -80,10 +81,13 @@ class MarginLogController extends AdminController
                         }
                         break;
                     case 'current_price':
-                    case 'entry_price':
-                    case 'risk_start_price':
-                    case 'position_price':
                         $data = ceil_dec($data, 2);
+                        break;
+                    case 'asset_free':
+                        $data = '未記錄';
+                        $data = data_get(json_decode($this->asset, true), 'quoteAsset.free', $data);
+                        if(is_numeric($data))
+                            $data = ceil_dec($data, 2);
                         break;
                 }
                 if($data instanceof Enum)
@@ -140,6 +144,12 @@ class MarginLogController extends AdminController
             HTML;
         });
 
+        $grid->column('message', __('admin.rec.signal.message'))->display(function ($txnMargOrders) {
+            return __('admin.rec.signal.detail');
+        })->modal(__('admin.rec.signal.detail'), function ($model) {
+            return $model->message;
+        });
+
         $grid->disableActions();
 
         $grid->filter(function($filter) {
@@ -147,7 +157,7 @@ class MarginLogController extends AdminController
             $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
         });
 
-        $grid->model()->where('type', TxnSettingType::Margin)->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
+        $grid->model()->where('type', TxnSettingType::Margin)->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.*')->join('signal_history_user', function ($join) use ($instance) {
             $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
                 ->where('admin_user_id', Admin::user()->id);
         });
