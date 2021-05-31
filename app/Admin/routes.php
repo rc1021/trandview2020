@@ -21,7 +21,6 @@ Route::group([
     ], function (Router $router) {
         $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret');
         $router->put('key-secrets', AuthController::class.'@putKeySecret')->name('keysecret');
-        $router->post('force-liquidation/{pair}', HomeController::class.'@forceLiquidation')->name('forceLiquidation');
     });
 
     Route::group([
@@ -34,6 +33,7 @@ Route::group([
         $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
         $router->resource('formula', MarginFormulaController::class);
         $router->resource('setting', MarginSettingController::class);
+        $router->post('force-liquidation/{pair}', MarginLogController::class.'@forceLiquidation')->name('forceLiquidation');
     });
 
     // Route::group([
