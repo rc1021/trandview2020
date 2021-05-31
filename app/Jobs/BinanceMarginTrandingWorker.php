@@ -201,6 +201,9 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                     }
                 });
             }
+
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
         }
         catch(Exception $e) {
             // 平倉失敗記錄起來
