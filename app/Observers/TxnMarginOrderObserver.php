@@ -44,10 +44,10 @@ class TxnMarginOrderObserver
                 // 取得帳戶現有資產
                 $currentAsset = $txnMarginOrder->user->binance_api->marginIsolatedAccountByKey($symbol_key);
                 $currentQuoteAssetFree = data_get($currentAsset, 'assets.'.$symbol_key.'.quoteAsset.free', 0);
-                array_push($msg, sprintf("目前帳戶資金：%s", $originQuoteAssetFree));
+                array_push($msg, sprintf("目前帳戶資金：%s", $currentQuoteAssetFree));
                 array_push($msg, sprintf("本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
                 // 通知盈虧
-                $txnMarginOrder->user->notify(print_r($msg, true));
+                $txnMarginOrder->user->notify(implode("\n", $msg));
             }
         }
         catch(Exception $e) {
