@@ -95,6 +95,7 @@ class BinanceApiManager
                 }
                 $resp['data'] = $tmp;
             }
+            $resp['serverTime'] = time();
             return $resp;
         });
     }
