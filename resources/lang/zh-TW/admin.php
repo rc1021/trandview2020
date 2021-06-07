@@ -341,8 +341,7 @@ return [
             'risk_start_price' => '起始風險價位',
             'hight_position_price' => '開倉價格容差(最高價位)',
             'low_position_price' => '開倉價格容差(最低價位)',
-            'position_price' => '開倉價格',
-            'auto_liquidation_at' => '自動平倉時間',
+            'position_price' => '開倉價格'
         ],
     ],
 ];

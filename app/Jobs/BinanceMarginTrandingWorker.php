@@ -325,12 +325,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
                 $result = $this->api->doMarginEntry($symbol, $direct, $quantity, $price, $stop_price, $sell_price);
             }
-            // 設定自動賣出時間
-            if($auto_liquidation > 0 and array_key_exists('orders', $result) and $result['orders']) {
-                $at = Carbon::now()->addHours($auto_liquidation)->format('Y-m-d H:i:s');
-                $this->signal->auto_liquidation_at = $at;
-                $this->signal->save();
-            }
         });
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
