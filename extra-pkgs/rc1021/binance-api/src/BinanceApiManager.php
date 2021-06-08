@@ -363,7 +363,7 @@ class BinanceApiManager
                     array_push($result['orders'], $order);
                 }
                 else {
-                    throw new Exception("做多出場，但市價賣出數量為0，以下為帳戶詳情：\n" . print_r($account, true) );
+                    throw new Exception("做多出場，但市價賣出數量為0，請查看帳戶詳情。");
                 }
             }
             else {
@@ -388,7 +388,7 @@ class BinanceApiManager
                     $this->api->marginIsolatedRepay($asset, $repay, $symbol_key);
                 }
                 else {
-                    throw new Exception("做空出場，但市價買入數量為0，以下為帳戶詳情：\n" . print_r($account, true) );
+                    throw new Exception("做空出場，但市價買入數量為0，請查看帳戶詳情");
                 }
             }
             // $freeQuantity = data_get($stopOrder, 'origQty', 0);

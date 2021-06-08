@@ -115,6 +115,7 @@ class TxnMarginOrderObserver
             $order['created_at'] = Carbon::parse($order['created_at'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
         unset($order['transactTime']);
         unset($order['clientOrderId']);
+        unset($order['isIsolated']);
         unset($order['id']);
         $data = '';
         foreach ($order as $key => $value) {

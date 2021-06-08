@@ -67,17 +67,17 @@ class BinanceMarginStopLossLimitCheck implements ShouldQueue
                     $side = SideType::fromValue(SideType::BUY)->key;
                     if($order->side == $side && $current['status'] == 'FILLED') {
                         $api->MarginBaseAssetRepay($order->symbol);
+
+                        $notify_message  = "止損單狀態改變，從" . $order->status . "到" . $current['status'] . "\n";
+                        $notify_message .= "並將還掉買入不足的標的幣還利息。";
+                        // $notify_message .= "詳情:";
+                        // $notify_message .= TxnMarginOrderObserver::GetMessage($current);
+                        $user->notify(print_r($notify_message, true));
                     }
                 }
 
                 $current = Arr::only($current, ["signal_id", "user_id", "fills", "symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"]);
                 TxnMarginOrder::where('id', $orderID)->update($current);
-                unset($order['isIsolated']);
-
-                $notify_message  = "止損單狀態改變，從" . $order->status . "到" . $current['status'] . "\n";
-                $notify_message .= "詳情:";
-                $notify_message .= TxnMarginOrderObserver::GetMessage($current);
-                $user->notify(print_r($notify_message, true));
             }
         }
         catch(Exception $e) {
