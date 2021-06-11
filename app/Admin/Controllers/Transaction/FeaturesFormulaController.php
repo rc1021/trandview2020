@@ -76,7 +76,7 @@ class FeaturesFormulaController extends AdminController implements Renderable
 
         $show->field('file_path', __('admin.txn.features.formula.file_path'))->file()->as(function ($render) {
             $preview = __('admin.txn.features.formula.file_preview');
-            $link = route('admin.txn.features.formula.preview', $this);
+            $link = route('txn.features.formula.preview', $this);
             return <<<Html
             <span>
                 <a href="$link" class="btn btn-link" target="_blank">$preview <i class="fa fa-external-link"></i></a>

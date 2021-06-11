@@ -36,7 +36,7 @@ trait LINENotifyFunc
     public function lineNotifyCallback() {
         $username = request()->get('username');
         $code = request()->get('code');
-        $callbackUrl = route('admin.admin-line-notify.callback', ['username' => $username]);
+        $callbackUrl = route('admin-line-notify.callback', ['username' => $username]);
         DB::statement("update admin_users set line_notify_auth_code='{$code}' where username='{$username}'");
         ### LINE Access Token ###
         $this->getNotifyAccessToken($username, $code, $callbackUrl);
