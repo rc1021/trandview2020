@@ -9,9 +9,49 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
 
+    $authController = config('admin.auth.controller');
+    $withoutVerified = ['admin', 'verified'];
+    $router->getRoutes()->getByAction($authController.'@getLogin')->withoutMiddleware($withoutVerified);
+    $router->getRoutes()->getByAction($authController.'@postLogin')->withoutMiddleware($withoutVerified);
+    $router->getRoutes()->getByAction($authController.'@getLogout')->withoutMiddleware($withoutVerified);
+
     $router->get('/', 'HomeController@index')->name('home');
     $router->get('notify-cancel', 'AuthController@lineNotifyCancel')->name('admin-line-notify.cancel');
     $router->get('notify-callback', 'AuthController@lineNotifyCallback')->name('admin-line-notify.callback');
+
+    // Registration Routes...
+    $router->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register')->withoutMiddleware($withoutVerified);
+    $router->post('register', 'Auth\RegisterController@register')->withoutMiddleware($withoutVerified);
+
+    // Password Reset Routes...
+    Route::group([
+        'prefix'        => 'password',
+        'as'            => 'password.',
+    ], function (Router $router) use ($withoutVerified) {
+        $router->get('reset', 'Auth\ForgotPasswordController@showLinkRequestForm')->name('request')->withoutMiddleware($withoutVerified);
+        $router->post('email', 'Auth\ForgotPasswordController@sendResetLinkEmail')->name('email')->withoutMiddleware($withoutVerified);
+        $router->get('reset/{token}', 'Auth\ResetPasswordController@showResetForm')->name('reset')->withoutMiddleware($withoutVerified);
+        $router->post('reset', 'Auth\ResetPasswordController@reset')->name('update')->withoutMiddleware($withoutVerified);
+    });
+
+    // Password Confirmation Routes...
+    Route::group([
+        'prefix'        => 'password',
+        'as'            => 'password.',
+    ], function (Router $router) {
+        $router->get('confirm', 'Auth\ConfirmPasswordController@showConfirmForm')->name('confirm');
+        $router->post('confirm', 'Auth\ConfirmPasswordController@confirm');
+    });
+
+    // Email Verification Routes...
+    Route::group([
+        'prefix'        => 'email',
+        'as'            => 'verification.',
+    ], function (Router $router) use ($withoutVerified) {
+        $router->get('verify', 'Auth\VerificationController@show')->name('notice')->withoutMiddleware($withoutVerified);
+        $router->get('verify/{id}/{hash}', 'Auth\VerificationController@verify')->name('verify')->withoutMiddleware($withoutVerified);
+        $router->post('resend', 'Auth\VerificationController@resend')->name('resend')->withoutMiddleware($withoutVerified);
+    });
 
     Route::group([
         'prefix'        => 'txn',
@@ -34,14 +74,4 @@ Route::group([
         $router->post('force-liquidation/{pair}', MarginLogController::class.'@forceLiquidation')->name('forceLiquidation');
     });
 
-    // Route::group([
-    //     'prefix'        => 'txn/features',
-    //     'namespace'     => 'Transaction',
-    //     'as'            => 'txn.features.',
-    // ], function (Router $router) {
-    //     $router->get('logs/calc/{signal_history}', FeaturesLogController::class.'@calc')->name('logs.calc');
-    //     $router->resource('logs', FeaturesLogController::class);
-    //     $router->get('formula/{key}/preview', FeaturesFormulaController::class.'@preview')->name('formula.preview');
-    //     $router->resource('formula', FeaturesFormulaController::class);
-    // });
 });
