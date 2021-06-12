@@ -61,6 +61,13 @@
 
     <div class="text-center">
         <a href="{{ route('register') }}">{{ __('Create Account') }}</a>
+
+        @if (Route::has('password.request'))
+        <span>&nbsp;|&nbsp;</span>
+        <a href="{{ route('password.request') }}">
+            {{ __('Forgot Your Password?') }}
+        </a>
+    @endif
     </div>
   </div>
 </div>

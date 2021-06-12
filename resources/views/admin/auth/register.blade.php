@@ -45,7 +45,7 @@
         <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
       </div>
       <div class="row">
-        <div class="col-xs-8">
+        <div class="col-xs-12">
           <div class="checkbox icheck">
             <label>
               <input type="checkbox" name="agree" value="1">
@@ -62,7 +62,7 @@
         @enderror
         </div>
         <!-- /.col -->
-        <div class="col-xs-4">
+        <div class="col-xs-12">
           <button type="submit" class="btn btn-primary btn-block btn-flat">{{ __('Register') }}</button>
         </div>
         <!-- /.col -->

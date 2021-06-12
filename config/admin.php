@@ -147,6 +147,7 @@ return [
             'email/resend',
             'password/reset*',
             'password/email',
+            'password/confirm',
             'register',
         ],
     ],
