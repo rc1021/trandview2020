@@ -30,6 +30,8 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
 {
     use CanResetPassword, MustVerifyEmail, Notifiable;
 
+    protected $fillable = ['email', 'password', 'name', 'avatar'];
+
     protected $appends = ['username'];
 
     // public function notify($message)

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title'){{ __('Register') }}@endsection
+
 @section('content')
 <div class="register-box">
   <div class="register-logo">
@@ -46,13 +48,18 @@
         <div class="col-xs-8">
           <div class="checkbox icheck">
             <label>
-              <div class="icheckbox_square-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" style="position: absolute; top: -20%; left: -20%; display: block; width: 140%; height: 140%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: -20%; left: -20%; display: block; width: 140%; height: 140%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins></div>
+              <input type="checkbox" name="agree" value="1">
               {!! __('I agree to the :terms_of_service and :privacy_policy', [
-                'terms_of_service' => '<a href="#">terms</a>',
-                'privacy_policy' => '<a href="#">privacy</a>',
+                'terms_of_service' => '<a href="#">'.__('Terms of Service').'</a>',
+                'privacy_policy' => '<a href="#">'.__('Privacy Policy').'</a>',
               ]) !!}
             </label>
           </div>
+          @error('agree')
+            <span class="invalid-feedback" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+        @enderror
         </div>
         <!-- /.col -->
         <div class="col-xs-4">

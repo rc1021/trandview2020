@@ -10,7 +10,7 @@ Route::group([
 ], function (Router $router) {
 
     $authController = config('admin.auth.controller');
-    $withoutVerified = ['admin', 'verified'];
+    $withoutVerified = ['verified'];
     $router->getRoutes()->getByAction($authController.'@getLogin')->withoutMiddleware($withoutVerified);
     $router->getRoutes()->getByAction($authController.'@postLogin')->withoutMiddleware($withoutVerified);
     $router->getRoutes()->getByAction($authController.'@getLogout')->withoutMiddleware($withoutVerified);

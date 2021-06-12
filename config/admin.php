@@ -2,6 +2,10 @@
 
 return [
 
+    'default' => [
+        'role' => env('ADMIN_USER_ROLE', 0)
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Laravel-admin name
@@ -139,7 +143,11 @@ return [
         'excepts' => [
             'auth/login',
             'auth/logout',
-            'auth/verify',
+            'email/verify*',
+            'email/resend',
+            'password/reset*',
+            'password/email',
+            'register',
         ],
     ],
 

@@ -157,5 +157,6 @@ return [
         'title'                 => '標題',
         'username'              => '使用者名稱',
         'year'                  => '年',
+        'agree'                 => '條款與政策',
     ],
 ];
