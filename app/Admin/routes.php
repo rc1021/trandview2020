@@ -10,7 +10,7 @@ Route::group([
 ], function (Router $router) {
 
     $authController = config('admin.auth.controller');
-    $withoutVerified = ['verified'];
+    $withoutVerified = ['verified', '2fa'];
     $router->getRoutes()->getByAction($authController.'@getLogin')->withoutMiddleware($withoutVerified);
     $router->getRoutes()->getByAction($authController.'@postLogin')->withoutMiddleware($withoutVerified);
     $router->getRoutes()->getByAction($authController.'@getLogout')->withoutMiddleware($withoutVerified);
@@ -22,6 +22,16 @@ Route::group([
     // Registration Routes...
     $router->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register')->withoutMiddleware($withoutVerified);
     $router->post('register', 'Auth\RegisterController@register')->withoutMiddleware($withoutVerified);
+
+    // Password Reset Routes...
+    Route::group([
+        'prefix'        => 'auth/twofactor',
+        'as'            => 'auth.2fa.',
+    ], function (Router $router) use ($withoutVerified) {
+        $router->post('enable', 'AuthController@enableTwoFactor')->name('enable');
+        $router->post('disable', 'AuthController@disableTwoFactor')->name('disable');
+        $router->post('verify', 'AuthController@verifyTwoFactor')->name('verify');
+    });
 
     // Password Reset Routes...
     Route::group([

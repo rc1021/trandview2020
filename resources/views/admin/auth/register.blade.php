@@ -62,11 +62,11 @@
     </form>
 
     <div class="social-auth-links text-center">
-      <p>- OR -</p>
+      {{--  <p>- OR -</p>
       <a href="#" class="btn btn-block btn-social btn-facebook btn-flat" style="color: #fff;"><i class="fa fa-facebook"></i> Sign up using
         Facebook</a>
       <a href="#" class="btn btn-block btn-social btn-google btn-flat" style="color: #fff;"><i class="fa fa-google-plus"></i> Sign up using
-        Google+</a>
+        Google+</a>  --}}
     </div>
     <div class="text-center">
         <a href="{{ route('admin.login') }}" class="text-center">{{ __('Already registered?') }}</a>

@@ -8,11 +8,12 @@ use Encore\Admin\Layout\Content;
 use Illuminate\Http\Request;
 use App\Http\Repositories\Admin\AuthKeySecretRepository;
 use App\Admin\Controllers\Traits\LINENotifyFunc;
+use App\Admin\Controllers\Traits\TwoFactorAuthTrait;
 use Encore\Admin\Form;
 
 class AuthController extends BaseAuthController
 {
-    use LINENotifyFunc;
+    use LINENotifyFunc, TwoFactorAuthTrait;
 
     /**
      * Get the login username to be used by the controller.
@@ -77,6 +78,9 @@ class AuthController extends BaseAuthController
             'data-cancelurl' => route('admin-line-notify.cancel', ['id' => Admin::user()->id]),
             'data-lineclientid' => config('app.line_notify_client_id')
             ]);
+
+        $form->html($this->twoFactorView(), __('Two Factor Authentication'));
+
         return $form;
     }
 
