@@ -2,14 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Encore\Admin\Auth\Database\Administrator;
 use App\Models\SignalHistory;
 use App\Models\SignalHistoryUser;
 use App\Models\TxnMarginOrder;
-use App\Jobs\LineNotify;
 use App\Enums\TradingPlatformType;
 use App\Enums\TxnExchangeType;
 use App\Enums\TxnSettingType;
@@ -18,13 +14,15 @@ use BinanceApi\Enums\OrderStatusType;
 use BinanceApi\Enums\OrderType;
 use BinanceApi\Enums\DirectType;
 use Illuminate\Database\Eloquent\Builder;
-use Exception;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContracts;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\LineNotify;
+
+use Exception;
 
 class AdminUser extends Administrator implements CanResetPasswordContract, MustVerifyEmailContracts
 {
@@ -34,12 +32,12 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
 
     protected $appends = ['username'];
 
-    // public function notify($message)
-    // {
-    //     if(!empty($this->line_notify_token)) {
-    //         LineNotify::dispatch($this->line_notify_token, $message);
-    //     }
-    // }
+    public function lineNotify($message)
+    {
+        if(!empty($this->line_notify_token)) {
+            $this->notify(new LineNotify($message));
+        }
+    }
 
     /**
      * 取得有設定指定交易設置的用戶

@@ -34,7 +34,7 @@ trait SignalHistoryTrait
             AdminUser::matchTypePair($rec->trading_platform_type, $rec->symbol_type)->chunk(200, function ($users) use ($message, $type) {
                 foreach ($users as $user)
                 {
-                    $user->notify(sprintf("%s訊號\n%s", TxnSettingType::fromValue($type)->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
+                    $user->lineNotify(sprintf("%s訊號\n%s", TxnSettingType::fromValue($type)->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
                 }
             });
         }

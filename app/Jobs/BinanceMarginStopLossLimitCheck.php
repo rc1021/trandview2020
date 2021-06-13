@@ -72,7 +72,7 @@ class BinanceMarginStopLossLimitCheck implements ShouldQueue
                         $notify_message .= "並將還掉買入不足的標的幣還利息。";
                         // $notify_message .= "詳情:";
                         // $notify_message .= TxnMarginOrderObserver::GetMessage($current);
-                        $user->notify(print_r($notify_message, true));
+                        $user->lineNotify(print_r($notify_message, true));
                     }
                 }
 

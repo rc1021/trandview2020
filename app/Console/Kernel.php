@@ -37,7 +37,7 @@ class Kernel extends ConsoleKernel
             AdminUser::whereNotNull('line_notify_token')->chunk(200, function ($users) {
                 foreach ($users as $user)
                 {
-                    $user->notify("嗨，該更新Binance金鑰囉!\n(為了該每次的交易更安全，每月第1天請記得更新金鑰)\n\n奉上網址\nhttps://www.binance.com/zh-TW/my/settings/api-management\n\n更換網址\nhttps://bosytradingbot.com/admin/auth/key-secrets");
+                    $user->lineNotify("嗨，該更新Binance金鑰囉!\n(為了該每次的交易更安全，每月第1天請記得更新金鑰)\n\n奉上網址\nhttps://www.binance.com/zh-TW/my/settings/api-management\n\n更換網址\nhttps://bosytradingbot.com/admin/auth/key-secrets");
                 }
             });
         })->cron('0 0 1 * *');
