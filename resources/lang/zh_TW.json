@@ -614,5 +614,8 @@
     "You may not leave a team that you created.": "你不能離開你創建的團隊。",
     "Your email address is not verified.": "您的電子郵件尚未驗證通過。",
     "Zambia": "Zambia",
-    "Zimbabwe": "Zimbabwe"
+    "Zimbabwe": "Zimbabwe",
+    "Google 2fa": "谷歌驗證碼",
+    "Please confirm your 6 characters Google 2fa code.": "請輸入 6 位谷歌驗證碼",
+    "For your account security, please complete the following verification operations.": "為了您的賬戶安全，請完成以下驗證操作"
 }

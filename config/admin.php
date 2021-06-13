@@ -66,7 +66,7 @@ return [
 
         'namespace' => 'App\\Admin\\Controllers',
 
-        'middleware' => ['web', 'admin', 'verified'],
+        'middleware' => ['web', 'admin', 'verified', '2fa'],
     ],
 
     /*
