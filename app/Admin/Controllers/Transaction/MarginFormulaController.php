@@ -84,7 +84,7 @@ class MarginFormulaController extends AdminController implements Renderable
         $show->field('pair', __('admin.txn.margin.formula.pair'));
         $show->field('file_path', __('admin.txn.margin.formula.file_path'))->file()->as(function ($render) {
             $preview = __('admin.txn.margin.formula.file_preview');
-            $link = route('admin.txn.margin.formula.preview', $this);
+            $link = route('txn.margin.formula.preview', $this);
             return <<<Html
             <span>
                 <a href="$link" class="btn btn-link" target="_blank">$preview <i class="fa fa-external-link"></i></a>
