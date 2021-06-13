@@ -3,7 +3,7 @@
 namespace App\Admin\Controllers\Traits;
 
 # MODELS
-use Encore\Admin\Auth\Database\Administrator;
+use App\Models\AdminUser;
 use DB;
 
 trait LINENotifyFunc
@@ -14,15 +14,12 @@ trait LINENotifyFunc
      * @return void
      */
     public function lineNotifyCancel() {
-        $username = request()->get('username');
-        $admin = Administrator::where(['username'=>$username])->first();
+        $admin = AdminUser::findOrFail(request()->get('id'));
         # 若使用者已連動則進行取消連動作業
         if (!empty($admin['line_notify_token'])) {
-            $this->lineNotifyRevoke($username, $admin);
+            $this->lineNotifyRevoke($admin);
             session()->flash('status', '解除連動');
-            return redirect()->route('admin.setting');
         }
-
         return redirect()->route('admin.setting');
     }
 
@@ -34,12 +31,13 @@ trait LINENotifyFunc
      * @return void
      */
     public function lineNotifyCallback() {
-        $username = request()->get('username');
         $code = request()->get('code');
-        $callbackUrl = route('admin-line-notify.callback', ['username' => $username]);
-        DB::statement("update admin_users set line_notify_auth_code='{$code}' where username='{$username}'");
+        $admin = AdminUser::findOrFail(request()->get('id'));
+        $callbackUrl = route('admin-line-notify.callback', ['id' => $admin->id]);
+        $admin->line_notify_auth_code = $code;
+        $admin->save();
         ### LINE Access Token ###
-        $this->getNotifyAccessToken($username, $code, $callbackUrl);
+        $this->getNotifyAccessToken($admin, $code, $callbackUrl);
         session()->flash('status', '連動完成!');
         return redirect()->route('admin.setting');
     }
@@ -50,7 +48,7 @@ trait LINENotifyFunc
      * @param [type] $access_token
      * @return void
      */
-    public function lineNotifyRevoke($username, $admin) {
+    public function lineNotifyRevoke(AdminUser $admin) {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, 'https://notify-api.line.me/api/revoke');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -65,7 +63,8 @@ trait LINENotifyFunc
          * {"status":200,"message":"ok"}
          */
         if (in_array($output['status'],[200,401])) {
-            DB::statement("update admin_users set line_notify_token = null where username='{$username}'");
+            $admin->line_notify_token = null;
+            $admin->save();
         }
         return $output;
     }
@@ -79,7 +78,7 @@ trait LINENotifyFunc
      * @param [type] $redirect_uri
      * @return void
      */
-    private function getNotifyAccessToken($username, $code, $redirect_uri) {
+    private function getNotifyAccessToken(AdminUser $admin, $code, $redirect_uri) {
         // $admin = Administrator::where(['username'=>$username])->first();
 
         $apiUrl = "https://notify-bot.line.me/oauth/token";
@@ -106,7 +105,8 @@ trait LINENotifyFunc
          *  }
          */
         $result = json_decode($output, true);
-        $token = $result['access_token'];
-        DB::statement("update admin_users set line_notify_token='{$token}' where username='{$username}'");
+        $admin->refresh();
+        $admin->line_notify_token = $result['access_token'];
+        $admin->save();
     }
 }
