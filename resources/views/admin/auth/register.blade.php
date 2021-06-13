@@ -13,39 +13,36 @@
 
     <form method="POST" action="{{ route('register') }}">
         @csrf
-      <div class="form-group has-feedback">
+      <div class="form-group has-feedback {!! !$errors->has('name') ?: 'has-error' !!}">
+        @error('name')
+            <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+        @enderror
         <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" placeholder="{{ __('Name') }}" required autocomplete="name" autofocus>
         <span class="glyphicon glyphicon-user form-control-feedback"></span>
-        @error('name')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
       </div>
-      <div class="form-group has-feedback">
+      <div class="form-group has-feedback {!! !$errors->has('email') ?: 'has-error' !!}">
+        @error('email')
+            <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+        @enderror
         <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" placeholder="{{ __('E-Mail Address') }}">
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
-        @error('email')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
       </div>
-      <div class="form-group has-feedback">
+      <div class="form-group has-feedback {!! !$errors->has('password') ?: 'has-error' !!}">
+        @error('password')
+            <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+        @enderror
         <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="{{ __('Password') }}">
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-        @error('password')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
       </div>
       <div class="form-group has-feedback">
         <input type="password" class="form-control" name="password_confirmation" required autocomplete="new-password" placeholder="{{ __('Confirm Password') }}">
         <span class="glyphicon glyphicon-log-in form-control-feedback"></span>
       </div>
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-12 {!! !$errors->has('agree') ?: 'has-error' !!}">
+        @error('agree')
+            <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+        @enderror
           <div class="checkbox icheck">
             <label>
               <input type="checkbox" name="agree" value="1">
@@ -55,11 +52,6 @@
               ]) !!}
             </label>
           </div>
-          @error('agree')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-        @enderror
         </div>
         <!-- /.col -->
         <div class="col-xs-12">

@@ -11,7 +11,7 @@
     <p class="login-box-msg">{{ trans('admin.login') }}</p>
 
     <form action="{{ admin_url('auth/login') }}" method="post">
-      <div class="form-group has-feedback {!! !$errors->has('username') ?: 'has-error' !!}">
+      <div class="form-group has-feedback {!! !$errors->has('email') ?: 'has-error' !!}">
 
         @if($errors->has('email'))
           @foreach($errors->get('email') as $message)
