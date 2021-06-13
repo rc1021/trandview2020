@@ -28,7 +28,7 @@ class TxnMarginOrderObserver
             $txnMarginOrder->withoutRelations();
             $data = self::GetMessage($txnMarginOrder->toArray());
             $data = sprintf('%s%s', DirectType::fromValue($txnMarginOrder->signal->txn_direct_type)->description, TxnExchangeType::fromValue($txnMarginOrder->signal->txn_exchange_type)->description) . $data;
-            $txnMarginOrder->user->notify($data);
+            $txnMarginOrder->user->lineNotify($data);
 
             // 如果是市價單出場就結算這次的盈虧
             if(OrderType::fromKey($txnMarginOrder->type)->is(OrderType::MARKET)) {
@@ -47,7 +47,7 @@ class TxnMarginOrderObserver
                 array_push($msg, sprintf("目前帳戶資金：%s", $currentQuoteAssetFree));
                 array_push($msg, sprintf("本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
                 // 通知盈虧
-                $txnMarginOrder->user->notify(implode("\n", $msg));
+                $txnMarginOrder->user->lineNotify(implode("\n", $msg));
             }
         }
         catch(Exception $e) {

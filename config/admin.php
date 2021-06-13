@@ -2,6 +2,10 @@
 
 return [
 
+    'default' => [
+        'role' => env('ADMIN_USER_ROLE', 0)
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Laravel-admin name
@@ -58,11 +62,11 @@ return [
     */
     'route' => [
 
-        'prefix' => env('ADMIN_ROUTE_PREFIX', 'admin'),
+        'prefix' => env('ADMIN_ROUTE_PREFIX', ''),
 
         'namespace' => 'App\\Admin\\Controllers',
 
-        'middleware' => ['web', 'admin'],
+        'middleware' => ['web', 'admin', 'verified', '2fa'],
     ],
 
     /*
@@ -139,6 +143,12 @@ return [
         'excepts' => [
             'auth/login',
             'auth/logout',
+            'email/verify*',
+            'email/resend',
+            'password/reset*',
+            'password/email',
+            'password/confirm',
+            'register',
         ],
     ],
 
@@ -178,7 +188,7 @@ return [
 
         // User tables and model.
         'users_table' => 'admin_users',
-        'users_model' => Encore\Admin\Auth\Database\Administrator::class,
+        'users_model' => App\Models\AdminUser::class,
 
         // Role table and model.
         'roles_table' => 'admin_roles',

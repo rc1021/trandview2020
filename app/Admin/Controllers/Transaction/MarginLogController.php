@@ -168,7 +168,14 @@ class MarginLogController extends AdminController
         $grid->disableColumnSelector();
         $grid->paginate(50);
 
-        return $this->txnEntryRows() . $grid->render();
+        try {
+            return $this->txnEntryRows() . $grid->render();
+        }
+        catch(Exception $e) {
+
+            session()->flash('status', '請設定金鑰!');
+            return redirect()->route('txn.keysecret');
+        }
     }
 
     private function txnEntryRows()

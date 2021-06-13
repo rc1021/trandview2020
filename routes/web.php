@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return '';
-});
+// Route::get('/', function () {
+//     return '';
+// });
 
 
 Route::get('signal-history/{clock?}', App\Http\Controllers\SignalHistoryController::class)->name('signal.history');

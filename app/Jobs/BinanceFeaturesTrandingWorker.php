@@ -124,7 +124,7 @@ class BinanceFeaturesTrandingWorker implements ShouldQueue
         }
         catch(Exception $e) {
             $error = $e->getMessage();
-            $this->user->notify(print_r($error, true));
+            $this->user->lineNotify(print_r($error, true));
         }
 
         $this->time_duration = $this->timer;
