@@ -4,7 +4,7 @@ RUN apk add --no-cache nginx supervisor wget
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions gd mysqli pdo_mysql zip mbstring xml swoole
+RUN install-php-extensions gd mysqli pdo_mysql zip mbstring xml swoole intl
 
 # fix work iconv library with alphine
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv
