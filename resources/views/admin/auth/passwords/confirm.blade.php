@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title'){{ __('Confirm Password') }}@endsection
+
 @section('content')
 
 <div class="register-box">
@@ -18,15 +20,13 @@
             <form method="POST" action="{{ route('password.confirm') }}">
                 @csrf
 
-                <div class="form-group has-feedback">
+                <div class="form-group has-feedback {!! !$errors->has('password') ?: 'has-error' !!}">
+                    @error('password')
+                        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+                    @enderror
                     <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password" placeholder="{{ __('Password') }}">
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
 
-                    @error('password')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
                 </div>
 
                 <div class="form-group row mb-0">
