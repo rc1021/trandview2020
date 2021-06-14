@@ -28,9 +28,9 @@ Route::group([
         'prefix'        => 'auth/twofactor',
         'as'            => 'auth.2fa.',
     ], function (Router $router) use ($withoutVerified) {
-        $router->post('enable', 'AuthController@enableTwoFactor')->name('enable');
-        $router->post('disable', 'AuthController@disableTwoFactor')->name('disable');
-        $router->post('verify', 'AuthController@verifyTwoFactor')->name('verify');
+        $router->post('enable', 'Auth\TwoFactorAuthController@enableTwoFactor')->name('enable');
+        $router->post('disable', 'Auth\TwoFactorAuthController@disableTwoFactor')->name('disable');
+        $router->post('verify', 'Auth\TwoFactorAuthController@verifyTwoFactor')->name('verify');
     });
 
     // Password Reset Routes...

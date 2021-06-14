@@ -143,6 +143,7 @@ return [
         'excepts' => [
             'auth/login',
             'auth/logout',
+            'auth/twofactor*',
             'email/verify*',
             'email/resend',
             'password/reset*',
