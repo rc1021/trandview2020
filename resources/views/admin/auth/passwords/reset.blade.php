@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title'){{ __('Reset Password') }}@endsection
+
 @section('content')
 
 <div class="register-box">

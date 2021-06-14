@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Admin\Controllers\Traits;
+namespace App\Admin\Controllers\Auth;
 
-use App\Models\TxnMarginOrder;
-use BinanceApi\Enums\OrderType;
-use Encore\Admin\Widgets\Table;
+use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
 use PragmaRX\Google2FALaravel\Support\Authenticator;
 use Illuminate\Http\JsonResponse;
+use Encore\Admin\Facades\Admin;
 
-trait TwoFactorAuthTrait
+class TwoFactorAuthController extends Controller
 {
     public function verifyTwoFactor(Request $request)
     {
@@ -22,17 +23,9 @@ trait TwoFactorAuthTrait
         return "otp auth f!";
     }
 
-    public function twoFactorView()
+    public function enableTwoFactor(Request $request)
     {
-        $user = $this->guard()->user();
-        if(!empty($user->two_factor_secret))
-            return view('admin.encore.form.twofactor-done');
-        return view('admin.encore.form.twofactor-start');
-    }
-
-    public function enableTwoFactor()
-    {
-        $user = $this->guard()->user();
+        $user = $request->user();
         if(!empty($user->two_factor_secret))
             return view('admin.encore.form.twofactor-done');
         else {
@@ -51,9 +44,9 @@ trait TwoFactorAuthTrait
         }
     }
 
-    public function disableTwoFactor()
+    public function disableTwoFactor(Request $request)
     {
-        $user = $this->guard()->user();
+        $user = $request->user();
         if(empty($user->two_factor_secret))
             return view('admin.encore.form.twofactor-start');
         else {

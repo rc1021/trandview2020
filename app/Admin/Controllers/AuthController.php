@@ -13,7 +13,7 @@ use Encore\Admin\Form;
 
 class AuthController extends BaseAuthController
 {
-    use LINENotifyFunc, TwoFactorAuthTrait;
+    use LINENotifyFunc;
 
     /**
      * Get the login username to be used by the controller.
@@ -84,8 +84,11 @@ class AuthController extends BaseAuthController
         return $form;
     }
 
-    public function verifyNotice(Request $request)
+    public function twoFactorView()
     {
-        return 5;
+        $user = $this->guard()->user();
+        if(!empty($user->two_factor_secret))
+            return view('admin.encore.form.twofactor-done');
+        return view('admin.encore.form.twofactor-start');
     }
 }
