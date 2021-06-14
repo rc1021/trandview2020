@@ -1,5 +1,11 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/14</h2>
+        <ul>
+            <li>取消白名單IP限制</li>
+            <li>新增帳戶功能：創建帳戶、忘記密碼、信箱驗證、設定金鑰時再次確認密碼</li>
+            <li>新增帳號雙因素驗證</li>
+        </ul>
         <h2>2021/05/31</h2>
         <ul>
             <li>更新出場結算 Line Notify 內容</li>
