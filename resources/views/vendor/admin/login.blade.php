@@ -2,6 +2,15 @@
 
 @section('title'){{ __('Login') }}@endsection
 
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+    function onSubmit(token) {
+        document.getElementById("frm").submit();
+    }
+    </script>
+@endpush
+
 @section('content')
 <div class="login-box">
   <div class="login-logo">
@@ -10,7 +19,7 @@
   <div class="login-box-body">
     <p class="login-box-msg">{{ trans('admin.login') }}</p>
 
-    <form action="{{ admin_url('auth/login') }}" method="post">
+    <form id="frm" action="{{ admin_url('auth/login') }}" method="post">
       <div class="form-group has-feedback {!! !$errors->has('email') ?: 'has-error' !!}">
 
         @if($errors->has('email'))
@@ -19,7 +28,7 @@
           @endforeach
         @endif
 
-        <input type="text" class="form-control" placeholder="{{ __('E-Mail Address') }}" name="email" value="{{ old('email') }}">
+        <input type="text" class="form-control" placeholder="{{ __('E-Mail Address') }}" name="email" value="{{ old('email') }}" required autofocus>
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       </div>
       <div class="form-group has-feedback {!! !$errors->has('password') ?: 'has-error' !!}">
@@ -30,8 +39,13 @@
           @endforeach
         @endif
 
-        <input type="password" class="form-control" placeholder="{{ trans('admin.password') }}" name="password">
+        <input type="password" class="form-control" placeholder="{{ trans('admin.password') }}" name="password" required>
         <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+      <div class="row {!! !$errors->has(config('googlerecaptcha.input')) ?: 'has-error' !!}">
+        @error(config('googlerecaptcha.input'))
+            <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+        @enderror
       </div>
       <div class="row">
         <div class="col-xs-8">
@@ -46,7 +60,10 @@
         </div>
         <div class="col-xs-4">
           <input type="hidden" name="_token" value="{{ csrf_token() }}">
-          <button type="submit" class="btn btn-primary btn-block btn-flat">{{ trans('admin.login') }}</button>
+          <button class="g-recaptcha btn btn-primary btn-block btn-flat"
+            data-sitekey="{{ config('googlerecaptcha.client_id') }}"
+            data-callback='onSubmit'
+            data-action='submit'>{{ trans('admin.login') }}</button>
         </div>
       </div>
     </form>
