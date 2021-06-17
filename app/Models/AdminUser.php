@@ -139,7 +139,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
         $key = data_get($ks, 'key', null);
         $secret = data_get($ks, 'secret', null);
         if(is_null($key) || is_null($secret))
-            return null;
+            throw new Exception('請先設定金鑰 <a href="'.route('txn.keysecret').'">前往設定</a>');
         return new BinanceApiManager($key, $secret);
     }
 
