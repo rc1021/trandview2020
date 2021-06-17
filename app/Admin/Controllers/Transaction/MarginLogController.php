@@ -43,7 +43,7 @@ class MarginLogController extends AdminController
      *
      * @return Grid
      */
-    protected function grid(Content $content)
+    protected function grid()
     {
         \Encore\Admin\Admin::style('.modal-dialog td[class^=column] { min-width: 125px; }');
 
@@ -172,10 +172,9 @@ class MarginLogController extends AdminController
             return $this->txnEntryRows() . $grid->render();
         }
         catch(Exception $e) {
-            $action = route('txn.keysecret');
-            return $content->body(<<<HTML
+            return <<<HTML
             執行發生錯誤 (error: {$e->getMessage()})
-        HTML);
+        HTML;
         }
     }
 
