@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/15</h2>
+        <ul>
+            <li>在創建帳戶、忘記密碼、帳戶登入頁面加入 Google reCAPTCHA 機制</li>
+        </ul>
         <h2>2021/06/14</h2>
         <ul>
             <li>取消白名單IP限制</li>

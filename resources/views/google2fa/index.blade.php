@@ -15,22 +15,16 @@
 
     <div class="card">
 
-        <div class="card-body">
-
             <form action="{{ url()->current() }}">
                 @csrf
 
-                <div class="form-group has-feedback">
+                <div class="form-group has-feedback {!! !Session::has(config('google2fa.otp_input')) ?: 'has-error' !!}">
+                    @if (Session::has(config('google2fa.otp_input')))
+                        <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{ Session::get(config('google2fa.otp_input')) }}</label><br>
+                    @endif
                     <input id="{{ config('google2fa.otp_input') }}" type="text" autofocus autocomplete="off" class="form-control @error(config('google2fa.otp_input')) is-invalid @enderror" name="{{ config('google2fa.otp_input') }}" required placeholder="{{ __('Google 2fa') }}">
                     <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-
-                    @error(config('google2fa.otp_input'))
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @else
-                        <span >{{ __('Please confirm your 6 characters Google 2fa code.') }}</span>
-                    @enderror
+                    <span >{{ __('Please confirm your 6 characters Google 2fa code.') }}</span>
                 </div>
 
                 <div class="form-group row mb-0">

@@ -67,7 +67,7 @@ Route::group([
         'prefix'        => 'txn',
         'as'            => 'txn.',
     ], function (Router $router) {
-        $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret')->middleware('password.confirm');
+        $router->get('key-secrets', AuthController::class.'@getKeySecret')->name('keysecret')->middleware('2fa.less.pw.confirm');
         $router->put('key-secrets', AuthController::class.'@putKeySecret')->name('keysecret');
     });
 

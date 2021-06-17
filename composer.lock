@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65833e9a10eb7dee18a87d2afb69a774",
+    "content-hash": "d534efdec4b19097f7f672036fc3d351",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -5060,7 +5060,7 @@
         },
         {
             "name": "rc1021/binance-api",
-            "version": "dev-master",
+            "version": "dev-develop",
             "dist": {
                 "type": "path",
                 "url": "./extra-pkgs/rc1021/binance-api",
@@ -10952,16 +10952,16 @@
         },
         {
             "name": "sebastian/type",
-            "version": "2.3.2",
+            "version": "2.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/type.git",
-                "reference": "0d1c587401514d17e8f9258a27e23527cb1b06c1"
+                "reference": "ca39369c41313ed12c071ed38ecda8fcdb248859"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/0d1c587401514d17e8f9258a27e23527cb1b06c1",
-                "reference": "0d1c587401514d17e8f9258a27e23527cb1b06c1",
+                "url": "https://api.github.com/repos/sebastianbergmann/type/zipball/ca39369c41313ed12c071ed38ecda8fcdb248859",
+                "reference": "ca39369c41313ed12c071ed38ecda8fcdb248859",
                 "shasum": ""
             },
             "require": {
@@ -10996,7 +10996,7 @@
             "homepage": "https://github.com/sebastianbergmann/type",
             "support": {
                 "issues": "https://github.com/sebastianbergmann/type/issues",
-                "source": "https://github.com/sebastianbergmann/type/tree/2.3.2"
+                "source": "https://github.com/sebastianbergmann/type/tree/2.3.3"
             },
             "funding": [
                 {
@@ -11004,7 +11004,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-06-04T13:02:07+00:00"
+            "time": "2021-06-15T10:50:11+00:00"
         },
         {
             "name": "sebastian/version",
@@ -11181,9 +11181,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "rc1021/binance-api": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

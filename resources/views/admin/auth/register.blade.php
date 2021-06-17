@@ -2,6 +2,15 @@
 
 @section('title'){{ __('Register') }}@endsection
 
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+    function onSubmit(token) {
+        document.getElementById("frm").submit();
+    }
+    </script>
+@endpush
+
 @section('content')
 <div class="register-box">
   <div class="register-logo">
@@ -11,7 +20,7 @@
   <div class="register-box-body">
     <p class="login-box-msg">{{ __('Register') }}</p>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form id="frm" method="POST" action="{{ route('register') }}">
         @csrf
       <div class="form-group has-feedback {!! !$errors->has('name') ?: 'has-error' !!}">
         @error('name')
@@ -54,8 +63,14 @@
           </div>
         </div>
         <!-- /.col -->
-        <div class="col-xs-12">
-          <button type="submit" class="btn btn-primary btn-block btn-flat">{{ __('Register') }}</button>
+        <div class="col-xs-12 {!! !$errors->has(config('googlerecaptcha.input')) ?: 'has-error' !!}">
+            @error(config('googlerecaptcha.input'))
+                <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i>{{$message}}</label><br>
+            @enderror
+          <button class="g-recaptcha btn btn-primary btn-block btn-flat"
+            data-sitekey="{{ config('googlerecaptcha.client_id') }}"
+            data-callback='onSubmit'
+            data-action='submit'>{{ __('Register') }}</button>
         </div>
         <!-- /.col -->
       </div>

@@ -2,6 +2,15 @@
 
 @section('title'){{ __('Reset Password') }}@endsection
 
+@push('scripts')
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+    <script>
+    function onSubmit(token) {
+        document.getElementById("frm").submit();
+    }
+    </script>
+@endpush
+
 @section('content')
 
 <div class="register-box">
@@ -21,7 +30,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('password.email') }}">
+            <form id="frm" method="POST" action="{{ route('password.email') }}">
                 @csrf
                 <div class="form-group has-feedback {!! !$errors->has('email') ?: 'has-error' !!}">
                     @error('email')
@@ -33,7 +42,10 @@
 
                 <div class="form-group row mb-0">
                     <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary">
+                        <button class="g-recaptcha btn btn-primary"
+                        data-sitekey="{{ config('googlerecaptcha.client_id') }}"
+                        data-callback='onSubmit'
+                        data-action='submit'>
                             {{ __('Send Password Reset Link') }}
                         </button>
                     </div>

@@ -10,6 +10,7 @@ use App\Http\Repositories\Admin\AuthKeySecretRepository;
 use App\Admin\Controllers\Traits\LINENotifyFunc;
 use App\Admin\Controllers\Traits\TwoFactorAuthTrait;
 use Encore\Admin\Form;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends BaseAuthController
 {
@@ -23,6 +24,22 @@ class AuthController extends BaseAuthController
     protected function username()
     {
         return 'email';
+    }
+
+    /**
+     * Get a validator for an incoming login request.
+     *
+     * @param array $data
+     *
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function loginValidator(array $data)
+    {
+        return Validator::make($data, [
+            config('googlerecaptcha.input') => ['required', 'string', new \App\Rules\GoogleRecapchaV3Case],
+            $this->username()   => 'required',
+            'password'          => 'required',
+        ]);
     }
 
     public function getKeySecret(Content $content, AuthKeySecretRepository $rep)

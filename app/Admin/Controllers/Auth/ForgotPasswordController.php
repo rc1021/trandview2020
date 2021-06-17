@@ -4,6 +4,7 @@ namespace App\Admin\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Http\Request;
 
 class ForgotPasswordController extends Controller
 {
@@ -19,6 +20,14 @@ class ForgotPasswordController extends Controller
     */
 
     use SendsPasswordResetEmails;
+
+    protected function validateEmail(Request $request)
+    {
+        $request->validate([
+            config('googlerecaptcha.input') => ['required', 'string', new \App\Rules\GoogleRecapchaV3Case],
+            'email' => 'required|email'
+        ]);
+    }
 
     public function showLinkRequestForm()
     {
