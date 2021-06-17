@@ -1,5 +1,5 @@
 <div class="btn-group" data-toggle="buttons">
-    <a href="{{ route('admin.txn.margin.forceLiquidation', ['pair' => $pair]) }}"
+    <a href="{{ route('txn.margin.forceLiquidation', ['pair' => $pair]) }}"
         rel="nofollow"
         class="btn btn-danger btn-xs"
         style="color: #fff;"
