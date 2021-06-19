@@ -81,8 +81,8 @@
             <li>幫現在的主題加料</li>
             <li>新增每日營收通知訊息</li>
             <li>換應用程式Logo<br>
-                for collapse&nbsp;&nbsp;<img src="/logo_lg.png" height="50" /><br>
-                for mini&nbsp;&nbsp;<img src="/logo_mini.png" height="50" /></li>
+                for collapse&nbsp;&nbsp;{!! config('admin.logo') !!}<br>
+                for mini&nbsp;&nbsp;{!! config('admin.logo-mini') !!}</li>
         </ul>
         <h2>2021/04/02</h2>
         <ul>
