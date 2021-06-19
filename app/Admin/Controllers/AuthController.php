@@ -11,6 +11,9 @@ use App\Admin\Controllers\Traits\LINENotifyFunc;
 use App\Admin\Controllers\Traits\TwoFactorAuthTrait;
 use Encore\Admin\Form;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\Facades\Redirect;
 
 class AuthController extends BaseAuthController
 {
@@ -58,7 +61,7 @@ class AuthController extends BaseAuthController
 
         $form = new Form(new $class());
 
-        $form->email('email', trans('admin.username'))->disable();
+        $form->email('email', trans('admin.email'))->disable();
         $form->text('name', trans('admin.name'))->rules('required');
         $form->image('avatar', trans('admin.avatar'));
         $form->password('password', trans('admin.password'))->rules('confirmed|required');

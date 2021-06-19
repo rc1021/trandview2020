@@ -23,6 +23,8 @@ Route::group([
     $router->get('register', 'Auth\RegisterController@showRegistrationForm')->name('register')->withoutMiddleware($withoutVerified);
     $router->post('register', 'Auth\RegisterController@register')->withoutMiddleware($withoutVerified);
 
+    $router->resource('auth/users', 'UserController')->names('admin.auth.users');
+
     // Password Reset Routes...
     Route::group([
         'prefix'        => 'auth/twofactor',

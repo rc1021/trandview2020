@@ -14,7 +14,7 @@
 @section('content')
 <div class="register-box">
   <div class="register-logo">
-    <a href="{{ admin_url('/') }}"><img src="/logo_lg.png" title="{{config('admin.name')}}" /></a>
+    <a href="{{ admin_url('/') }}">{!! config('admin.logo') !!}</a>
   </div>
 
   <div class="register-box-body">

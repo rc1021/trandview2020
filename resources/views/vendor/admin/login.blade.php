@@ -14,7 +14,7 @@
 @section('content')
 <div class="login-box">
   <div class="login-logo">
-    <a href="{{ admin_url('/') }}"><img src="/logo_lg.png" title="{{config('admin.name')}}" /></a>
+    <a href="{{ admin_url('/') }}">{!! config('admin.logo') !!}</a>
   </div>
   <div class="login-box-body">
     <p class="login-box-msg">{{ trans('admin.login') }}</p>
