@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/19</h2>
+        <ul>
+            <li>在 交易紀錄 加入每筆下單記錄的成交詳情，請點擊 槓桿交易 &gt; 交易紀錄 &gt; 下單資料 &gt; 成交內容</li>
+        </ul>
         <h2>2021/06/15</h2>
         <ul>
             <li>在創建帳戶、忘記密碼、帳戶登入頁面加入 Google reCAPTCHA 機制</li>
