@@ -75,15 +75,21 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     {
         $error = null;
         try {
+            $symbol_key = $this->signal->symbol_type;
+
             $this->txn_setting = $this->user->txnSettings()->where('pair', $this->signal->symbol_type)->with('user')->first();
             $this->user->signals()->attach($this->signal);
 
             $exchange = $this->signal->txn_exchange_type;
-            $this->initBinanceApi();
+            $this->api = $this->user->binance_api;
+
+            // 記錄交易前的資產情況
+            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+            $this->user->signals()->updateExistingPivot($this->signal, ['before_asset' => data_get($account, "assets.$symbol_key", [])]);
 
             if($this->signal->txn_direct_type->is(DirectType::FORCE))
             {
-                $price = $this->api->marginPrice($this->signal->symbol_type);
+                $price = $this->api->marginPrice($symbol_key);
                 $this->signal->current_price = $this->api->floor_dec($price, 2);
                 $this->signal->save();
                 // 強制出場
@@ -94,7 +100,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                 // 買入
                 if($exchange->is(TxnExchangeType::Entry))
                 {
-                    $this->initWorksheet();
+                    $this->initWorksheet($account);
 
                     for($i = 2.0; $i >= 0.0; $i = $i - 0.1) {
                         try {
@@ -131,6 +137,10 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         $this->time_duration = $this->timer;
         $this->signal->save();
 
+        // 記錄交易後的資產情況
+        $account = $this->api->marginIsolatedAccountByKey($symbol_key);
+        $this->user->signals()->updateExistingPivot($this->signal, ['after_asset' => data_get($account, "assets.$symbol_key", [])]);
+
         if(!is_null($error))
             $this->user->signals()->updateExistingPivot($this->signal, compact('error'));
         $this->user->save();
@@ -147,17 +157,8 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                 $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
                 $this->timer['force_liquidation_quoteAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
-                    if(array_key_exists('orders', $result) and $result['orders']) {
-                        foreach ($result['orders'] as $order) {
-                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
-                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
-                            }
-                            TxnMarginOrder::create(array_merge([
-                                'user_id' => $this->user->id,
-                                'signal_id' => $this->signal->id
-                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
-                        }
-                    }
+                    if(array_key_exists('orders', $result) and $result['orders'])
+                        $this->createTxnOrderFromOrders($result['orders']);
                 });
             }
             // 做空進場狀態, 所以做空出場
@@ -167,50 +168,32 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                 $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::SHORT));
                 $this->timer['force_liquidation_baseAsset_borrowed'] = self::DuringTimer(function () use (&$result)
                 {
-                    if(array_key_exists('orders', $result) and $result['orders']) {
-                        foreach ($result['orders'] as $order) {
-                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
-                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
-                            }
-                            TxnMarginOrder::create(array_merge([
-                                'user_id' => $this->user->id,
-                                'signal_id' => $this->signal->id
-                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
-                        }
-                    }
+                    if(array_key_exists('orders', $result) and $result['orders'])
+                        $this->createTxnOrderFromOrders($result['orders']);
                 });
             }
-            // 出掉所有的標的幣
-            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-            $base_asset_free = data_get($account, "assets.$symbol_key.baseAsset.free", 0);
-            if($base_asset_free > 0) {
-                $result = $this->api->doMarginExit($symbol_key, DirectType::fromValue(DirectType::LONG));
-                $this->timer['force_liquidation_baseAsset_free'] = self::DuringTimer(function () use (&$result)
-                {
-                    if(array_key_exists('orders', $result) and $result['orders']) {
-                        foreach ($result['orders'] as $order) {
-                            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
-                                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
-                            }
-                            TxnMarginOrder::create(array_merge([
-                                'user_id' => $this->user->id,
-                                'signal_id' => $this->signal->id
-                            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
-                        }
-                    }
-                });
-            }
-
-            $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-            $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
     }
 
-    private function initBinanceApi()
+
+    /**
+     * 從orders陣列新增訂單紀錄
+     *
+     * @return void
+     */
+    public function createTxnOrderFromOrders(array $orders)
     {
-        $this->api = $this->user->binance_api;
+        foreach ($orders as $order) {
+            if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
+                $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
+            }
+            TxnMarginOrder::create(array_merge([
+                'user_id' => $this->user->id,
+                'signal_id' => $this->signal->id
+            ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated", "fills", "loan_ratio"])));
+        }
     }
 
-    private function initWorksheet()
+    private function initWorksheet(array $account)
     {
         $symbol_key = $this->signal->symbol_type;
         $formulaTable = $this->formulaTable = FormulaTable::pair($symbol_key)->version()->first();
@@ -222,9 +205,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
         // 當前表試算表
         $sheet = $this->sheet = $this->spreadsheet->getActiveSheet();
-
-        $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-        $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
 
         // 當前總資金(計價幣)
         $sheet->setCellValue($formulaTable->setcol1, data_get($account, "assets.$symbol_key.quoteAsset.free"));
@@ -324,19 +304,16 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
         {
-            if(array_key_exists('orders', $result) and $result['orders']) {
+            if(array_key_exists('orders', $result) and $result['orders'])
+            {
                 foreach ($result['orders'] as $order) {
-                    $arr = [
-                        'user_id' => $this->user->id,
-                        'signal_id' => $this->signal->id,
-                    ];
                     if(OrderType::fromKey($order['type'])->is(OrderType::LIMIT))
                     {
                         list($loan_ratio) = $this->getCalculatedValues([$this->formulaTable->setcol31]);
-                        $arr['loan_ratio'] = $loan_ratio;
+                        $order['loan_ratio'] = $loan_ratio;
                     }
-                    TxnMarginOrder::create(array_merge($arr, Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated", "fills"])));
                 }
+                $this->createTxnOrderFromOrders($result['orders']);
             }
         });
 
@@ -363,19 +340,9 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
         $this->timer['record_orders'] = self::DuringTimer(function () use (&$result)
         {
-            if(array_key_exists('orders', $result) and $result['orders']) {
-                foreach ($result['orders'] as $order) {
-                    TxnMarginOrder::create(array_merge([
-                        'user_id' => $this->user->id,
-                        'signal_id' => $this->signal->id
-                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated", "fills"])));
-                }
-            }
+            if(array_key_exists('orders', $result) and $result['orders'])
+                $this->createTxnOrderFromOrders($result['orders']);
         });
-
-        $symbol_key = $this->signal->symbol_type;
-        $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-        $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
 
         if(array_key_exists('error', $result) and $result['error'])
             throw new Exception($result['error']);

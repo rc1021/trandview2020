@@ -64,7 +64,7 @@ class MarginLogController extends AdminController
             });
 
             // $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
-            $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'asset_free', 'loan_ratio'];
+            $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'quote_asset_free', 'loan_ratio'];
             foreach ($dynamic_columns as $column) {
                 $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
                     $data = $this[$column->getName()];
@@ -84,11 +84,14 @@ class MarginLogController extends AdminController
                         case 'current_price':
                             $data = ceil_dec($data, 2);
                             break;
-                        case 'asset_free':
-                            $data = '未記錄';
-                            $data = data_get(json_decode($this->asset, true), 'quoteAsset.free', $data);
-                            if(is_numeric($data))
-                                $data = ceil_dec($data, 2);
+                        case 'quote_asset_free':
+                            $b = data_get(json_decode($this->before_asset, true), 'quoteAsset.free', '未記錄');
+                            $a = data_get(json_decode($this->after_asset, true), 'quoteAsset.free', '未記錄');
+                            if(is_numeric($b))
+                                $b = ceil_dec($b, 2);
+                            if(is_numeric($a))
+                                $a = ceil_dec($a, 2);
+                            $data = sprintf('%s | %s', $b, $a);
                             break;
                     }
                     if($data instanceof Enum)

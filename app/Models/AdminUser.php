@@ -64,8 +64,8 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
 
     public function signals()
     {
-        // return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->withPivot('error', 'asset');
-        return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->using(SignalHistoryUser::class)->withPivot('error', 'asset');
+        // return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->withPivot('error', 'before_asset', 'after_asset');
+        return $this->belongsToMany(SignalHistory::class, 'signal_history_user')->using(SignalHistoryUser::class)->withPivot('error', 'before_asset', 'after_asset');
     }
 
     public function orders()
@@ -158,7 +158,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
             if($is_entry) {
                 try {
                     $signal = $this->latestTxnEntrySignal($item->pair);
-                    $free = data_get($signal, 'pivot.asset.quoteAsset.free', 0);
+                    $free = data_get($signal, 'pivot.after_asset.quoteAsset.free', 0);
                     $txn = $signal->txnMargOrders()
                         ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
                         ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
