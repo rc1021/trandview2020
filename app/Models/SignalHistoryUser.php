@@ -8,6 +8,7 @@ class SignalHistoryUser extends Pivot
 {
 
     protected $casts = [
-        'asset' => 'array',
+        'before_asset' => 'array',
+        'after_asset' => 'array',
     ];
 }

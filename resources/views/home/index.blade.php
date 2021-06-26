@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/27</h2>
+        <ul>
+            <li>增加槓桿訊號執行前後資產變化紀錄</li>
+        </ul>
         <h2>2021/06/26</h2>
         <ul>
             <li>槓桿交易訂單加入實際成交均價金額</li>

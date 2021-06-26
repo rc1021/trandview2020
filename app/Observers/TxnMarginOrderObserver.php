@@ -39,7 +39,7 @@ class TxnMarginOrderObserver
                 if(is_null($lastSignal))
                     throw new Exception("No Latest EntrySignal: ". $symbol_key);
                 array_push($msg, sprintf("交易對：%s", $lastSignal->symbol_type));
-                $originQuoteAssetFree = data_get($lastSignal->pivot->asset, 'quoteAsset.free', 0);
+                $originQuoteAssetFree = data_get($lastSignal->pivot->after_asset, 'quoteAsset.free', 0);
                 array_push($msg, sprintf("進場前原資金：%s", $originQuoteAssetFree));
                 // 取得帳戶現有資產
                 $currentAsset = $txnMarginOrder->user->binance_api->marginIsolatedAccountByKey($symbol_key);

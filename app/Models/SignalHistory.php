@@ -91,7 +91,7 @@ class SignalHistory extends Model
 
     public function users()
     {
-        return $this->belongsToMany(AdminUser::class, 'signal_history_user')->using(SignalHistoryUser::class)->withPivot('error', 'asset');
+        return $this->belongsToMany(AdminUser::class, 'signal_history_user')->using(SignalHistoryUser::class)->withPivot('error', 'before_asset', 'after_asset');
     }
 
     public function txnMargOrders()
