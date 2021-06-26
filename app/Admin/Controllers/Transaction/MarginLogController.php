@@ -161,8 +161,8 @@ class MarginLogController extends AdminController
 
     private function txnEntryRows()
     {
-        $user = AdminUser::find(Admin::user()->id);
-        $txns = $user->getCurrentMarginTxns();
+        $user = Admin::guard()->user();
+        $txns = $user->current_margin_txns;
         $header = ['交易對', '進場中', '進場前原始資金', '進場當時價位', '目前價位', '目前未出場獲利', '操作'];
         $box = new Box('進場中的交易列表', new Table($header, $txns));
         $box->collapsable();
