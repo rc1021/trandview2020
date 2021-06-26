@@ -352,7 +352,7 @@ class BinanceApiManager
             {
                 $free = floatval(data_get($account, "assets.$symbol_key.baseAsset.free"));
                 $quantity = $this->floor_dec($free, 5);
-                if($quantity > 0) {
+                try{
                     // 市價賣出
                     $side = SideType::fromValue(SideType::SELL);
                     $type = OrderType::fromValue(OrderType::MARKET);
@@ -362,8 +362,12 @@ class BinanceApiManager
                     $order = $this->api->marginIsolatedOrder($symbol_key, $side->key, $type->key, $quantity, null, null, null, null, null, $resp->key, $effect->key, $force->key);
                     array_push($result['orders'], $order);
                 }
-                else {
-                    throw new Exception("做多出場，但市價賣出數量為0，請查看帳戶詳情。");
+                catch(Exception $e) {
+                    $req = $this->getLastRequest();
+                    if(data_get($req, 'json.code', 0) == -1013) {
+                        throw new Exception(sprintf("做多出場，但市價賣出數量不足量(%f)，請查看帳戶詳情", $quantity));
+                    }
+                    throw $e;
                 }
             }
             else {
@@ -371,7 +375,7 @@ class BinanceApiManager
                 $taker = floatval(data_get($trade_fee, 'tradeFee.taker', 0.001));
                 $netAsset = floatval(data_get($account, "assets.$symbol_key.baseAsset.netAsset"));
                 $quantity = $this->ceil_dec(abs($netAsset) / (1 - $taker), 5);
-                if($quantity > 0) {
+                try {
                     // 市價賣出，但不自動還款
                     $side = SideType::fromValue(SideType::BUY);
                     $type = OrderType::fromValue(OrderType::MARKET);
@@ -387,8 +391,12 @@ class BinanceApiManager
                     $repay = $borrowed + $interest;
                     $this->api->marginIsolatedRepay($asset, $repay, $symbol_key);
                 }
-                else {
-                    throw new Exception("做空出場，但市價買入數量為0，請查看帳戶詳情");
+                catch(Exception $e) {
+                    $req = $this->getLastRequest();
+                    if(data_get($req, 'json.code', 0) == -1013) {
+                        throw new Exception(sprintf("做空出場，但市價買入數量不足量(%f)，請查看帳戶詳情", $quantity));
+                    }
+                    throw $e;
                 }
             }
             // $freeQuantity = data_get($stopOrder, 'origQty', 0);
@@ -397,8 +405,7 @@ class BinanceApiManager
             //     throw new Exception("Delete StopLossLimit failure. origQty: $freeQuantity");
         }
         catch(Exception $e) {
-            $req = $this->getLastRequest();
-            $result['error'] = $e->getMessage() . "\n" . print_r($req, true);
+            $result['error'] = $e->getMessage();
         }
 
         return $result;

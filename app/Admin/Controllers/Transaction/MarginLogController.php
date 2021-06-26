@@ -100,62 +100,7 @@ class MarginLogController extends AdminController
             $grid->column('txnMargOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnMargOrders) {
                 $count = count($txnMargOrders);
                 return __('admin.rec.signal.txn_order.count', compact('count'));
-            })->expand(function ($model) {
-                // "symbol", "clientOrderId", "origClientOrderId"
-                $only = ["orderId", "type", "side", "created_at", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "loan_ratio", "fills"];
-                $txnMargOrders = $model->txnMargOrders->map(function ($origin) use ($only, $model) {
-                    $order = $origin->only($only);
-                    $order['side'] = SideType::fromKey($order['side'])->description;
-                    $order['type'] = OrderType::fromKey($order['type'])->description;
-                    $order['status'] = OrderStatusType::fromKey($order['status'])->description;
-                    $order['loan_ratio'] = sprintf('%s%%', $origin['loan_ratio'] * 100);
-                    $order['price'] = ceil_dec($origin['price'], 2);
-                    $order['cummulativeQuoteQty'] = ceil_dec($origin['cummulativeQuoteQty'], 2);
-                    $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
-                    if(!empty($order['fills'])) {
-                        $fills_data = [
-                            'url'     => null,
-                            'async'   => false,
-                            'grid'    => false,
-                            'key'     => $model->id . '_' . $origin->id,
-                            'name'    => 'signal-' . $model->id . '-order-' . $origin->id,
-                        ];
-                        try {
-                            $fills_data['title'] = __('admin.txn.order.fills') . __('admin.rec.signal.detail');
-                            $fills_data['value'] = __('admin.rec.signal.detail');
-                            $fills = collect(json_decode($order['fills'], true));
-                            if($fills->count() == 0)
-                                $fills_data = null;
-                            else {
-                                $columns = collect(['price', 'qty', 'commission', 'amount'])->map(function ($column) {
-                                    return __('admin.txn.order.fills_detail.'.$column);
-                                })->toArray();
-                                $fills_data['html'] = (new Table($columns, $fills->map(function ($fill) {
-                                    $fill['amount'] = ($fill['price'] * $fill['qty']) . ' ' . $fill['commissionAsset'];
-                                    $fill['commission'] = $fill['commission'] . ' ' . $fill['commissionAsset'];
-                                    unset($fill['commissionAsset']);
-                                    return $fill;
-                                })->toArray()))->render();
-                            }
-                        }
-                        catch(Exception $e) {
-                            $fills_data['title'] = __('admin.rec.signal.error');
-                            $fills_data['value'] = $e->getMessage();
-                            $fills_data['html'] = <<<HTML
-                            <div> {$e->getMessage()} </div>
-                            <div> {$order['fills']} </div>
-                            HTML;
-                        }
-                        $order['fills'] = !is_null($fills_data) ? Admin::component('admin::components.column-modal', $fills_data) : '';
-                    }
-                    // $order['transactTime'] = Carbon::parse($origin['transactTime'])->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
-                    return $order;
-                })->toArray();
-                $columns = collect($only)->map(function ($column) {
-                    return __('admin.txn.order.'.$column);
-                })->toArray();
-                return new Table($columns, $txnMargOrders);
-            });
+            })->expand($this->expandTxnMargOrderTable());
 
             $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
                 if($this->calc_log_path)
@@ -223,6 +168,73 @@ class MarginLogController extends AdminController
         $box->collapsable();
         $box->style('info');
         return str_replace('"box-body"', '"box-body table-responsive no-padding"' ,$box->render());
+    }
+
+    /**
+     * 用表格形式展開訂單交易記錄
+     *
+     * @return function
+     */
+    private function expandTxnMargOrderTable()
+    {
+        return function (SignalHistory $model) : Table {
+            // "symbol", "clientOrderId", "origClientOrderId"
+            $only = ["orderId", "type", "side", "price", "avg_price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "loan_ratio", "fills"];
+            $txnMargOrders = $model->txnMargOrders->map(function ($origin) use ($only, $model) {
+                $order = $origin->only($only);
+                $order['side'] = SideType::fromKey($order['side'])->description;
+                $order['type'] = OrderType::fromKey($order['type'])->description;
+                $order['status'] = OrderStatusType::fromKey($order['status'])->description;
+                $order['loan_ratio'] = sprintf('%s%%', $origin['loan_ratio'] * 100);
+                $order['price'] = ceil_dec($origin['price'], 2);
+                $order['cummulativeQuoteQty'] = ceil_dec($origin['cummulativeQuoteQty'], 2);
+                $order['marginBuyBorrowAmount'] .= ' '.$origin['marginBuyBorrowAsset'];
+
+                if(empty($order['fills'])) {
+                    $order['fills'] = '';
+                    $order['avg_price'] = 0;
+                }
+                else {
+                    $fills_data = [
+                        'url'     => null,
+                        'async'   => false,
+                        'grid'    => false,
+                        'key'     => $model->id . '_' . $origin->id,
+                        'name'    => 'signal-' . $model->id . '-order-' . $origin->id,
+                        'title'   => __('admin.txn.order.fills') . __('admin.rec.signal.detail'),
+                        'value'   => __('admin.rec.signal.detail'),
+                    ];
+                    try {
+                        $columns = collect(['price', 'qty', 'commission', 'amount'])->map(function ($column) {
+                            return __('admin.txn.order.fills_detail.'.$column);
+                        })->toArray();
+                        $collect = collect($order['fills']);
+                        $order['avg_price'] = ceil_dec($collect->avg('price'), 2);
+                        $fills_data['html'] = (new Table($columns, $collect->map(function ($fill) {
+                            $fill['amount'] = ($fill['price'] * $fill['qty']) . ' ' . $fill['commissionAsset'];
+                            $fill['commission'] = $fill['commission'] . ' ' . $fill['commissionAsset'];
+                            unset($fill['commissionAsset']);
+                            return $fill;
+                        })->toArray()))->render();
+                    }
+                    catch(Exception $e) {
+                        $content = json_encode($order['fills']);
+                        $fills_data['title'] = __('admin.rec.signal.error');
+                        $fills_data['value'] = $e->getMessage();
+                        $fills_data['html'] = <<<HTML
+                        <div> {$e->getMessage()} </div>
+                        <div> {$content} </div>
+                        HTML;
+                    }
+                    $order['fills'] = Admin::component('admin::components.column-modal', $fills_data);
+                }
+                return $order;
+            })->toArray();
+            $columns = collect($only)->map(function ($column) {
+                return __('admin.txn.order.'.$column);
+            })->toArray();
+            return new Table($columns, $txnMargOrders);
+        };
     }
 
     public function calc(SignalHistory $signal_history, Content $content)
