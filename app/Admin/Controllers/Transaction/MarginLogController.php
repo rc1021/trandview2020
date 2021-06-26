@@ -214,10 +214,12 @@ class MarginLogController extends AdminController
                         $collect = collect($order['fills']);
                         $order['avg_price'] = ceil_dec($collect->avg('price'), 2);
                         $fills_data['html'] = (new Table($columns, $collect->map(function ($fill) {
-                            $fill['amount'] = ($fill['price'] * $fill['qty']) . ' ' . $fill['commissionAsset'];
-                            $fill['commission'] = $fill['commission'] . ' ' . $fill['commissionAsset'];
-                            unset($fill['commissionAsset']);
-                            return $fill;
+                            return [
+                                'price' => $fill['price'],
+                                'qty' => $fill['qty'],
+                                'commission' => $fill['commission'] . ' ' . $fill['commissionAsset'],
+                                'amount' => ($fill['price'] * $fill['qty']) . ' ' . $fill['commissionAsset']
+                            ];
                         })->toArray()))->render();
                     }
                     catch(Exception $e) {
