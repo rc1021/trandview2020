@@ -139,7 +139,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     // 強制平倉
     public function forceLiquidation()
     {
-        try {
             $symbol_key = $this->signal->symbol_type;
             // 做多進場狀態, 所以做多出場
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
@@ -204,10 +203,6 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
             $account = $this->api->marginIsolatedAccountByKey($symbol_key);
             $this->user->signals()->updateExistingPivot($this->signal, ['asset' => data_get($account, "assets.$symbol_key", [])]);
-        }
-        catch(Exception $e) {
-            // 平倉失敗記錄起來
-        }
     }
 
     private function initBinanceApi()
@@ -334,14 +329,13 @@ class BinanceMarginTrandingWorker implements ShouldQueue
                     $arr = [
                         'user_id' => $this->user->id,
                         'signal_id' => $this->signal->id,
-                        'fills' => json_encode($order['fills'])
                     ];
                     if(OrderType::fromKey($order['type'])->is(OrderType::LIMIT))
                     {
                         list($loan_ratio) = $this->getCalculatedValues([$this->formulaTable->setcol31]);
                         $arr['loan_ratio'] = $loan_ratio;
                     }
-                    TxnMarginOrder::create(array_merge($arr, Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated"])));
+                    TxnMarginOrder::create(array_merge($arr, Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated", "fills"])));
                 }
             }
         });
@@ -371,15 +365,10 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         {
             if(array_key_exists('orders', $result) and $result['orders']) {
                 foreach ($result['orders'] as $order) {
-
-                    if($order['price'] == 0 and OrderType::fromKey($order['type'])->is(OrderType::MARKET)) {
-                        $order['price'] = $order['cummulativeQuoteQty'] / $order['executedQty'];
-                    }
-
                     TxnMarginOrder::create(array_merge([
                         'user_id' => $this->user->id,
                         'signal_id' => $this->signal->id
-                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "isIsolated"])));
+                    ], Arr::only($order, ["symbol", "orderId", "clientOrderId", "transactTime", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "type", "side", "marginBuyBorrowAsset", "marginBuyBorrowAmount", "isIsolated", "fills"])));
                 }
             }
         });

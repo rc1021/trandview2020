@@ -22,6 +22,10 @@ class TxnMarginOrder extends Model
         'transactTime',
     ];
 
+    protected $casts = [
+        'fills' => 'array',
+    ];
+
     public function scopeFilterStatus($query, string $status)
     {
         return $query->where('status', $status);
