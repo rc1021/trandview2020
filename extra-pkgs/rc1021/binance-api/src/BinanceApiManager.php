@@ -473,11 +473,7 @@ class BinanceApiManager
             if(!OrderStatusType::fromKey($order['status'])->is(OrderStatusType::FILLED)) {
                 $this->marginDeleteIsolatedOrder($order['symbol'], $order['orderId']);
                 $ord = print_r($order, true);
-                throw new Exception(<<<EOF
-                    未立即完成訂單(撤單)
-                    訂單細節:
-                    $ord
-                EOF);
+                throw new Exception('未立即完成訂單(撤單)');
             }
             // 等一下再去下止損單
             sleep(1);

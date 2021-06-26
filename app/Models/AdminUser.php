@@ -155,6 +155,10 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
         return $this->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($api) {
             $is_entry = $this->IsTxnEntryStatus($item->pair);
             $icon = $is_entry ? '<i class="fa fa-check text-green"></i>' : '<i class="fa fa-close text-red"></i>';
+            $def = [$item->pair, $icon, [
+                'col' => 5,
+                'content' => '目前未交易'
+            ]];
             if($is_entry) {
                 try {
                     $signal = $this->latestTxnEntrySignal($item->pair);
@@ -162,6 +166,8 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
                     $txn = $signal->txnMargOrders()
                         ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
                         ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
+                    if(empty($txn))
+                        return $def;
                     $avg_price = ceil_dec(collect(data_get($txn, 'fills', []))->avg('price'), 2);
                     $current_price = $api->floor_dec($api->marginPrice($item->pair), 2);
                     $account = $api->marginIsolatedAccountByKey($item->pair);
@@ -193,10 +199,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
                     ];
                 }
             }
-            return [$item->pair, $icon, [
-                'col' => 5,
-                'content' => '目前未交易'
-            ]];
+            return $def;
         })->all();
     }
 }
