@@ -149,7 +149,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
      * @return array containing the response
      * @throws \Exception
      */
-    public function getCurrentMarginTxns() : array
+    public function getCurrentMarginTxnsAttribute() : array
     {
         $api = $this->binance_api;
         return $this->txnSettings()->filterType(TxnSettingType::Margin)->get()->map(function ($item, $key) use ($api) {
@@ -162,6 +162,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
                     $txn = $signal->txnMargOrders()
                         ->filterStatus(OrderStatusType::fromValue(OrderStatusType::FILLED)->key)
                         ->filterType(OrderType::fromValue(OrderType::LIMIT)->key)->first();
+                    $avg_price = ceil_dec(collect(data_get($txn, 'fills', []))->avg('price'), 2);
                     $current_price = $api->floor_dec($api->marginPrice($item->pair), 2);
                     $account = $api->marginIsolatedAccountByKey($item->pair);
                     $quoteQty = $txn->executedQty * $current_price;
@@ -175,7 +176,7 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
                         $item->pair,
                         $icon,
                         $api->floor_dec($free, 2),
-                        $txn->price,
+                        $avg_price,
                         $current_price,
                         $api->floor_dec($gap, 2) . ' | '. $gap_rate . '%',
                         $btn->render(),
