@@ -4,7 +4,6 @@ namespace App\Models\Traits;
 
 use Illuminate\Support\Arr;
 use App\Enums\TradingPlatformType;
-use App\Enums\TxnSettingType;
 use BinanceApi\Enums\DirectType;
 use App\Enums\TxnExchangeType;
 use App\Jobs\ProcessSignal;
@@ -29,16 +28,6 @@ trait SignalHistoryTrait
         $rec->type = $type;
         $rec->message = $message;
         $rec->save();
-
-        try {
-            AdminUser::matchTypePair($rec->trading_platform_type, $rec->symbol_type)->chunk(200, function ($users) use ($message, $type) {
-                foreach ($users as $user)
-                {
-                    $user->lineNotify(sprintf("%s訊號\n%s", TxnSettingType::fromValue($type)->key, str_replace('=', ': ', str_replace(',', "\n", $message))));
-                }
-            });
-        }
-        catch(Exception $e) {}
 
         ProcessSignal::dispatchSync($rec);
     }

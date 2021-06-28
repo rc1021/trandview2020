@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\SignalHistory;
 use App\Models\AdminUser;
 use App\Enums\TradingPlatformType;
+use App\Enums\TxnSettingType;
 use App\Jobs\BinanceMarginTrandingWorker;
 use Binance;
+use Exception;
 
 class ProcessSignal implements ShouldQueue
 {
@@ -40,9 +42,14 @@ class ProcessSignal implements ShouldQueue
     {
         if($this->signal->is_valid)
         {
-            AdminUser::matchTypePair($this->signal->trading_platform_type, $this->signal->symbol_type)->orderBy('id', 'desc')->chunk(200, function ($users) {
+            AdminUser::matchTypePair($this->signal->trading_platform_type, $this->signal->symbol_type)->chunk(200, function ($users) {
                 foreach ($users as $user)
                 {
+                    try {
+                        $user->lineNotify(sprintf("%s訊號\n%s", TxnSettingType::fromValue($this->signal->type)->key, str_replace('=', ': ', str_replace(',', "\n", $this->signal->message))));
+                    }
+                    catch(Exception $e) {}
+
                     if($this->signal->trading_platform_type->is(TradingPlatformType::BINANCE)) {
                         BinanceMarginTrandingWorker::dispatch($user, $this->signal);
                     }

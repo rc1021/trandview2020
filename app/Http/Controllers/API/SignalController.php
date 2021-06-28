@@ -18,11 +18,11 @@ class SignalController extends Controller
 
     public function fire(Request $request)
     {
-        $this->m_rep->doFire($request);
         if(config('nodes.type') === 'master')
         {
             foreach(config('nodes.webhooks') as $webhook)
                 SignalPodcast::dispatch($webhook, '/'.$request->path(), $request->getContent());
         }
+        $this->m_rep->doFire($request);
     }
 }
