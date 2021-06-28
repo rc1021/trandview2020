@@ -131,7 +131,7 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         }
         catch(Exception $e) {
             $error = $e->getMessage();
-            $this->user->lineNotify(print_r($error, true));
+            $this->user->lineNotify($e->getMessage());
         }
 
         $this->time_duration = $this->timer;
@@ -306,11 +306,11 @@ class BinanceMarginTrandingWorker implements ShouldQueue
         {
             if(array_key_exists('orders', $result) and $result['orders'])
             {
-                foreach ($result['orders'] as $order) {
+                foreach ($result['orders'] as $key => $order) {
                     if(OrderType::fromKey($order['type'])->is(OrderType::LIMIT))
                     {
                         list($loan_ratio) = $this->getCalculatedValues([$this->formulaTable->setcol31]);
-                        $order['loan_ratio'] = $loan_ratio;
+                        $result['orders'][$key]['loan_ratio'] = $loan_ratio;
                     }
                 }
                 $this->createTxnOrderFromOrders($result['orders']);

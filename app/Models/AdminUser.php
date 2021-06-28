@@ -39,6 +39,16 @@ class AdminUser extends Administrator implements CanResetPasswordContract, MustV
         }
     }
 
+    public function getSettingNotifyOrderAttribute($value)
+    {
+        return explode(',', $value);
+    }
+
+    public function setSettingNotifyOrderAttribute($value)
+    {
+        $this->attributes['setting_notify_order'] = implode(',', $value);
+    }
+
     /**
      * 取得有設定指定交易設置的用戶
      *

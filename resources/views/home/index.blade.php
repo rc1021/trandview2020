@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/29</h2>
+        <ul>
+            <li>加入&nbsp;<a href="{{ route('admin.setting') }}#setting_notify_order">訂單通知選項</a></li>
+        </ul>
         <h2>2021/06/28</h2>
         <ul>
             <li>將槓桿訊號執行前後資產變化紀錄，改名為 <code>前後資產變化</code>，並顯示更詳細的內容</li>

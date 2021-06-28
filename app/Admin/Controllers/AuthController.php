@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Redirect;
+use BinanceApi\Enums\OrderStatusType;
 
 class AuthController extends BaseAuthController
 {
@@ -92,14 +93,16 @@ class AuthController extends BaseAuthController
             'step'      => 1,
             'prefix'    => 'Vip ',
         ]);
+
+        $form->html($this->twoFactorView(), __('Two Factor Authentication'));
+
         $form->linenotify('line_notify_token', 'LINE 通知')->attribute([
             'readonly'=>true,
             'data-callbackurl' => route('admin-line-notify.callback', ['id' => Admin::user()->id]),
             'data-cancelurl' => route('admin-line-notify.cancel', ['id' => Admin::user()->id]),
             'data-lineclientid' => config('app.line_notify_client_id')
             ]);
-
-        $form->html($this->twoFactorView(), __('Two Factor Authentication'));
+        $form->multipleSelect('setting_notify_order', '訂單狀態通知')->options(OrderStatusType::asSelectArray());
 
         return $form;
     }
