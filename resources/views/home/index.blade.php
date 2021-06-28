@@ -1,5 +1,9 @@
 <div class="box box-solid">
     <div class="box-body">
+        <h2>2021/06/28</h2>
+        <ul>
+            <li>將槓桿訊號執行前後資產變化紀錄，改名為 <code>前後資產變化</code>，並顯示更詳細的內容</li>
+        </ul>
         <h2>2021/06/27</h2>
         <ul>
             <li>增加槓桿訊號執行前後資產變化紀錄</li>

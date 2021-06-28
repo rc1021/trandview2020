@@ -18,7 +18,7 @@ class ShowTxnOrder implements Renderable
             return $order;
         })->toArray();
         $columns = collect($only)->map(function ($column) {
-            return __('admin.txn.order.'.$column);
+            return __('txn.order.'.$column);
         })->toArray();
         return (new Table($columns, $txnMargOrders))->render();
     }

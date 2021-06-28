@@ -49,7 +49,7 @@ class FeaturesLogController extends AdminController
     //         $tools->append(new MarginForceLiquidationTool());
     //     });
 
-    //     $grid->column('created_at', __('admin.txn.order.created_at'))->display(function($created_at) {
+    //     $grid->column('created_at', __('txn.order.created_at'))->display(function($created_at) {
     //         $html = <<<HTML
     //             <i class="fa fa-fw fa-check text-success"></i>
     //         HTML;
@@ -64,7 +64,7 @@ class FeaturesLogController extends AdminController
     //     // "orderId"
     //     $dynamic_columns = ["symbol", "txn_type", "type", "side", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", 'loan_ratio'];
     //     foreach ($dynamic_columns as $column) {
-    //         $grid->column($column, __('admin.txn.order.'.$column))->display(function($name, $column) {
+    //         $grid->column($column, __('txn.order.'.$column))->display(function($name, $column) {
     //             $data = $this[$column->getName()];
     //             switch($column->getName()) {
     //                 case 'txn_type':
@@ -95,18 +95,18 @@ class FeaturesLogController extends AdminController
     //         });
     //     }
 
-    //     $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
+    //     $grid->column('log', __('rec.signal.log'))->display(function($log) {
     //         if($this->signal->calc_log_path)
-    //             return __('admin.rec.signal.detail');
+    //             return __('rec.signal.detail');
     //         return 'No Data';
-    //     })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
+    //     })->modal(__('rec.signal.log'), ShowCalcLog::class);
 
-    //     $grid->column('error', __('admin.rec.signal.error'))->display(function($log) {
+    //     $grid->column('error', __('rec.signal.error'))->display(function($log) {
     //         if($this->signal->error)
-    //             return __('admin.rec.signal.detail');
+    //             return __('rec.signal.detail');
     //         return 'No Data';
     //     })->expand(function ($model) {
-    //         $title = __('admin.rec.signal.error');
+    //         $title = __('rec.signal.error');
     //         return <<<HTML
     //         <div class="box">
     //             <div class="box-header">
@@ -123,7 +123,7 @@ class FeaturesLogController extends AdminController
 
     //     $grid->filter(function($filter) {
     //         $filter->disableIdFilter();
-    //         $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
+    //         $filter->between('created_at', __('rec.signal.created_at'))->datetime();
     //     });
 
     //     $grid->model()->load(['signal'])->where('user_id', Admin::user()->id);
@@ -153,7 +153,7 @@ class FeaturesLogController extends AdminController
             $tools->append(new MarginForceLiquidationTool());
         });
 
-        $grid->column('created_at', __('admin.rec.signal.created_at'))->display(function($created_at) {
+        $grid->column('created_at', __('rec.signal.created_at'))->display(function($created_at) {
             $html = <<<HTML
                 <i class="fa fa-fw fa-check text-success"></i>
             HTML;
@@ -167,7 +167,7 @@ class FeaturesLogController extends AdminController
 
         $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
         foreach ($dynamic_columns as $column) {
-            $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
+            $grid->column($column, __('rec.signal.'.$column))->display(function($name, $column) {
                 $data = $this[$column->getName()];
                 switch($column->getName()) {
                     case 'txn_type':
@@ -195,9 +195,9 @@ class FeaturesLogController extends AdminController
             });
         }
 
-        $grid->column('txnFeatOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnFeatOrders) {
+        $grid->column('txnFeatOrders', __('rec.signal.txn_orders'))->display(function ($txnFeatOrders) {
             $count = count($txnFeatOrders);
-            return __('admin.rec.signal.txn_order.count', compact('count'));
+            return __('rec.signal.txn_order.count', compact('count'));
         })->expand(function ($model) {
             // "symbol", "clientOrderId", "origClientOrderId"
             $only = ["orderId", "type", "side", "created_at", "price", "origQty", "executedQty", "cummulativeQuoteQty", "status", "timeInForce", "marginBuyBorrowAmount", "loan_ratio"];
@@ -214,23 +214,23 @@ class FeaturesLogController extends AdminController
                 return $order;
             })->toArray();
             $columns = collect($only)->map(function ($column) {
-                return __('admin.txn.order.'.$column);
+                return __('txn.order.'.$column);
             })->toArray();
             return new Table($columns, $txnFeatOrders);
         });
 
-        $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
+        $grid->column('log', __('rec.signal.log'))->display(function($log) {
             if($this->calc_log_path)
-                return __('admin.rec.signal.detail');
+                return __('rec.signal.detail');
             return 'No Data';
-        })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
+        })->modal(__('rec.signal.log'), ShowCalcLog::class);
 
-        $grid->column('error', __('admin.rec.signal.error'))->display(function($log) {
+        $grid->column('error', __('rec.signal.error'))->display(function($log) {
             if($this->error)
-                return __('admin.rec.signal.detail');
+                return __('rec.signal.detail');
             return 'No Data';
         })->expand(function ($model) {
-            $title = __('admin.rec.signal.error');
+            $title = __('rec.signal.error');
             return <<<HTML
             <div class="box">
                 <div class="box-header">
@@ -247,7 +247,7 @@ class FeaturesLogController extends AdminController
 
         $grid->filter(function($filter) {
             $filter->disableIdFilter();
-            $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
+            $filter->between('created_at', __('rec.signal.created_at'))->datetime();
         });
 
         $grid->model()->where('type', 'features')->with('txnFeatOrders')->select($instance->getTable().'.*', 'signal_history_user.error')->join('signal_history_user', function ($join) use ($instance) {
