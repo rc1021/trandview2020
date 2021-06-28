@@ -74,8 +74,9 @@ class BinanceMarginTrandingWorker implements ShouldQueue
     public function handle()
     {
         $error = null;
+        $symbol_key = $this->signal->symbol_type;
+
         try {
-            $symbol_key = $this->signal->symbol_type;
 
             $this->txn_setting = $this->user->txnSettings()->where('pair', $this->signal->symbol_type)->with('user')->first();
             $this->user->signals()->attach($this->signal);
@@ -139,11 +140,38 @@ class BinanceMarginTrandingWorker implements ShouldQueue
 
         // 記錄交易後的資產情況
         $account = $this->api->marginIsolatedAccountByKey($symbol_key);
-        $this->user->signals()->updateExistingPivot($this->signal, ['after_asset' => data_get($account, "assets.$symbol_key", [])]);
+        $currentAsset = data_get($account, "assets.$symbol_key", []);
+        $this->user->signals()->updateExistingPivot($this->signal, ['after_asset' => $currentAsset]);
 
         if(!is_null($error))
             $this->user->signals()->updateExistingPivot($this->signal, compact('error'));
         $this->user->save();
+
+        // 當 signal 為出場，並且沒發生錯誤時計算盈虧，然後通知用戶
+        if(is_null($error)) {
+            try {
+                $this->user->refresh();
+                $this->signal->refresh();
+                if($this->signal->txn_exchange_type->is(TxnExchangeType::Exit)) {
+                    // 取得進場時原始資產
+                    $lastSignal = $this->user->latestTxnEntrySignal($symbol_key);
+                    if(is_null($lastSignal))
+                        throw new Exception("No Latest EntrySignal: ". $symbol_key);
+                    array_push($msg, sprintf("交易對：%s", $lastSignal->symbol_type));
+                    $originQuoteAssetFree = data_get($lastSignal->pivot->after_asset, 'quoteAsset.free', 0);
+                    array_push($msg, sprintf("進場前原資金：%s", $originQuoteAssetFree));
+                    // 取得帳戶現有資產
+                    $currentQuoteAssetFree = data_get($currentAsset, 'quoteAsset.free', 0);
+                    array_push($msg, sprintf("目前帳戶資金：%s", $currentQuoteAssetFree));
+                    array_push($msg, sprintf("本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
+                    // 通知盈虧
+                    $this->user->lineNotify(implode("\n", $msg));
+                }
+            }
+            catch(Exception $e) {
+
+            }
+        }
     }
 
     // 強制平倉
