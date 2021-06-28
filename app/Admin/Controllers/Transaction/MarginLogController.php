@@ -51,7 +51,7 @@ class MarginLogController extends AdminController
             $instance = new SignalHistory();
             $grid = new Grid($instance);
 
-            $grid->column('created_at', __('admin.rec.signal.created_at'))->display(function($created_at) {
+            $grid->column('created_at', __('rec.signal.created_at'))->display(function($created_at) {
                 $html = <<<HTML
                     <i class="fa fa-fw fa-check text-success"></i>
                 HTML;
@@ -64,9 +64,9 @@ class MarginLogController extends AdminController
             });
 
             // $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
-            $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'quote_asset_free', 'loan_ratio'];
+            $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'loan_ratio'];
             foreach ($dynamic_columns as $column) {
-                $grid->column($column, __('admin.rec.signal.'.$column))->display(function($name, $column) {
+                $grid->column($column, __('rec.signal.'.$column))->display(function($name, $column) {
                     $data = $this[$column->getName()];
                     switch($column->getName()) {
                         case 'txn_type':
@@ -84,15 +84,6 @@ class MarginLogController extends AdminController
                         case 'current_price':
                             $data = ceil_dec($data, 2);
                             break;
-                        case 'quote_asset_free':
-                            $b = data_get(json_decode($this->before_asset, true), 'quoteAsset.free', '未記錄');
-                            $a = data_get(json_decode($this->after_asset, true), 'quoteAsset.free', '未記錄');
-                            if(is_numeric($b))
-                                $b = ceil_dec($b, 2);
-                            if(is_numeric($a))
-                                $a = ceil_dec($a, 2);
-                            $data = sprintf('%s | %s', $b, $a);
-                            break;
                     }
                     if($data instanceof Enum)
                         return $data->description;
@@ -100,38 +91,30 @@ class MarginLogController extends AdminController
                 });
             }
 
-            $grid->column('txnMargOrders', __('admin.rec.signal.txn_orders'))->display(function ($txnMargOrders) {
+            $grid->column('AssetChange', __('rec.signal.asset_free'))->display(function ($txnMargOrders) {
+                return __('rec.signal.detail');
+            })->modal($this->modalAssetChangeTable());
+
+            $grid->column('txnMargOrders', __('rec.signal.txn_orders'))->display(function ($txnMargOrders) {
                 $count = count($txnMargOrders);
-                return __('admin.rec.signal.txn_order.count', compact('count'));
+                return __('rec.signal.txn_order.count', compact('count'));
             })->expand($this->expandTxnMargOrderTable());
 
-            $grid->column('log', __('admin.rec.signal.log'))->display(function($log) {
+            $grid->column('log', __('rec.signal.log'))->display(function($log) {
                 if($this->calc_log_path)
-                    return __('admin.rec.signal.detail');
+                    return __('rec.signal.detail');
                 return 'No Data';
-            })->modal(__('admin.rec.signal.log'), ShowCalcLog::class);
+            })->modal(__('rec.signal.log'), ShowCalcLog::class);
 
-            $grid->column('error', __('admin.rec.signal.error'))->display(function($log) {
+            $grid->column('error', __('rec.signal.error'))->display(function($log) {
                 if($this->error)
-                    return __('admin.rec.signal.detail');
+                    return __('rec.signal.detail');
                 return 'No Data';
-            })->expand(function ($model) {
-                $title = __('admin.rec.signal.error');
-                return <<<HTML
-                <div class="box">
-                    <div class="box-header">
-                        <i class="fa fa-warning text-red"></i> $title
-                    </div>
-                    <div class="box-body">
-                        <div style="white-space: pre-wrap;background: #333;color: #fff; padding: 10px;">$model->error</div>
-                    </div>
-                </div>
-                HTML;
-            });
+            })->expand($this->expandError());
 
-            $grid->column('message', __('admin.rec.signal.message'))->display(function ($txnMargOrders) {
-                return __('admin.rec.signal.detail');
-            })->modal(__('admin.rec.signal.detail'), function ($model) {
+            $grid->column('message', __('rec.signal.message'))->display(function ($txnMargOrders) {
+                return __('rec.signal.detail');
+            })->modal(__('rec.signal.detail'), function ($model) {
                 return $model->message;
             });
 
@@ -139,7 +122,7 @@ class MarginLogController extends AdminController
 
             $grid->filter(function($filter) {
                 $filter->disableIdFilter();
-                $filter->between('created_at', __('admin.rec.signal.created_at'))->datetime();
+                $filter->between('created_at', __('rec.signal.created_at'))->datetime();
             });
 
             $grid->model()->where('type', TxnSettingType::Margin)->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.*')->join('signal_history_user', function ($join) use ($instance) {
@@ -174,6 +157,78 @@ class MarginLogController extends AdminController
     }
 
     /**
+     * 用表格形式展開錯誤訊息
+     *
+     * @return function
+     */
+    private function expandError()
+    {
+        return function (SignalHistory $model) {
+            $title = __('rec.signal.error');
+            return <<<HTML
+            <div class="box">
+                <div class="box-header">
+                    <i class="fa fa-warning text-red"></i> $title
+                </div>
+                <div class="box-body">
+                    <div style="white-space: pre-wrap;background: #333;color: #fff; padding: 10px;">$model->error</div>
+                </div>
+            </div>
+            HTML;
+        };
+    }
+
+    /**
+     * 用表格形式展開資產前後變化內容
+     *
+     * @return function
+     */
+    private function modalAssetChangeTable()
+    {
+        return function (SignalHistory $model) : Table {
+            $beforeAsset = json_decode($model->before_asset, true);
+            $afterAsset = json_decode($model->after_asset, true);
+            $columns = ["free", "locked", "borrowed", "interest", "netAsset", "totalAsset"];
+
+            $row1 = [__('rec.signal.before_asset'), [
+                'col' => 3,
+                'content' => '未記錄'
+            ]];
+            if(!empty($beforeAsset)) {
+                $row1 = [__('rec.signal.before_asset'), data_get($beforeAsset, 'indexPrice')];
+                $row1[2] = implode('<br>', collect($columns)->map(function ($column) use ($beforeAsset) {
+                    return __('rec.signal.asset.'.$column) . '：' . data_get($beforeAsset, 'baseAsset.'.$column, '');
+                })->toArray());
+                $row1[3] = implode('<br>', collect($columns)->map(function ($column) use ($beforeAsset) {
+                    return __('rec.signal.asset.'.$column) . '：' . data_get($beforeAsset, 'quoteAsset.'.$column, '');
+                })->toArray());
+            }
+
+            $row2 = [__('rec.signal.after_asset'), [
+                'col' => 3,
+                'content' => '未記錄'
+            ]];
+            if(!empty($afterAsset)) {
+                $row2 = [__('rec.signal.after_asset'), data_get($afterAsset, 'indexPrice')];
+                $row2[2] = implode('<br>', collect($columns)->map(function ($column) use ($afterAsset) {
+                    return __('rec.signal.asset.'.$column) . '：' . data_get($afterAsset, 'baseAsset.'.$column, '');
+                })->toArray());
+                $row2[3] = implode('<br>', collect($columns)->map(function ($column) use ($afterAsset) {
+                    return __('rec.signal.asset.'.$column) . '：' . data_get($afterAsset, 'quoteAsset.'.$column, '');
+                })->toArray());
+            }
+
+            $columns = [
+                __('rec.signal.asset_unit'),
+                __('rec.signal.asset.indexPrice'),
+                data_get($beforeAsset, 'baseAsset.asset', data_get($afterAsset, 'baseAsset.asset', __('rec.signal.asset.base'))),
+                data_get($beforeAsset, 'quoteAsset.asset', data_get($afterAsset, 'quoteAsset.asset', __('rec.signal.asset.quote'))),
+            ];
+            return new Table($columns, [$row1, $row2]);
+        };
+    }
+
+    /**
      * 用表格形式展開訂單交易記錄
      *
      * @return function
@@ -204,12 +259,12 @@ class MarginLogController extends AdminController
                         'grid'    => false,
                         'key'     => $model->id . '_' . $origin->id,
                         'name'    => 'signal-' . $model->id . '-order-' . $origin->id,
-                        'title'   => __('admin.txn.order.fills') . __('admin.rec.signal.detail'),
-                        'value'   => __('admin.rec.signal.detail'),
+                        'title'   => __('txn.order.fills') . __('rec.signal.detail'),
+                        'value'   => __('rec.signal.detail'),
                     ];
                     try {
                         $columns = collect(['price', 'qty', 'commission', 'amount'])->map(function ($column) {
-                            return __('admin.txn.order.fills_detail.'.$column);
+                            return __('txn.order.fills_detail.'.$column);
                         })->toArray();
                         $collect = collect($order['fills']);
                         $order['avg_price'] = ceil_dec($collect->avg('price'), 2);
@@ -224,7 +279,7 @@ class MarginLogController extends AdminController
                     }
                     catch(Exception $e) {
                         $content = json_encode($order['fills']);
-                        $fills_data['title'] = __('admin.rec.signal.error');
+                        $fills_data['title'] = __('rec.signal.error');
                         $fills_data['value'] = $e->getMessage();
                         $fills_data['html'] = <<<HTML
                         <div> {$e->getMessage()} </div>
@@ -236,7 +291,7 @@ class MarginLogController extends AdminController
                 return $order;
             })->toArray();
             $columns = collect($only)->map(function ($column) {
-                return __('admin.txn.order.'.$column);
+                return __('txn.order.'.$column);
             })->toArray();
             return new Table($columns, $txnMargOrders);
         };

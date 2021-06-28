@@ -44,14 +44,14 @@ class MarginSettingController extends AdminController
     {
         $grid = new Grid(new AdminTxnSetting);
 
-        $grid->column('pair', __('admin.txn.margin.setting.pair'))->sortable();
-        $grid->column('lever_switch', __('admin.txn.margin.setting.lever_switch'))->display(function($val, $column) {
+        $grid->column('pair', __('txn.margin.setting.pair'))->sortable();
+        $grid->column('lever_switch', __('txn.margin.setting.lever_switch'))->display(function($val, $column) {
             return $this[$column->getName()];
         })->bool();
 
         $dynamic_columns = [ 'initial_tradable_total_funds', 'initial_capital_risk', 'base_asset_daily_interest', 'quote_asset_daily_interest'];
         foreach ($dynamic_columns as $column) {
-            $grid->column($column, __('admin.txn.margin.setting.'.$column))->display(function($val, $column) {
+            $grid->column($column, __('txn.margin.setting.'.$column))->display(function($val, $column) {
                 $data = $this[$column->getName()];
                 switch($column->getName()) {
                     case 'initial_tradable_total_funds':
@@ -74,11 +74,11 @@ class MarginSettingController extends AdminController
                 return $data;
             });
         }
-        $grid->column('updated_at', __('admin.txn.margin.setting.updated_at'))->sortable();
+        $grid->column('updated_at', __('txn.margin.setting.updated_at'))->sortable();
         $grid->filter(function ($filter) {
             $filter->disableIdFilter();
-            $filter->equal('pair', __('admin.txn.margin.setting.pair'));
-            $filter->between('updated_at', __('admin.txn.margin.setting.updated_at'))->datetime();
+            $filter->equal('pair', __('txn.margin.setting.pair'));
+            $filter->between('updated_at', __('txn.margin.setting.updated_at'))->datetime();
         });
         $grid->model()->where('type', TxnSettingType::Margin)->where('user_id', Admin::user()->id);
         $grid->model()->orderBy('id', 'desc');
@@ -103,20 +103,20 @@ class MarginSettingController extends AdminController
 
         $form = new Form(new AdminTxnSetting());
 
-        $form->hidden('user_id', __('admin.txn.margin.setting.user_id'))->value(Admin::user()->id);
-        $form->hidden('type', __('admin.txn.margin.setting.type'))->default(TxnSettingType::Margin)->value(TxnSettingType::Margin);
+        $form->hidden('user_id', __('txn.margin.setting.user_id'))->value(Admin::user()->id);
+        $form->hidden('type', __('txn.margin.setting.type'))->default(TxnSettingType::Margin)->value(TxnSettingType::Margin);
 
         $pairs = FormulaTable::select('pair')->groupBy('pair')->get()->pluck('pair')->all();
-        $form->select('pair', __('admin.txn.margin.setting.pair'))->options(array_combine($pairs, $pairs))->rules('required');
+        $form->select('pair', __('txn.margin.setting.pair'))->options(array_combine($pairs, $pairs))->rules('required');
 
         $form->embeds('options', '各項交易屬性', function ($form) {
             $states = [
                 'on'  => ['value' => 1, 'text' => '打開', 'color' => 'success'],
                 'off' => ['value' => 0, 'text' => '開閉', 'color' => 'danger'],
             ];
-            $form->text('initial_tradable_total_funds', __('admin.txn.margin.setting.form.initial_tradable_total_funds'))->rules('required')->default(1.0);
-            $form->text('initial_capital_risk', __('admin.txn.margin.setting.form.initial_capital_risk'))->rules('required')->default(0.07);
-            $form->switch('lever_switch', __('admin.txn.margin.setting.lever_switch'))->rules('required')->default(true)->states($states);
+            $form->text('initial_tradable_total_funds', __('txn.margin.setting.form.initial_tradable_total_funds'))->rules('required')->default(1.0);
+            $form->text('initial_capital_risk', __('txn.margin.setting.form.initial_capital_risk'))->rules('required')->default(0.07);
+            $form->switch('lever_switch', __('txn.margin.setting.lever_switch'))->rules('required')->default(true)->states($states);
         });
 
         $form->disableEditingCheck();

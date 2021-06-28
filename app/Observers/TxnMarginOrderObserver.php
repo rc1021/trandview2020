@@ -119,7 +119,7 @@ class TxnMarginOrderObserver
         unset($order['id']);
         $data = '';
         foreach ($order as $key => $value) {
-            $data .= "\n" . __('admin.txn.order.'.$key) . ': ' . $value;
+            $data .= "\n" . __('txn.order.'.$key) . ': ' . $value;
         }
         return $data;
     }
