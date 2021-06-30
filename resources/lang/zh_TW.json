@@ -618,5 +618,6 @@
     "Google 2fa": "谷歌驗證碼",
     "Please confirm your 6 characters Google 2fa code.": "請輸入 6 位谷歌驗證碼",
     "For your account security, please complete the following verification operations.": "為了您的賬戶安全，請完成以下驗證操作",
-    ":attribute failed.": "驗證失敗。"
+    ":attribute failed.": "驗證失敗。",
+    "Verifying...": "驗證中..."
 }
