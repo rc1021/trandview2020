@@ -103,6 +103,8 @@ class TxnMarginOrderObserver
         unset($order['id']);
         $data = '';
         foreach ($order as $key => $value) {
+            if(gettype($value) == "array")
+                continue;
             $data .= "\n" . __('txn.order.'.$key) . ': ' . $value;
         }
         return $data;
