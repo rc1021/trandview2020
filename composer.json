@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
+        "aws/aws-sdk-php": "^3.185",
         "bensampo/laravel-enum": "^3.3",
         "encore/laravel-admin": "^1.8",
         "fideloper/proxy": "^4.4",
