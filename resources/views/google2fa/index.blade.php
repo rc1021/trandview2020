@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@push('scripts')
+
+<script>
+    $(function () {
+        $('#{{ config('google2fa.otp_input') }}')
+            .on('keyup', function () {
+                if($(this).val().length >= 6)
+                    $(this).closest('form').find('[type="submit"]').click();
+            });
+    });
+</script>
+
+@endpush
+
 @section('content')
 
 <div class="register-box">
@@ -29,7 +43,7 @@
 
                 <div class="form-group row mb-0">
                     <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" data-disable-with="{{ __('Verifying') }}">
                             {{ __('Confirm') }}{{ __('Code') }}
                         </button>
                     </div>
