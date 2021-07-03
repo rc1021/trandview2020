@@ -31,6 +31,7 @@ use App\Enums\TxnDirectType;
 use App\Enums\TradingPlatformType;
 use PhpOffice\PhpSpreadsheet\Writer\Html;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class BinanceMarginTrandingWorker implements ShouldQueue
 {
@@ -152,24 +153,26 @@ class BinanceMarginTrandingWorker implements ShouldQueue
             try {
                 $this->user->refresh();
                 $this->signal->refresh();
+                $msg = ['本次結算'];
                 if($this->signal->txn_exchange_type->is(TxnExchangeType::Exit)) {
                     // 取得進場時原始資產
                     $lastSignal = $this->user->latestTxnEntrySignal($symbol_key);
                     if(is_null($lastSignal))
                         throw new Exception("No Latest EntrySignal: ". $symbol_key);
                     array_push($msg, sprintf("交易對：%s", $lastSignal->symbol_type));
-                    $originQuoteAssetFree = data_get($lastSignal->pivot->after_asset, 'quoteAsset.free', 0);
+                    $originQuoteAssetFree = $this->api->ceil_dec(data_get($lastSignal->pivot->before_asset, 'quoteAsset.free', 0), 2);
                     array_push($msg, sprintf("進場前原資金：%s", $originQuoteAssetFree));
                     // 取得帳戶現有資產
-                    $currentQuoteAssetFree = data_get($currentAsset, 'quoteAsset.free', 0);
+                    $currentQuoteAssetFree = $this->api->ceil_dec(data_get($this->signal->pivot->after_asset, 'quoteAsset.free', 0), 2);
                     array_push($msg, sprintf("目前帳戶資金：%s", $currentQuoteAssetFree));
-                    array_push($msg, sprintf("本次盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
+                    array_push($msg, sprintf("盈虧：%s", $currentQuoteAssetFree - $originQuoteAssetFree));
+                    array_push($msg, sprintf("盈虧%%：%s%%", $this->api->ceil_dec(($currentQuoteAssetFree - $originQuoteAssetFree) / $originQuoteAssetFree * 100, 2) ));
                     // 通知盈虧
                     $this->user->lineNotify(implode("\n", $msg));
                 }
             }
             catch(Exception $e) {
-
+                Log::warning($e->getMessage(), $e->getTrace());
             }
         }
     }
