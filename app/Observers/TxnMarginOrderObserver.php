@@ -99,9 +99,12 @@ class TxnMarginOrderObserver
         unset($order['transactTime']);
         unset($order['clientOrderId']);
         unset($order['isIsolated']);
+        unset($order['fills']);
         unset($order['id']);
         $data = '';
         foreach ($order as $key => $value) {
+            if(gettype($value) == "array")
+                continue;
             $data .= "\n" . __('txn.order.'.$key) . ': ' . $value;
         }
         return $data;
