@@ -24,43 +24,19 @@ use App\Admin\Models\TransactionLog\ShowCalcLog;
 use App\Admin\Extensions\Tools\MarginForceLiquidationTool;
 use App\Enums\TxnSettingType;
 use App\Models\TxnMarginOrder;
-use App\Models\FormulaTable;
 use App\Models\AdminTxnSetting;
 use App\Models\AdminUser;
 use Exception;
 use App\Jobs\BinanceMarginTrandingWorker;
-use HTML5;
 
 class MarginLogController extends AdminController
 {
-    private $api, $pairs = []; // 儲存已查詢的 pair 資料
-
     /**
      * Title for current resource.
      *
      * @var string
      */
     protected $title = '交易紀錄';
-
-    private function getBinanceApi()
-    {
-        if(empty($this->api)) {
-            $this->api = Admin::user()->binance_api;
-        }
-        return $this->api;
-    }
-
-    private function getPair($symbol)
-    {
-        try {
-            if(!array_key_exists($symbol, $this->pairs)) {
-                $this->pairs[$symbol] = $this->getBinanceApi()->marginIsolatedPairs($symbol);
-            }
-            return $this->pairs[$symbol];
-        }
-        catch(Exception $e) { }
-        return null;
-    }
 
     /**
      * Make a grid builder.
@@ -72,67 +48,87 @@ class MarginLogController extends AdminController
         \Encore\Admin\Admin::style('.modal-dialog td[class^=column] { min-width: 125px; }');
 
         try {
-            $instance = new TxnMarginOrder;
+            $instance = new SignalHistory();
             $grid = new Grid($instance);
-            $controller = $this;
 
-            $grid->column('created_at', __('txn.order.created_at'))->display(function($data, $column) {
+            $grid->column('created_at', __('rec.signal.created_at'))->display(function($created_at) {
                 $html = <<<HTML
                     <i class="fa fa-fw fa-check text-success"></i>
                 HTML;
-                if(!empty($this->signal->error)) {
+                if(!empty($this->error)) {
                     $html = <<<HTML
                         <i class="fa fa-fw fa-exclamation-circle text-danger"></i>
                     HTML;
                 }
-                return $html . '&nbsp;' . Carbon::parse($data)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
+                return $html . '&nbsp;' . Carbon::parse($created_at)->setTimezone('Asia/Taipei')->format('Y-m-d H:i:s');
             });
-            $grid->column('symbol', __('txn.order.symbol'));
-            $grid->column('txn_type', __('txn.order.txn_type'))->display(function($model) {
-                return sprintf('%s%s'
-                , DirectType::fromValue($this->signal->txn_direct_type)->description
-                , TxnExchangeType::fromValue($this->signal->txn_exchange_type)->description);
+
+            // $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'entry_price', 'risk_start_price', 'position_price', 'loan_ratio'];
+            $dynamic_columns = [ 'symbol_type', 'txn_type', 'current_price', 'loan_ratio'];
+            foreach ($dynamic_columns as $column) {
+                $grid->column($column, __('rec.signal.'.$column))->display(function($name, $column) {
+                    $data = $this[$column->getName()];
+                    switch($column->getName()) {
+                        case 'txn_type':
+                            return sprintf('%s%s'
+                                    , DirectType::fromValue($this->txn_direct_type)->description
+                                    , TxnExchangeType::fromValue($this->txn_exchange_type)->description);
+                        case 'loan_ratio':
+                            if(TxnExchangeType::fromValue($this->txn_exchange_type)->is(TxnExchangeType::Entry)) {
+                                foreach ($this->txnMargOrders as $order) {
+                                    if(OrderType::fromKey($order->type)->is(OrderType::LIMIT) and $order->loan_ratio > 0)
+                                        $data = $order->loan_ratio * 100 . '%';
+                                }
+                            }
+                            break;
+                        case 'current_price':
+                            $data = ceil_dec($data, 2);
+                            break;
+                    }
+                    if($data instanceof Enum)
+                        return $data->description;
+                    return $data;
+                });
+            }
+
+            $grid->column('AssetChange', __('rec.signal.asset_free'))->display(function ($txnMargOrders) {
+                return __('rec.signal.detail');
+            })->modal($this->modalAssetChangeTable());
+
+            $grid->column('txnMargOrders', __('rec.signal.txn_orders'))->display(function ($txnMargOrders) {
+                $count = count($txnMargOrders);
+                return __('rec.signal.txn_order.count', compact('count'));
+            })->expand($this->expandTxnMargOrderTable());
+
+            $grid->column('log', __('rec.signal.log'))->display(function($log) {
+                if($this->calc_log_path)
+                    return __('rec.signal.detail');
+                return 'No Data';
+            })->modal(__('rec.signal.log'), ShowCalcLog::class);
+
+            $grid->column('error', __('rec.signal.error'))->display(function($log) {
+                if($this->error)
+                    return __('rec.signal.detail');
+                return 'No Data';
+            })->expand($this->expandError());
+
+            $grid->column('message', __('rec.signal.message'))->display(function ($txnMargOrders) {
+                return __('rec.signal.detail');
+            })->modal(__('rec.signal.detail'), function ($model) {
+                return $model->message;
             });
-            $grid->column('price', __('txn.order.price'))->display(function($data, $column) {
-                return ceil_dec($data, 2);
-            });
-            $grid->column('executedPrice', __('txn.order.executedPrice'))->display(function($data, $column) {
-                $data = '未記錄';
-                if(!empty($this->fills) and gettype($this->fills) == 'array')
-                    $data = ceil_dec(collect($this->fills)->avg('price'), 2);
-                return $data;
-            });
-            $grid->column('origQty', __('txn.order.origQty'))->display(function($data, $column) use ($controller) {
-                return sprintf('%s %s', ceil_dec($data, 2), data_get($controller->getPair($this->symbol), 'base', ''));
-            });
-            $grid->column('executedQty', __('txn.order.executedQty'))->display(function($data, $column) use ($controller) {
-                return sprintf('%s %s', ceil_dec($data, 2), data_get($controller->getPair($this->symbol), 'base', ''));
-            });
-            $grid->column('cummulativeQuoteQty', __('txn.order.cummulativeQuoteQty'))->display(function($data, $column) {
-                // return sprintf('%s %s', ceil_dec($data, 2), data_get($controller->getPair($this->symbol), 'quote', ''));
-                return ceil_dec($data, 2);
-            });
-            $grid->column('marginBuyBorrowAmount', __('txn.order.marginBuyBorrowAmount'))->display(function($data, $column) {
-                $data = ceil_dec($data, 2);
-                if($data == 0)
-                    $data = '';
-                else if(!empty($this->loan_ratio) and $this->loan_ratio > 0)
-                    $data = sprintf('%s %s (%s%%)', $data, $this->marginBuyBorrowAsset, $this->loan_ratio * 100);
-                return $data;
-            });
-            // $grid->column('created_at', __('txn.order.created_at'))->display(function($name, $column) use ($tippyJs) {
-            // });
 
             $grid->disableActions();
 
             $grid->filter(function($filter) {
                 $filter->disableIdFilter();
-                $pairs = FormulaTable::select('pair')->groupBy('pair')->get()->pluck('pair')->all();
-                $filter->equal('symbol', __('txn.order.symbol'))->select(array_combine($pairs, $pairs));
-                $filter->between('created_at', __('txn.order.created_at'))->datetime();
+                $filter->between('created_at', __('rec.signal.created_at'))->datetime();
             });
 
-            $grid->model()->with('user', 'signal')->where('status', OrderStatusType::getKey(OrderStatusType::FILLED))->where('user_id', Admin::user()->id);
+            $grid->model()->where('type', TxnSettingType::Margin)->with('txnMargOrders')->select($instance->getTable().'.*', 'signal_history_user.*')->join('signal_history_user', function ($join) use ($instance) {
+                $join->on($instance->getTable().'.id', '=', 'signal_history_user.signal_history_id')
+                    ->where('admin_user_id', Admin::user()->id);
+            });
             $grid->model()->orderBy('id', 'desc');
             $grid->disableCreateButton();
             $grid->disableRowSelector();
@@ -158,48 +154,6 @@ class MarginLogController extends AdminController
         $box->collapsable();
         $box->style('info');
         return str_replace('"box-body"', '"box-body table-responsive no-padding"' ,$box->render());
-    }
-
-    /**
-     * tippy
-     *
-     * @return function
-     */
-    private function tippyJs()
-    {
-        return function (string $text, Array $attrs = [], Array $opts = []) {
-            $attribues = [];
-            foreach ($attrs as $key => $value) {
-                array_push($attribues, $key.'="'.$value.'"');
-            }
-            $attribues = implode(' ', $attribues);
-            $data_attribues = [];
-            foreach ($opts as $key => $value) {
-                array_push($data_attribues, 'data-tippy-'.$key.'="'.$value.'"');
-            }
-            $data_attribues = implode(' ', $data_attribues);
-            return <<<HTML
-            <span $attribues $data_attribues>$text</span>
-            HTML;
-        };
-    }
-
-    private function expandTxnType()
-    {
-        return function (TxnMarginOrder $model) : Table
-        {
-            $columns = collect(["orderId", "timeInForce", "side", "type"])->map(function ($col) {
-                return __('txn.order.'.$col);
-            });
-            return new Table($columns, [
-                [
-                    $model->orderId,
-                    $model->timeInForce,
-                    SideType::fromKey($model->side)->description,
-                    OrderType::fromKey($model->type)->description,
-                ]
-            ]);
-        };
     }
 
     /**

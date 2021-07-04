@@ -43,7 +43,7 @@
 
                 <div class="form-group row mb-0">
                     <div class="col-md-12">
-                        <button type="submit" class="btn btn-primary" data-disable-with="{{ __('Verifying') }}">
+                        <button type="submit" class="btn btn-primary" data-disable-with="{{ __('Verifying...') }}">
                             {{ __('Confirm') }}{{ __('Code') }}
                         </button>
                     </div>

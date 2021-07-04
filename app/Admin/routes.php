@@ -78,7 +78,6 @@ Route::group([
         'namespace'     => 'Transaction',
         'as'            => 'txn.margin.',
     ], function (Router $router) {
-        $router->get('logs/calc/{signal_history}', MarginLogController::class.'@calc')->name('logs.calc');
         $router->resource('logs', MarginLogController::class);
         $router->get('formula/{key}/preview', MarginFormulaController::class.'@preview')->name('formula.preview');
         $router->resource('formula', MarginFormulaController::class);

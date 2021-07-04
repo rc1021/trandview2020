@@ -1,5 +1,8 @@
-require('jquery-ujs');
+import 'jquery-ujs';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
+window.tippy = tippy;
 
 $(function () {
     $(document)
@@ -20,5 +23,7 @@ $(function () {
             setTimeout(() => {
                 window.location.reload();
             }, r);
-        })
+        });
+
+    tippy('[data-tippy-content]');
 });
