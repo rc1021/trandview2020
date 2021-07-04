@@ -18,6 +18,7 @@
         "vue-template-compiler": "^2.6.12"
     },
     "dependencies": {
-        "jquery-ujs": "^1.2.2"
+        "jquery-ujs": "^1.2.2",
+        "tippy.js": "^6.3.1"
     }
 }
